@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Push-up",
+    "difficulty": "beginner",
+    "injury_safe": ["knee"],
+    "type": "strength"
+  },
+  {
+    "name": "Plank",
+    "difficulty": "beginner",
+    "injury_safe": ["knee"],
+    "type": "core"
+  },
+  {
+    "name": "Jump Rope",
+    "difficulty": "medium",
+    "injury_safe": [],
+    "type": "cardio"
+  }
+]
