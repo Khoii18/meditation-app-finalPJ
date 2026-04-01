@@ -1,11 +1,56 @@
 "use client";
 
 import { useState } from "react";
-import { Flower2, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Flower2, Mail, Lock, Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function MeditationLogin() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      setError("Vui lòng nhập email và mật khẩu");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+      
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data || "Đăng nhập thất bại");
+      }
+
+      // Lưu trữ token và thông tin user
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      // Chuyển hướng
+      router.push("/"); 
+
+    } catch (err: any) {
+      setError(err.message || "Đã xảy ra lỗi hệ thống");
+    } finally {
+      setLoading(false);
+    }
+  };
   
   return (
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden font-sans">
@@ -53,7 +98,14 @@ export default function MeditationLogin() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.8 }}
           className="space-y-5"
+          onSubmit={handleLogin}
         >
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-xl text-center">
+              {error}
+            </div>
+          )}
+
           {/* Email Input */}
           <div className="space-y-1">
             <label className="text-xs font-medium text-zinc-600 dark:text-zinc-300 ml-1">
@@ -66,6 +118,9 @@ export default function MeditationLogin() {
               <input
                 type="email"
                 placeholder="namaste@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
                 className="w-full pl-11 pr-4 py-3.5 bg-white/50 dark:bg-zinc-800/50 border border-white/60 dark:border-zinc-700/50 rounded-2xl text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:bg-white/80 dark:focus:bg-zinc-800/80 transition-all duration-300"
               />
             </div>
@@ -88,6 +143,9 @@ export default function MeditationLogin() {
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
                 className="w-full pl-11 pr-12 py-3.5 bg-white/50 dark:bg-zinc-800/50 border border-white/60 dark:border-zinc-700/50 rounded-2xl text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:bg-white/80 dark:focus:bg-zinc-800/80 transition-all duration-300"
               />
               <button
@@ -104,10 +162,21 @@ export default function MeditationLogin() {
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
-            className="w-full mt-6 py-3.5 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-medium shadow-lg shadow-teal-600/20 flex items-center justify-center gap-2 transition-all group"
+            disabled={loading}
+            type="submit"
+            className="w-full mt-6 py-3.5 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-medium shadow-lg shadow-teal-600/20 flex items-center justify-center gap-2 transition-all group disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            Bắt đầu thiền
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Đang đăng nhập...
+              </>
+            ) : (
+              <>
+                Bắt đầu thiền
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
           </motion.button>
         </motion.form>
 
