@@ -218,7 +218,7 @@ export default function MeditationLogin() {
           className="mt-8 text-center text-sm text-zinc-600 dark:text-zinc-400"
         >
           Chưa có tài khoản?{" "}
-          <a href="#" className="text-teal-700 dark:text-teal-400 font-medium hover:underline">
+          <a href="/register" className="text-teal-700 dark:text-teal-400 font-medium hover:underline">
             Đăng ký ngay
           </a>
         </motion.p>
