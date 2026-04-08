@@ -5,8 +5,11 @@ import cors from "cors";
 import mongoose from "mongoose";
 import authRoute from "./routes/auth.route.js";
 import workoutRoute from "./routes/workout.route.js";
-
-
+import checkinRoute from "./routes/checkin.route.js";
+import coachRoute from "./routes/coach.route.js";
+import userRoute from "./routes/user.route.js";
+import contentRoute from "./routes/content.route.js";
+import liveRoute from "./routes/live.route.js";
 
 const app = express();
 
@@ -15,15 +18,16 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 🔥 DEBUG BODY
-app.use((req, res, next) => {
-  console.log("BODY:", req.body);
-  next();
-});
+// removed debug block
 
 // 🔥 ROUTES
 app.use("/api/auth", authRoute);
 app.use("/api/workout", workoutRoute);
+app.use("/api/checkins", checkinRoute);
+app.use("/api/coach", coachRoute);
+app.use("/api/users", userRoute);
+app.use("/api/content", contentRoute);
+app.use("/api/live", liveRoute);
 
 // CONNECT DB
 mongoose.connect(process.env.MONGO_URI)

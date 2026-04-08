@@ -5,13 +5,15 @@ const userSchema = new mongoose.Schema({
   password: String,
   name: String,
 
-  profile: {
-    height: Number,
-    weight: Number,
-    goal: String,
-    level: String,
-    injury: String
-  }
+  stats: {
+    currentStreak: { type: Number, default: 0 },
+    longestStreak: { type: Number, default: 0 },
+    totalSessions: { type: Number, default: 0 },
+    mindfulMinutes: { type: Number, default: 0 },
+    lastCheckInDate: { type: String, default: null } // ISO String (YYYY-MM-DD)
+  },
+  
+  role: { type: String, default: "user" } // 'user' or 'admin'
 });
 
 export default mongoose.model("User", userSchema);

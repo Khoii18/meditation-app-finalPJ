@@ -17,7 +17,7 @@ export function RegisterForm() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !password) {
-      setError("Vui lòng điền đầy đủ thông tin");
+      setError("Please fill in all fields");
       return;
     }
 
@@ -36,14 +36,14 @@ export function RegisterForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data || "Đăng ký thất bại");
+        throw new Error(data || "Registration failed");
       }
 
       // Automatically login or redirect to login
       router.push("./login"); 
 
     } catch (err: any) {
-      setError(err.message || "Đã xảy ra lỗi hệ thống");
+      setError(err.message || "A system error occurred");
     } finally {
       setLoading(false);
     }
@@ -78,10 +78,10 @@ export function RegisterForm() {
             <Flower2 className="w-8 h-8 text-teal-600 dark:text-teal-400" strokeWidth={1.5} />
           </motion.div>
           <h1 className="text-2xl font-semibold text-zinc-800 dark:text-zinc-100 mb-2 text-center">
-            Bắt đầu hành trình
+            Start Your Journey
           </h1>
           <p className="text-sm text-zinc-600 dark:text-zinc-400 text-center">
-            Tạo tài khoản để mở khóa những bài thiền riêng biệt dành cho bạn.
+            Create an account to unlock personalized meditation plans.
           </p>
         </div>
 
@@ -94,7 +94,7 @@ export function RegisterForm() {
 
           {/* Name Input */}
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-600 dark:text-zinc-300 ml-1">Tên hiển thị</label>
+            <label className="text-xs font-medium text-zinc-600 dark:text-zinc-300 ml-1">Display Name</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <UserCircle className="h-5 w-5 text-zinc-400" />
@@ -112,7 +112,7 @@ export function RegisterForm() {
 
           {/* Email Input */}
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-600 dark:text-zinc-300 ml-1">Email của bạn</label>
+            <label className="text-xs font-medium text-zinc-600 dark:text-zinc-300 ml-1">Your Email</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Mail className="h-5 w-5 text-zinc-400" />
@@ -130,7 +130,7 @@ export function RegisterForm() {
 
           {/* Password Input */}
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-600 dark:text-zinc-300 ml-1">Mật khẩu</label>
+            <label className="text-xs font-medium text-zinc-600 dark:text-zinc-300 ml-1">Password</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Lock className="h-5 w-5 text-zinc-400" />
@@ -165,7 +165,7 @@ export function RegisterForm() {
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
-                Đăng ký tài khoản
+                Create Account
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </>
             )}
@@ -173,9 +173,9 @@ export function RegisterForm() {
         </form>
 
         <p className="mt-8 text-center text-sm text-zinc-600 dark:text-zinc-400">
-          Đã có tài khoản?{" "}
+          Already have an account?{" "}
           <a href="./login" className="text-teal-700 dark:text-teal-400 font-medium hover:underline">
-            Đăng nhập
+            Sign in
           </a>
         </p>
       </motion.div>

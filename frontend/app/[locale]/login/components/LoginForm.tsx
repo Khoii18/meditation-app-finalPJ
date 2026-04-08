@@ -16,7 +16,7 @@ export function LoginForm() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      setError("Vui lòng nhập email và mật khẩu");
+      setError("Please enter your email and password");
       return;
     }
 
@@ -35,7 +35,7 @@ export function LoginForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data || "Đăng nhập thất bại");
+        throw new Error(data || "Login failed");
       }
 
       // Lưu trữ token và thông tin user
@@ -43,10 +43,14 @@ export function LoginForm() {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       // Chuyển hướng
-      router.push("/"); 
+      if (data.user.role === "admin") {
+        router.push("./admin"); 
+      } else {
+        router.push("./home"); 
+      }
 
     } catch (err: any) {
-      setError(err.message || "Đã xảy ra lỗi hệ thống");
+      setError(err.message || "A system error occurred");
     } finally {
       setLoading(false);
     }
@@ -85,10 +89,10 @@ export function LoginForm() {
             />
           </motion.div>
           <h1 className="text-2xl font-semibold text-zinc-800 dark:text-zinc-100 mb-2 text-center">
-            Chào mừng trở lại
+            Welcome back
           </h1>
           <p className="text-sm text-zinc-600 dark:text-zinc-400 text-center">
-            Hãy hít một hơi thật sâu và tiếp tục hành trình tinh thần của bạn.
+            Take a deep breath and continue your spiritual journey.
           </p>
         </div>
 
@@ -109,7 +113,7 @@ export function LoginForm() {
           {/* Email Input */}
           <div className="space-y-1">
             <label className="text-xs font-medium text-zinc-600 dark:text-zinc-300 ml-1">
-              Email của bạn
+              Your Email
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -130,10 +134,10 @@ export function LoginForm() {
           <div className="space-y-1">
             <div className="flex justify-between items-center ml-1">
               <label className="text-xs font-medium text-zinc-600 dark:text-zinc-300">
-                Mật khẩu
+                Password
               </label>
               <button type="button" className="text-xs text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 transition-colors">
-                Quên mật khẩu?
+                Forgot password?
               </button>
             </div>
             <div className="relative">
@@ -169,11 +173,11 @@ export function LoginForm() {
             {loading ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Đang đăng nhập...
+                Signing in...
               </>
             ) : (
               <>
-                Bắt đầu thiền
+                Start Meditating
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </>
             )}
@@ -188,7 +192,7 @@ export function LoginForm() {
           className="mt-8 flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400"
         >
           <div className="flex-1 h-px bg-zinc-300 dark:bg-zinc-700"></div>
-          <span className="px-3">Hoặc tiếp tục với</span>
+          <span className="px-3">Or continue with</span>
           <div className="flex-1 h-px bg-zinc-300 dark:bg-zinc-700"></div>
         </motion.div>
 
@@ -217,9 +221,9 @@ export function LoginForm() {
           transition={{ delay: 0.9, duration: 0.8 }}
           className="mt-8 text-center text-sm text-zinc-600 dark:text-zinc-400"
         >
-          Chưa có tài khoản?{" "}
+          Don't have an account?{" "}
           <a href="./register" className="text-teal-700 dark:text-teal-400 font-medium hover:underline">
-            Đăng ký ngay
+            Register now
           </a>
         </motion.p>
       </motion.div>

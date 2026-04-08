@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import User from "../models/user.model.js";
 
 export const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -22,4 +23,19 @@ export const verifyToken = (req, res, next) => {
     console.log("JWT ERROR:", err.message);
     return res.status(403).json("Invalid token");
   }
+};
+
+export const verifyAdmin = async (req, res, next) => {
+  verifyToken(req, res, async () => {
+    try {
+      const user = await User.findById(req.user.id);
+      if (user && user.role === "admin") {
+        next();
+      } else {
+        res.status(403).json("You are not allowed to do that!");
+      }
+    } catch (err) {
+      res.status(500).json(err.message);
+    }
+  });
 };
