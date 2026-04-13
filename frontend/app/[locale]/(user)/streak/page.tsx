@@ -50,7 +50,7 @@ export default function StreakPage() {
           <StreakMetrics stats={stats} />
         </div>
 
-        <RecentBadges />
+        <RecentBadges currentStreak={stats.currentStreak} longestStreak={stats.longestStreak} />
       </div>
     </div>
   );

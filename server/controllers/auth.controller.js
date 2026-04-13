@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 // REGISTER
 export const register = async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, role } = req.body;
 
     // 🔥 1. Validate input
     if (!email || !password || !name) {
@@ -21,11 +21,17 @@ export const register = async (req, res) => {
     // 🔥 3. Hash password
     const hash = await bcrypt.hash(password, 10);
 
-    // 🔥 4. Create user
+    // 🔥 4. Validate role - only allow "user" or "coach"
+    const allowedRoles = ["user", "coach"];
+    const userRole = allowedRoles.includes(role) ? role : "user";
+    console.log(`[REGISTER] name=${name}, email=${email}, role received="${role}", role saved="${userRole}"`);
+
+    // 🔥 5. Create user
     const user = await User.create({
       email,
       password: hash,
-      name
+      name,
+      role: userRole
     });
 
     // 🔥 5. Remove password (FIX CHUẨN)

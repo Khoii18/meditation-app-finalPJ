@@ -5,22 +5,24 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 export function ConstellationMap() {
-  const [currentDay, setCurrentDay] = useState(1);
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [totalSessions, setTotalSessions] = useState(0);
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
-        const res = await fetch("http://localhost:5000/api/user/me", {
+        // ✅ Fixed: use correct endpoint /api/users/me
+        const res = await fetch("http://localhost:5000/api/users/me", {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {
           const user = await res.json();
           const streak = user.stats?.currentStreak || 0;
-          // Loop through the 10-day orbit based on continuous streak
-          let orbitDay = (streak % 10) + 1;
-          setCurrentDay(orbitDay);
+          const sessions = user.stats?.totalSessions || 0;
+          setCurrentStreak(streak);
+          setTotalSessions(sessions);
         }
       } catch (err) {
         console.error(err);
@@ -29,13 +31,20 @@ export function ConstellationMap() {
     fetchProfile();
   }, []);
 
+  // Correct logic:
+  // - Days BEFORE the current active day are "completed"
+  // - The NEXT day after streak is "active" (the day you are on)
+  // - All others are "locked"
+  // e.g. streak=2 → Day 1 completed, Day 2 completed, Day 3 active, Day 4-10 locked
+  const orbitPosition = currentStreak % 10; // 0-9 within the 10-day orbit
+  const activeDay = orbitPosition + 1; // day 1-10
+
   const nodes = Array.from({ length: 10 }).map((_, i) => {
     const day = i + 1;
-    let status = "locked";
-    if (day < currentDay) status = "completed";
-    if (day === currentDay) status = "active";
-    
-    // Zig zag math for coordinates
+    let status: "completed" | "active" | "locked" = "locked";
+    if (day < activeDay) status = "completed";
+    else if (day === activeDay) status = "active";
+
     const isEven = i % 2 === 0;
     const x = isEven ? "30%" : "70%";
     const y = `${(i + 1) * 9}%`;
@@ -64,6 +73,19 @@ export function ConstellationMap() {
         >
           <h1 className="text-4xl text-white font-serif font-medium mb-2">Mindful Orbit</h1>
           <p className="text-indigo-300/80 text-sm">A 10-day journey to unlock cognitive potential.</p>
+
+          {/* Live stats summary synced with streak */}
+          <div className="mt-4 flex justify-center gap-6 text-sm">
+            <div className="flex flex-col items-center">
+              <span className="text-2xl font-bold text-indigo-300">{currentStreak}</span>
+              <span className="text-indigo-400/70 text-xs uppercase tracking-widest">Day Streak</span>
+            </div>
+            <div className="w-px bg-white/10" />
+            <div className="flex flex-col items-center">
+              <span className="text-2xl font-bold text-violet-300">{totalSessions}</span>
+              <span className="text-indigo-400/70 text-xs uppercase tracking-widest">Sessions</span>
+            </div>
+          </div>
         </motion.header>
 
         <div className="relative h-[800px] w-full mt-4">
@@ -98,7 +120,7 @@ export function ConstellationMap() {
               style={{ left: node.x, top: node.y }}
             >
               <div className="relative group cursor-pointer flex flex-col items-center">
-                {/* Node Ring */}
+                {/* Pulsing ring for active node */}
                 {node.status === "active" && (
                   <motion.div 
                     animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0.6, 0.3] }}

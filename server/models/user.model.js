@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
     lastCheckInDate: { type: String, default: null } // ISO String (YYYY-MM-DD)
   },
   
-  role: { type: String, default: "user" } // 'user' or 'admin'
+  role: { type: String, enum: ["user", "admin", "coach"], default: "user" } // 'user', 'admin', or 'coach'
 });
 
 export default mongoose.model("User", userSchema);

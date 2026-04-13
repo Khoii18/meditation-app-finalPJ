@@ -13,6 +13,7 @@ export function RegisterForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState<"user" | "coach">("user");
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,10 +28,8 @@ export function RegisterForm() {
       
       const res = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, email, password }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, role }),
       });
 
       const data = await res.json();
@@ -39,7 +38,6 @@ export function RegisterForm() {
         throw new Error(data || "Registration failed");
       }
 
-      // Automatically login or redirect to login
       router.push("./login"); 
 
     } catch (err: any) {
@@ -51,7 +49,7 @@ export function RegisterForm() {
   
   return (
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden font-sans py-12">
-      {/* Soft Background Gradient & Image */}
+      {/* Background */}
       <div 
         className="absolute inset-0 bg-cover bg-center z-0"
         style={{ 
@@ -68,7 +66,7 @@ export function RegisterForm() {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="relative z-10 w-full max-w-md p-8 mx-4 bg-white/70 dark:bg-zinc-900/60 backdrop-blur-2xl rounded-[2.5rem] border border-white/50 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.1)]"
       >
-        <div className="flex flex-col items-center mb-8">
+        <div className="flex flex-col items-center mb-6">
           <motion.div
             initial={{ rotate: -90, opacity: 0 }}
             animate={{ rotate: 0, opacity: 1 }}
@@ -77,12 +75,56 @@ export function RegisterForm() {
           >
             <Flower2 className="w-8 h-8 text-teal-600 dark:text-teal-400" strokeWidth={1.5} />
           </motion.div>
-          <h1 className="text-2xl font-semibold text-zinc-800 dark:text-zinc-100 mb-2 text-center">
+          <h1 className="text-2xl font-semibold text-zinc-800 dark:text-zinc-100 mb-1 text-center">
             Start Your Journey
           </h1>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 text-center">
-            Create an account to unlock personalized meditation plans.
-          </p>
+          {/* Animated role description */}
+          <motion.p
+            key={role}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="text-sm text-center mt-1 font-medium"
+            style={{ color: role === "coach" ? "#7c3aed" : "#0f766e" }}
+          >
+            {role === "user"
+              ? "🧘 You are registering as a Student"
+              : "🏅 You are registering as a Coach"}
+          </motion.p>
+        </div>
+
+        {/* Animated Role Toggle */}
+        <div className="relative flex bg-zinc-100/80 dark:bg-zinc-800/60 rounded-2xl p-1 mb-6 shadow-inner">
+          {/* Sliding pill background */}
+          <motion.div
+            className="absolute top-1 bottom-1 rounded-xl shadow-md"
+            animate={{
+              left: role === "user" ? "4px" : "calc(50% + 2px)",
+              width: "calc(50% - 6px)",
+              background: role === "user"
+                ? "linear-gradient(to right, #14b8a6, #10b981)"
+                : "linear-gradient(to right, #6366f1, #a855f7)",
+            }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          />
+          <button
+            type="button"
+            onClick={() => setRole("user")}
+            className={`relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors duration-200 ${
+              role === "user" ? "text-white" : "text-zinc-500 dark:text-zinc-400"
+            }`}
+          >
+            🧘 Student
+          </button>
+          <button
+            type="button"
+            onClick={() => setRole("coach")}
+            className={`relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors duration-200 ${
+              role === "coach" ? "text-white" : "text-zinc-500 dark:text-zinc-400"
+            }`}
+          >
+            🏅 Coach
+          </button>
         </div>
 
         <form className="space-y-4" onSubmit={handleRegister}>
@@ -154,19 +196,31 @@ export function RegisterForm() {
             </div>
           </div>
 
+          {/* Submit Button - color changes with role */}
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
             disabled={loading}
             type="submit"
-            className="w-full mt-6 py-3.5 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-medium shadow-lg shadow-teal-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+            animate={{
+              background: role === "coach"
+                ? ["linear-gradient(to right, #6366f1, #a855f7)"]
+                : ["linear-gradient(to right, #0d9488, #059669)"],
+            }}
+            transition={{ duration: 0.4 }}
+            className="w-full mt-6 py-3.5 rounded-2xl text-white font-medium shadow-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            style={{
+              background: role === "coach"
+                ? "linear-gradient(to right, #6366f1, #a855f7)"
+                : "linear-gradient(to right, #0d9488, #059669)",
+            }}
           >
             {loading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
-                Create Account
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                {role === "coach" ? "Register as Coach" : "Create Account"}
+                <ArrowRight className="w-4 h-4" />
               </>
             )}
           </motion.button>

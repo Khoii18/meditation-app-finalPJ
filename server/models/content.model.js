@@ -7,7 +7,8 @@ const contentSchema = new mongoose.Schema({
   image: { type: String, required: true },
   type: { type: String, required: true }, // e.g. "Thiền định", "Thư giãn", "Story", "Sound"
   description: { type: String },
-  audioUrl: { type: String }
+  audioUrl: { type: String },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" } // coach/admin who created this
 }, { timestamps: true });
 
 export default mongoose.model("Content", contentSchema);

@@ -2,11 +2,11 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { Plus } from "lucide-react";
-import { AdminTable } from "../components/AdminTable";
-import { AdminFormModal } from "../components/AdminFormModal";
+import { CoachTable } from "../components/CoachTable";
+import { CoachFormModal } from "../components/CoachFormModal";
 import { useSearchParams } from "next/navigation";
 
-function AdminPageContent() {
+function CoachPageContent() {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get("tab") || "content";
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -33,7 +33,10 @@ function AdminPageContent() {
   const fetchData = async () => {
     try {
       const endpoint = activeTab === "content" ? "/api/content" : "/api/live";
-      const res = await fetch(`http://localhost:5000${endpoint}`);
+      const currentToken = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const res = await fetch(`http://localhost:5000${endpoint}`, {
+        headers: currentToken ? { "Authorization": `Bearer ${currentToken}` } : {}
+      });
       const json = await res.json();
       setData(json);
     } catch (err) {
@@ -76,7 +79,7 @@ function AdminPageContent() {
       });
       setShowModal(false);
       fetchData();
-      } catch (err) {
+    } catch (err) {
       console.error(err);
     }
   };
@@ -86,12 +89,13 @@ function AdminPageContent() {
     setShowModal(true);
   };
 
-  if (!user || user.role !== "admin") {
+  // We check if the user is a coach or an admin (admins can also view)
+  if (!user || (user.role !== "coach" && user.role !== "admin")) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0C] flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-rose-500 mb-2">Access Denied</h1>
-          <p className="text-slate-500">You do not have administration privileges to access this page.</p>
+          <p className="text-slate-500">You must be a coach to access this dashboard.</p>
         </div>
       </div>
     );
@@ -102,8 +106,8 @@ function AdminPageContent() {
       <div className="max-w-6xl mx-auto">
         <header className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-serif font-bold">Admin Dashboard</h1>
-            <p className="text-slate-500 mt-1">Manage Mindfulness app content</p>
+            <h1 className="text-3xl font-serif font-bold">Coach Dashboard</h1>
+            <p className="text-slate-500 mt-1">Hello {user?.name}! Manage your meditation courses and livestreams.</p>
           </div>
           <button 
             onClick={() => { setFormData({}); setShowModal(true); }}
@@ -114,11 +118,11 @@ function AdminPageContent() {
         </header>
 
         <div className="flex gap-4 mb-6 border-b border-slate-200 dark:border-white/10 pb-2">
-          <button onClick={() => setActiveTab("content")} className={`px-4 py-2 font-medium ${activeTab === 'content' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500'}`}>Meditations</button>
-          <button onClick={() => setActiveTab("live")} className={`px-4 py-2 font-medium ${activeTab === 'live' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500'}`}>Live Sessions</button>
+          <button onClick={() => setActiveTab("content")} className={`px-4 py-2 font-medium ${activeTab === 'content' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500'}`}>My Meditations</button>
+          <button onClick={() => setActiveTab("live")} className={`px-4 py-2 font-medium ${activeTab === 'live' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500'}`}>My Live Sessions</button>
         </div>
 
-        <AdminTable 
+        <CoachTable 
           data={data}
           activeTab={activeTab}
           onEdit={handleEdit}
@@ -126,22 +130,23 @@ function AdminPageContent() {
         />
       </div>
 
-      <AdminFormModal 
+      <CoachFormModal 
         formData={formData}
         setFormData={setFormData}
         activeTab={activeTab}
         showModal={showModal}
         setShowModal={setShowModal}
         handleSave={handleSave}
+        user={user}
       />
     </div>
   );
 }
 
-export default function AdminPage() {
+export default function CoachPage() {
   return (
     <Suspense fallback={<div className="p-8 text-slate-500">Loading Dashboard...</div>}>
-      <AdminPageContent />
+      <CoachPageContent />
     </Suspense>
   );
 }

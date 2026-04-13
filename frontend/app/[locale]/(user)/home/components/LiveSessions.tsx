@@ -2,9 +2,11 @@
 
 import { Calendar } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export function LiveSessions() {
   const [schedule, setSchedule] = useState<any[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchLive = async () => {
@@ -33,6 +35,11 @@ export function LiveSessions() {
         {schedule.map((session, idx) => (
           <div 
             key={idx} 
+            onClick={() => {
+               if (session.isLive) {
+                 router.push('./live');
+               }
+            }}
             className="flex items-center justify-between p-4 rounded-[1.5rem] bg-white dark:bg-[#1C1C1E] shadow-sm border border-slate-100 dark:border-white/5 active:scale-95 transition-transform cursor-pointer"
           >
             <div className="flex items-center gap-4">
@@ -51,7 +58,9 @@ export function LiveSessions() {
                 <span className={`w-1.5 h-1.5 rounded-full ${session.isLive ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`} />
                 {session.isLive ? 'Live Now' : 'Upcoming'}
               </span>
-              <button className="text-xs font-semibold text-slate-400 hover:text-indigo-500 transition-colors">Notify me</button>
+              <button className={`text-xs font-semibold transition-colors ${session.isLive ? 'text-rose-500 bg-rose-50 dark:bg-rose-500/10 px-2 py-1 rounded-md' : 'text-slate-400 hover:text-indigo-500'}`}>
+                 {session.isLive ? 'Join Now' : 'Notify me'}
+              </button>
             </div>
           </div>
         ))}

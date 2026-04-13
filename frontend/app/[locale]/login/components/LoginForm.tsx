@@ -42,11 +42,13 @@ export function LoginForm() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      // Chuyển hướng
+      // Redirect based on role
       if (data.user.role === "admin") {
-        router.push("./admin"); 
+        router.push("./admin");
+      } else if (data.user.role === "coach") {
+        router.push("./coach");
       } else {
-        router.push("./home"); 
+        router.push("./home");
       }
 
     } catch (err: any) {

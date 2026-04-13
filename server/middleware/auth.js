@@ -39,3 +39,18 @@ export const verifyAdmin = async (req, res, next) => {
     }
   });
 };
+
+export const verifyAdminOrCoach = async (req, res, next) => {
+  verifyToken(req, res, async () => {
+    try {
+      const user = await User.findById(req.user.id);
+      if (user && (user.role === "admin" || user.role === "coach")) {
+        next();
+      } else {
+        res.status(403).json("Access denied. Admin or Coach required!");
+      }
+    } catch (err) {
+      res.status(500).json(err.message);
+    }
+  });
+};
