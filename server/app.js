@@ -10,6 +10,7 @@ import coachRoute from "./routes/coach.route.js";
 import userRoute from "./routes/user.route.js";
 import contentRoute from "./routes/content.route.js";
 import liveRoute from "./routes/live.route.js";
+import subscriptionRoute from "./routes/subscription.route.js";
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use("/api/coach", coachRoute);
 app.use("/api/users", userRoute);
 app.use("/api/content", contentRoute);
 app.use("/api/live", liveRoute);
+app.use("/api", subscriptionRoute);
 
 // CONNECT DB
 mongoose.connect(process.env.MONGO_URI)

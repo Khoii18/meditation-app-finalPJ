@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard, FileText, CalendarDays, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, FileText, CalendarDays, Settings, LogOut, Users, Smile } from "lucide-react";
 
 export default function AdminLayout({
   children,
@@ -34,6 +34,14 @@ export default function AdminLayout({
           <Link href="?tab=live" className="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors font-medium">
             <CalendarDays className="w-5 h-5" />
             Live Schedule
+          </Link>
+          <Link href="?tab=users" className="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors font-medium">
+            <Users className="w-5 h-5" />
+            Users
+          </Link>
+          <Link href="?tab=emotions" className="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors font-medium">
+            <Smile className="w-5 h-5" />
+            Emotions
           </Link>
           <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors font-medium">
             <Settings className="w-5 h-5" />

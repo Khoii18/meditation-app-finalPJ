@@ -3,7 +3,7 @@ import User from "../models/user.model.js";
 
 export const addCheckin = async (req, res) => {
   try {
-    const { sleep, energy, goal } = req.body;
+    const { sleep, energy, goal, mood, moodNote } = req.body;
     
     // YYYY-MM-DD
     const today = new Date().toISOString().split('T')[0];
@@ -27,15 +27,19 @@ export const addCheckin = async (req, res) => {
     let newStreak = 1;
 
     if (user.stats.lastCheckInDate) {
-      const lastCheckIn = new Date(user.stats.lastCheckInDate);
-      const currentTime = new Date(today);
-      
-      const diffTime = Math.abs(currentTime - lastCheckIn);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-      
+      // Compare YYYY-MM-DD strings directly to avoid timezone issues
+      const last = new Date(user.stats.lastCheckInDate + "T00:00:00Z");
+      const curr = new Date(today + "T00:00:00Z");
+      const diffDays = Math.round((curr - last) / (1000 * 60 * 60 * 24));
+
       if (diffDays === 1) {
+        // Consecutive day → continue streak
         newStreak = user.stats.currentStreak + 1;
+      } else if (diffDays === 0) {
+        // Same day — shouldn't happen (caught above), but just in case
+        newStreak = user.stats.currentStreak;
       }
+      // diffDays > 1 → missed a day → streak resets to 1
     }
 
     user.stats.currentStreak = newStreak;
@@ -51,6 +55,8 @@ export const addCheckin = async (req, res) => {
       sleep,
       energy,
       goal,
+      mood: mood || null,
+      moodNote: moodNote || null,
       date: today
     });
 
@@ -64,3 +70,29 @@ export const addCheckin = async (req, res) => {
     res.status(500).json(error.message);
   }
 };
+
+export const updateMood = async (req, res) => {
+  try {
+    const { mood, moodNote } = req.body;
+    const today = new Date().toISOString().split('T')[0];
+    const userId = req.user.id;
+
+    const checkin = await Checkin.findOne({ userId, date: today });
+
+    if (!checkin) {
+      return res.status(404).json({ message: "No check-in found for today. Please check-in first." });
+    }
+
+    checkin.mood = mood;
+    checkin.moodNote = moodNote;
+    await checkin.save();
+
+    res.status(200).json({
+      message: "Mood updated successfully",
+      checkin
+    });
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};
+

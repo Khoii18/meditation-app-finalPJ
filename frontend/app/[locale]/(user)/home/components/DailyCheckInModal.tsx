@@ -9,17 +9,42 @@ export function DailyCheckInModal() {
   const [step, setStep] = useState(0);
   
   useEffect(() => {
-    // Show only once per session or day. Using simple timeout for demo.
-    const hasCheckedIn = sessionStorage.getItem("checkedIn");
-    if (!hasCheckedIn) {
-      const timer = setTimeout(() => setIsOpen(true), 1500);
-      return () => clearTimeout(timer);
-    }
+    const checkStatus = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const res = await fetch("http://localhost:5000/api/users/me", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const user = await res.json();
+          const today = new Date().toISOString().split('T')[0];
+          
+          // Only show if they haven't checked in today according to DB
+          // AND they haven't closed it in this specific session already
+          const hasDismissed = sessionStorage.getItem("checkedIn_dismissed");
+
+          if (user.stats?.lastCheckInDate !== today && !hasDismissed) {
+            const timer = setTimeout(() => setIsOpen(true), 1500);
+            return () => clearTimeout(timer);
+          }
+        }
+      } catch (err) {
+        console.error("Check-in status check failed:", err);
+      }
+    };
+
+    checkStatus();
   }, []);
 
-  const close = () => {
+  const close = (isSuccess = false) => {
     setIsOpen(false);
-    sessionStorage.setItem("checkedIn", "true");
+    sessionStorage.setItem("checkedIn_dismissed", "true");
+    if (isSuccess) {
+      // Refresh user data or page to update streak in UI
+      window.location.reload();
+    }
   };
 
   const [answers, setAnswers] = useState({ sleep: "", energy: "", goal: "" });
@@ -46,7 +71,7 @@ export function DailyCheckInModal() {
       } catch (err) {
         console.error(err);
       }
-      close();
+      close(true);
     } else {
       setStep(s => s + 1);
     }
@@ -74,7 +99,7 @@ export function DailyCheckInModal() {
             className="w-full max-w-md bg-white dark:bg-[#1C1C1E] rounded-[2.5rem] shadow-2xl overflow-hidden relative"
           >
             {/* Top close */}
-            <button onClick={close} className="absolute top-6 right-6 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors z-10">
+            <button onClick={() => close()} className="absolute top-6 right-6 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors z-10">
               <X className="w-6 h-6" />
             </button>
 

@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { Sparkles, ArrowRight, Loader2, PlayCircle, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export function AiCoachView() {
+  const router = useRouter();
   const [mood, setMood] = useState("");
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<any>(null);
@@ -32,12 +34,6 @@ export function AiCoachView() {
       setPlan(data.plan);
     } catch (err) {
       console.error(err);
-      // Fallback
-      setPlan({
-        title: "Emergency Relaxation Plan",
-        description: `We notice you are feeling "${mood}". Please take 3 deep breaths and try again.`,
-        steps: [{ name: "Deep Breathing", duration: "1 min", type: "Rhythmic breathing" }]
-      });
     } finally {
       setLoading(false);
     }
@@ -115,7 +111,11 @@ export function AiCoachView() {
 
             <div className="flex gap-4">
               <button 
-                onClick={() => window.location.href = "./home"}
+                onClick={() => {
+                  // Dùng đường dẫn chuẩn để tránh 404
+                  const locale = window.location.pathname.split('/')[1] || 'vi';
+                  window.location.href = `/${locale}/home`;
+                }}
                 className="bg-white text-indigo-900 px-8 py-4 rounded-full font-bold flex items-center gap-2 hover:scale-105 transition-transform shadow-xl shadow-white/10"
               >
                 <PlayCircle className="w-6 h-6" /> Start Practice

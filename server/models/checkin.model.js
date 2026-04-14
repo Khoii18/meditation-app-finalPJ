@@ -5,6 +5,8 @@ const checkinSchema = new mongoose.Schema({
   sleep: String,
   energy: String,
   goal: String,
+  mood: { type: String, default: null }, // emoji label: Angry, Sad, Neutral, Peaceful, Happy
+  moodNote: { type: String, default: null }, // optional note
   date: { type: String, required: true }, // Format YYYY-MM-DD
   createdAt: { type: Date, default: Date.now }
 });
