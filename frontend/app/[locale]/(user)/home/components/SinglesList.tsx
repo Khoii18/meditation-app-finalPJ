@@ -9,16 +9,26 @@ export function SinglesList() {
   const [routines, setRoutines] = useState<any[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const FALLBACK_DATA = [
+    { _id: "s1", title: "Deep Rest", type: "Single", duration: "15 min", image: "https://images.unsplash.com/photo-1511295742362-92c96b1cf484?q=80&w=600" },
+    { _id: "s2", title: "Morning Stretch", type: "Single", duration: "10 min", image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=600" },
+    { _id: "s3", title: "Focus Flow", type: "Work", duration: "20 min", image: "https://images.unsplash.com/photo-1518241353330-0f7941c2d1b5?q=80&w=600" },
+    { _id: "s4", title: "Evening Wind Down", type: "Single", duration: "10 min", image: "https://images.unsplash.com/photo-1499209974431-9dddcece7fdd?q=80&w=600" },
+    { _id: "s5", title: "Quick Relief", type: "Anxiety", duration: "5 min", image: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=600" }
+  ];
+
   useEffect(() => {
     const fetchContent = async () => {
       try {
         const res = await fetch("http://localhost:5000/api/content");
         if (res.ok) {
           const data = await res.json();
-          setRoutines(data);
+          setRoutines(data.length > 0 ? data : FALLBACK_DATA);
+        } else {
+          setRoutines(FALLBACK_DATA);
         }
       } catch (err) {
-        console.error(err);
+        setRoutines(FALLBACK_DATA);
       }
     };
     fetchContent();
@@ -43,7 +53,7 @@ export function SinglesList() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.3 }}
-      className="mt-8 mb-6"
+      className="mt-6 mb-6"
     >
       <div className="px-6 mb-4 flex justify-between items-center whitespace-nowrap">
         <h3 className="text-xl font-serif font-medium text-slate-800 dark:text-slate-100 flex-shrink-0">Singles</h3>
@@ -81,7 +91,7 @@ export function SinglesList() {
               className="min-w-[160px] max-w-[160px] snap-start"
             >
               <Link href={`./play/${routine._id}`} className="group flex flex-col gap-3">
-                <div className="relative aspect-square rounded-[1.5rem] overflow-hidden bg-slate-200 dark:bg-slate-800 shadow-sm transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
+                <div className="relative aspect-square rounded-3xl overflow-hidden bg-slate-200 dark:bg-slate-800 shadow-sm transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
                   <img 
                     src={routine.image || 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=400'} 
                     alt={routine.title} 

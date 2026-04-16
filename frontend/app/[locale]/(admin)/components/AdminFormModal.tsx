@@ -4,7 +4,14 @@ export function AdminFormModal({ formData, setFormData, activeTab, showModal, se
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white dark:bg-[#1C1C1E] w-full max-w-lg rounded-3xl p-8 shadow-2xl">
-        <h2 className="text-2xl font-serif font-bold mb-6">{formData._id ? "Edit" : "Add"} {activeTab === 'content' ? "Meditation" : "Live Session"}</h2>
+        <h2 className="text-2xl font-serif font-bold mb-6">
+          {formData._id ? "Edit" : "Add"} {
+            activeTab === 'content' ? "Meditation" :
+            activeTab === 'sleep' ? "Sleep Content" :
+            activeTab === 'plans' ? "Plan" :
+            "Live Session"
+          }
+        </h2>
         <form onSubmit={handleSave} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">Title</label>
@@ -18,11 +25,21 @@ export function AdminFormModal({ formData, setFormData, activeTab, showModal, se
             <label className="block text-sm font-medium mb-1">Cover Image URL</label>
             <input required value={formData.image || ''} onChange={e => setFormData({...formData, image: e.target.value})} className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 dark:bg-black/20" placeholder="https://..." />
           </div>
-          {activeTab === 'content' ? (
+           {(activeTab === 'content' || activeTab === 'sleep' || activeTab === 'plans') ? (
              <>
                <div>
-                 <label className="block text-sm font-medium mb-1">Category</label>
-                 <input required value={formData.type || ''} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 dark:bg-black/20" placeholder="Meditation, Sleep, Focus..." />
+                 <label className="block text-sm font-medium mb-1">Category / Type</label>
+                 <input 
+                   required 
+                   value={formData.type || ''} 
+                   onChange={e => setFormData({...formData, type: e.target.value})} 
+                   className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 dark:bg-black/20" 
+                   placeholder={
+                     activeTab === 'sleep' ? "Sleep Story, Sleep Sound, etc." : 
+                     activeTab === 'plans' ? "Plan" : 
+                     "Meditation, Breathwork, Focus..."
+                   } 
+                 />
                </div>
                <div>
                  <label className="block text-sm font-medium mb-1">Duration</label>

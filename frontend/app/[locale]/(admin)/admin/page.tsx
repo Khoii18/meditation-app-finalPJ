@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { Plus, Users, FileText, CalendarDays, Smile } from "lucide-react";
+import { Plus, Users, FileText, CalendarDays, Smile, Moon, Layers } from "lucide-react";
 import { AdminTable } from "../components/AdminTable";
 import { AdminFormModal } from "../components/AdminFormModal";
 import { UsersManagement } from "../components/UsersManagement";
@@ -35,7 +35,8 @@ function AdminPageContent() {
   const fetchData = async () => {
     if (activeTab === "users" || activeTab === "emotions") return;
     try {
-      const endpoint = activeTab === "content" ? "/api/content" : "/api/live";
+      const isContent = activeTab === "content" || activeTab === "sleep" || activeTab === "plans";
+      const endpoint = isContent ? "/api/content" : "/api/live";
       const res = await fetch(`http://localhost:5000${endpoint}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
@@ -53,7 +54,8 @@ function AdminPageContent() {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure?")) return;
     try {
-      const endpoint = activeTab === "content" ? `/api/content/${id}` : `/api/live/${id}`;
+      const isContent = activeTab === "content" || activeTab === "sleep" || activeTab === "plans";
+      const endpoint = isContent ? `/api/content/${id}` : `/api/live/${id}`;
       await fetch(`http://localhost:5000${endpoint}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
@@ -66,7 +68,8 @@ function AdminPageContent() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    const endpoint = activeTab === "content" ? "/api/content" : "/api/live";
+    const isContent = activeTab === "content" || activeTab === "sleep" || activeTab === "plans";
+    const endpoint = isContent ? "/api/content" : "/api/live";
     const method = formData._id ? "PUT" : "POST";
     const url = formData._id
       ? `http://localhost:5000${endpoint}/${formData._id}`
@@ -106,10 +109,19 @@ function AdminPageContent() {
 
   const TABS = [
     { key: "content",   label: "Meditations",  icon: FileText },
+    { key: "sleep",     label: "Sleep Content",icon: Moon },
+    { key: "plans",     label: "Plans",        icon: Layers },
     { key: "live",      label: "Live Sessions", icon: CalendarDays },
     { key: "users",     label: "Users",         icon: Users },
     { key: "emotions",  label: "Emotions",      icon: Smile },
   ];
+
+  const filteredData = Array.isArray(data) ? data.filter((d: any) => {
+    if (activeTab === "sleep") return d.type?.toLowerCase().includes("sleep");
+    if (activeTab === "plans") return d.type?.toLowerCase().includes("plan");
+    if (activeTab === "content") return !d.type?.toLowerCase().includes("sleep") && !d.type?.toLowerCase().includes("plan");
+    return true; // live, users, emotions
+  }) : [];
 
   return (
     <div className="p-8 pb-32 font-sans text-slate-800 dark:text-slate-200">
@@ -156,7 +168,7 @@ function AdminPageContent() {
           <EmotionsAnalytics token={token || ""} />
         ) : (
           <AdminTable
-            data={data}
+            data={filteredData}
             activeTab={activeTab}
             onEdit={handleEdit}
             onDelete={handleDelete}

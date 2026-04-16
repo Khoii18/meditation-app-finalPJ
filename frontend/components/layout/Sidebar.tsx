@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Flame, PlayCircle, CreditCard, User, LogOut, Sparkles, Moon, Map as MapIcon } from "lucide-react";
+import { Home, Flame, PlayCircle, CreditCard, User, LogOut, Sparkles, Moon, Map as MapIcon, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -18,9 +18,11 @@ export function Sidebar() {
 
       <nav className="flex-1 space-y-2">
         <NavItem href="/vi/home" icon={<Home className="w-5 h-5" />} label="Today" isActive={pathname.includes("/home")} />
+        <NavItem href="/vi/plans" icon={<MapIcon className="w-5 h-5" />} label="Plans" isActive={pathname.includes("/plans")} />
         <NavItem href="/vi/journey" icon={<MapIcon className="w-5 h-5" />} label="Journey" isActive={pathname.includes("/journey")} />
         <NavItem href="/vi/streak" icon={<Flame className="w-5 h-5" />} label="Streak" isActive={pathname.includes("/streak")} />
         <NavItem href="/vi/ai-coach" icon={<Sparkles className="w-5 h-5" />} label="AI Coach" isActive={pathname.includes("/ai-coach")} />
+        <NavItem href="/vi/coaches" icon={<Users className="w-5 h-5" />} label="Coaches" isActive={pathname.includes("/coaches")} />
         <NavItem href="/vi/sleep" icon={<Moon className="w-5 h-5" />} label="Sleep" isActive={pathname.includes("/sleep")} />
         <NavItem href="/vi/pricing" icon={<CreditCard className="w-5 h-5" />} label="Pricing" isActive={pathname.includes("/pricing")} />
         <NavItem href="/vi/profile" icon={<User className="w-5 h-5" />} label="Profile" isActive={pathname.includes("/profile")} />

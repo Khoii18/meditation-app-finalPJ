@@ -9,6 +9,13 @@ export function SleepStories() {
   const [stories, setStories] = useState<any[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const FALLBACK_STORIES = [
+    { _id: "ss1", title: "Midnight Express", type: "Sleep Story", duration: "35 min", image: "https://images.unsplash.com/photo-1478147424040-f6af9b35fd69?q=80&w=600" },
+    { _id: "ss2", title: "The Quiet Cabin", type: "Sleep Story", duration: "45 min", image: "https://images.unsplash.com/photo-1510798831971-661eb04b3739?q=80&w=600" },
+    { _id: "ss3", title: "Ocean's Lullaby", type: "Sleep Story", duration: "30 min", image: "https://images.unsplash.com/photo-1495012379376-194a416fcc5f?q=80&w=600" },
+    { _id: "ss4", title: "Starlit Journey", type: "Sleep Story", duration: "40 min", image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600" }
+  ];
+
   useEffect(() => {
     const fetchContent = async () => {
       try {
@@ -21,10 +28,18 @@ export function SleepStories() {
             d.type.toLowerCase().includes("story") ||
             d.title.toLowerCase().includes("sleep")
           );
-          setStories(sleepData.length > 0 ? sleepData : data.slice(0, 4));
+          if (sleepData.length > 0) {
+            setStories(sleepData);
+          } else if (data.length >= 2) {
+            setStories(data.slice(0, 4));
+          } else {
+             setStories(FALLBACK_STORIES);
+          }
+        } else {
+           setStories(FALLBACK_STORIES);
         }
       } catch (err) {
-        console.error(err);
+        setStories(FALLBACK_STORIES);
       }
     };
     fetchContent();

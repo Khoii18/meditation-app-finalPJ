@@ -1,143 +1,86 @@
 "use client";
 
-import { useState } from "react";
-import { Check } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { CheckCircle2 } from "lucide-react";
 
-const moods = [
-  { emoji: "😠", label: "Angry" },
-  { emoji: "😔", label: "Sad" },
-  { emoji: "😐", label: "Neutral" },
-  { emoji: "😌", label: "Peaceful" },
-  { emoji: "🤩", label: "Happy" },
+const MOODS = [
+  { id: "angry", label: "Angry", emoji: "😡" },
+  { id: "sad", label: "Sad", emoji: "😢" },
+  { id: "neutral", label: "Neutral", emoji: "😐" },
+  { id: "peaceful", label: "Peaceful", emoji: "😌" },
+  { id: "happy", label: "Happy", emoji: "🤩" },
 ];
 
 export function MoodJournal() {
-  const [selectedMood, setSelectedMood] = useState<number | null>(null);
-  const [note, setNote] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
 
-  const handleSubmit = async () => {
-    if (selectedMood === null) return;
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      // Save mood to the latest checkin or as standalone
-      await fetch("http://localhost:5000/api/checkins/mood", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          mood: moods[selectedMood].label,
-          moodNote: note || null,
-        }),
-      });
-      setSubmitted(true);
-    } catch (err) {
-      console.error(err);
-      setSubmitted(true); // still show success
-    } finally {
-      setLoading(false);
-    }
+  const handleSelect = (id: string) => {
+    setSelected(id);
+    setSaved(false);
+    // Simulate save
+    setTimeout(() => {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    }, 600);
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5 }}
-      className="bg-white dark:bg-[#1C1C1E] border border-slate-100 dark:border-white/5 rounded-[2rem] p-6 shadow-sm mb-8"
-    >
-      <AnimatePresence mode="wait">
-        {!submitted ? (
-          <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 mb-4 text-center">
-              How are you feeling?
-            </h3>
-            <div className="flex items-center gap-1 mb-6 w-full">
-              {moods.map((mood, idx) => (
-                <motion.button
-                  whileTap={{ scale: 0.85 }}
-                  key={idx}
-                  onClick={() => setSelectedMood(idx)}
-                  className={`flex-1 flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-2xl transition-all ${
-                    selectedMood === idx
-                      ? "bg-indigo-50 dark:bg-indigo-500/20 shadow-sm ring-2 ring-indigo-400/40"
-                      : "hover:bg-slate-50 dark:hover:bg-white/5"
-                  }`}
-                >
-                  <motion.span
-                    className="text-3xl inline-block"
-                    animate={
-                      idx === 0 ? // 😠 Angry — rapid shake
-                        { rotate: [-6, 6, -6, 6, 0], x: [-2, 2, -2, 2, 0] } :
-                      idx === 1 ? // 😔 Sad — slow droop & rise
-                        { y: [0, 4, 0], rotate: [0, -4, 0] } :
-                      idx === 2 ? // 😐 Neutral — slow side tilt
-                        { rotate: [-5, 5, -5], scale: [1, 1.05, 1] } :
-                      idx === 3 ? // 😌 Peaceful — gentle float
-                        { y: [0, -5, 0], scale: [1, 1.05, 1] } :
-                               // 🤩 Happy — bouncy jump
-                        { y: [0, -8, 0, -4, 0], rotate: [0, -5, 0, 5, 0] }
-                    }
-                    transition={
-                      idx === 0 ? { duration: 0.6, repeat: Infinity, repeatDelay: 1.5, ease: "easeInOut" } :
-                      idx === 1 ? { duration: 2.5, repeat: Infinity, ease: "easeInOut" } :
-                      idx === 2 ? { duration: 3,   repeat: Infinity, ease: "easeInOut" } :
-                      idx === 3 ? { duration: 3,   repeat: Infinity, ease: "easeInOut" } :
-                                  { duration: 0.7, repeat: Infinity, repeatDelay: 1,   ease: "easeOut" }
-                    }
-                  >
-                    {mood.emoji}
-                  </motion.span>
-                  <span className={`text-[10px] font-medium ${selectedMood === idx ? "text-indigo-500" : "text-slate-400"}`}>
-                    {mood.label}
-                  </span>
-                </motion.button>
-              ))}
-            </div>
+    <div className="bg-[#1C1C1E] rounded-[2rem] p-6 lg:p-8 flex flex-col items-center justify-center relative shadow-xl mb-8 border border-white/5 mx-auto">
+      <h3 className="text-white font-medium text-lg mb-6">How are you feeling?</h3>
+      
+      <div className="flex items-center justify-between w-full max-w-sm px-2 gap-2 sm:gap-4">
+        {MOODS.map((mood) => (
+          <button
+            key={mood.id}
+            onClick={() => handleSelect(mood.id)}
+            className="flex flex-col items-center gap-3 transition-transform hover:-translate-y-1 group"
+          >
+            <motion.div 
+              className={`text-4xl inline-block transition-all duration-300 ${selected && selected !== mood.id ? "opacity-30 grayscale saturate-0" : selected === mood.id ? "scale-125" : "grayscale-0"}`}
+              animate={
+                mood.id === "angry"
+                  ? { rotate: [-5, 5, -5], x: [-1, 1, -1] }
+                : mood.id === "sad"
+                  ? { y: [0, 4, 0], rotate: [0, -3, 0] }
+                : mood.id === "neutral"
+                  ? { scale: [1, 1.05, 1], rotate: [-2, 2, -2] }
+                : mood.id === "peaceful"
+                  ? { y: [0, -4, 0], scale: [1, 1.05, 1] }
+                : 
+                  { y: [0, -6, 0], rotate: [-4, 4, -4] }
+              }
+              transition={{
+                repeat: Infinity,
+                duration: mood.id === "angry" ? 0.3 : mood.id === "happy" ? 0.8 : 2.5,
+                ease: "easeInOut"
+              }}
+            >
+              {mood.emoji}
+            </motion.div>
+            <span className={`text-[10px] sm:text-xs font-medium transition-colors ${selected === mood.id ? "text-slate-200" : "text-slate-500 group-hover:text-slate-300"}`}>
+              {mood.label}
+            </span>
+          </button>
+        ))}
+      </div>
 
-            {selectedMood !== null && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                className="overflow-hidden"
-              >
-                <input
-                  type="text"
-                  value={note}
-                  onChange={e => setNote(e.target.value)}
-                  placeholder="Briefly note why... (optional)"
-                  className="w-full bg-slate-50 dark:bg-[#0A0A0C] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-                <button
-                  onClick={handleSubmit}
-                  disabled={loading}
-                  className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors disabled:opacity-60"
-                >
-                  {loading ? "Saving..." : "Save Mood"}
-                </button>
-              </motion.div>
-            )}
+      <div className="h-8 mt-6 flex items-center justify-center w-full">
+        {selected ? (
+          <motion.div 
+            key={selected}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2 text-sm font-medium bg-indigo-500/10 text-indigo-400 px-4 py-1.5 rounded-full border border-indigo-500/20"
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            Feeling {MOODS.find(m => m.id === selected)?.label} Today
           </motion.div>
         ) : (
-          <motion.div
-            key="success"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-4"
-          >
-            <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Check className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100">Emotion Saved!</h3>
-            <p className="text-sm text-slate-500 mt-1">Thank you for checking in today.</p>
-          </motion.div>
+          <div className="h-8" />
         )}
-      </AnimatePresence>
-    </motion.div>
+      </div>
+    </div>
   );
 }

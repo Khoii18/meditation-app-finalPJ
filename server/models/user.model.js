@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema({
     bio:         { type: String, default: "" },
     specialties: { type: [String], default: [] },
     avatar:      { type: String, default: "" },
+    introVideo:  { type: String, default: "" },
     plans: {
       type: [{
         name:        String,
@@ -27,6 +28,11 @@ const userSchema = new mongoose.Schema({
         currency:    { type: String, default: "USD" },
         period:      { type: String, default: "month" },
         features:    [String],
+        exercises:   [{
+          title:     String,
+          duration:  String,
+          audioUrl:  String,
+        }],
         highlighted: { type: Boolean, default: false }
       }],
       default: []

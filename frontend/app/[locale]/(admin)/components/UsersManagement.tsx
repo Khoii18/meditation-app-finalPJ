@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Users, Flame, Trophy, Clock, CalendarCheck,
   ShieldCheck, User, ChevronDown, Trash2, X, Activity,
-  TrendingUp, Moon, Zap, Target
+  TrendingUp, Moon, Zap, Target, CheckCircle2
 } from "lucide-react";
 
 const ROLE_STYLES: Record<string, string> = {
@@ -54,6 +54,7 @@ function UserDetailModal({ user, token, onClose, onRoleChange, onDelete }: UserD
   const [checkins, setCheckins] = useState<Checkin[]>([]);
   const [loading, setLoading] = useState(true);
   const [roleDropdown, setRoleDropdown] = useState(false);
+  const [detailTab, setDetailTab] = useState<"stats" | "packages">("stats");
 
   useEffect(() => {
     fetch(`http://localhost:5000/api/users/${user._id}/checkins`, {
@@ -65,6 +66,8 @@ function UserDetailModal({ user, token, onClose, onRoleChange, onDelete }: UserD
   }, [user._id, token]);
 
   const stats = user.stats || { currentStreak: 0, longestStreak: 0, totalSessions: 0, mindfulMinutes: 0, lastCheckInDate: null };
+  const coachPlans = (user as any).coachProfile?.plans || [];
+  const isCoach = user.role === "coach";
 
   const EMOJI_MAP: Record<string, string> = {
     good: "😊", great: "🤩", okay: "😐", tired: "😴", stressed: "😰",
@@ -99,116 +102,180 @@ function UserDetailModal({ user, token, onClose, onRoleChange, onDelete }: UserD
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
-          {/* Stats grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { label: "Current Streak", value: stats.currentStreak, unit: "days", icon: Flame, color: "text-orange-400" },
-              { label: "Best Streak",    value: stats.longestStreak, unit: "days", icon: TrendingUp, color: "text-violet-400" },
-              { label: "Sessions",       value: stats.totalSessions, unit: "total", icon: Activity, color: "text-indigo-400" },
-              { label: "Mindful Min.",   value: stats.mindfulMinutes, unit: "min", icon: Clock, color: "text-emerald-400" },
-            ].map((s, i) => (
-              <div key={i} className="bg-white/5 border border-white/5 rounded-2xl p-4">
-                <s.icon className={`w-4 h-4 ${s.color} mb-2`} />
-                <p className="text-2xl font-bold text-white">{s.value ?? 0}</p>
-                <p className="text-xs text-slate-500 mt-0.5">{s.label}</p>
-              </div>
+        {/* Tabs (only if coach) */}
+        {isCoach && (
+          <div className="flex gap-1 px-6 pt-4 border-b border-white/5">
+            {(["stats", "packages"] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setDetailTab(t)}
+                className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                  detailTab === t
+                    ? "text-indigo-400 border-b-2 border-indigo-500"
+                    : "text-slate-500 hover:text-slate-300"
+                }`}
+              >
+                {t === "stats" ? "Stats & History" : `Packages (${coachPlans.length})`}
+              </button>
             ))}
           </div>
+        )}
 
-          {/* Last checkin */}
-          {stats.lastCheckInDate && (
-            <div className="flex items-center gap-2 text-sm text-slate-400 bg-white/5 rounded-xl px-4 py-3">
-              <CalendarCheck className="w-4 h-4 text-emerald-400" />
-              Last check-in: <span className="text-white font-medium ml-1">{stats.lastCheckInDate}</span>
-            </div>
-          )}
-
-          {/* Role management */}
-          <div className="bg-white/5 border border-white/5 rounded-2xl p-4">
-            <p className="text-xs text-slate-500 uppercase tracking-widest mb-3 font-semibold">Role</p>
-            <div className="relative inline-block">
-              <button
-                onClick={() => setRoleDropdown(!roleDropdown)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium ${ROLE_STYLES[user.role] || ROLE_STYLES.user}`}
-              >
-                {user.role}
-                <ChevronDown className="w-3 h-3" />
-              </button>
-              <AnimatePresence>
-                {roleDropdown && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }}
-                    className="absolute top-full left-0 mt-1 bg-[#1a1a22] border border-white/10 rounded-xl overflow-hidden shadow-xl z-20 w-36"
-                  >
-                    {["user", "coach", "admin"].map(r => (
-                      <button
-                        key={r}
-                        onClick={() => { onRoleChange(user._id, r); setRoleDropdown(false); }}
-                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-white/5 transition-colors flex items-center gap-2 ${user.role === r ? "text-white font-medium" : "text-slate-400"}`}
-                      >
-                        {r}
-                        {user.role === r && <span className="ml-auto text-violet-400">✓</span>}
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-
-          {/* Checkin history */}
-          <div>
-            <p className="text-xs text-slate-500 uppercase tracking-widest mb-3 font-semibold flex items-center gap-2">
-              <CalendarCheck className="w-4 h-4" /> Check-in History (last 30)
-            </p>
-            {loading ? (
-              <div className="text-slate-500 text-sm text-center py-6">Loading...</div>
-            ) : checkins.length === 0 ? (
-              <div className="text-center py-8 text-slate-500 text-sm bg-white/5 rounded-2xl">
-                No check-ins recorded yet
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {checkins.map((c, i) => (
-                  <div key={i} className="flex items-center gap-3 bg-white/[0.03] border border-white/5 rounded-xl px-4 py-3">
-                    <span className="text-xs font-mono text-slate-500 w-24 flex-shrink-0">{c.date}</span>
-                    <div className="flex items-center gap-3 flex-1 flex-wrap">
-                      {c.sleep && (
-                        <span className="flex items-center gap-1 text-xs bg-slate-800 rounded-full px-3 py-1">
-                          <Moon className="w-3 h-3 text-indigo-400" />
-                          {EMOJI_MAP[c.sleep] || "—"} {c.sleep}
+        <div className="p-6 space-y-6">
+          {/* PACKAGES TAB (Coach only) */}
+          {isCoach && detailTab === "packages" ? (
+            <div>
+              {coachPlans.length === 0 ? (
+                <div className="text-center py-12 text-slate-500 text-sm bg-white/5 rounded-2xl">
+                  This coach hasn't created any packages yet.
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {coachPlans.map((plan: any, i: number) => (
+                    <div
+                      key={i}
+                      className={`relative rounded-2xl p-5 border ${
+                        plan.highlighted
+                          ? "bg-gradient-to-br from-indigo-600/20 to-violet-600/10 border-indigo-500/30"
+                          : "bg-white/5 border-white/10"
+                      }`}
+                    >
+                      {plan.highlighted && (
+                        <span className="absolute -top-2.5 left-4 bg-gradient-to-r from-indigo-500 to-violet-500 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-0.5 rounded-full">
+                          Popular
                         </span>
                       )}
-                      {c.energy && (
-                        <span className="flex items-center gap-1 text-xs bg-slate-800 rounded-full px-3 py-1">
-                          <Zap className="w-3 h-3 text-yellow-400" />
-                          {EMOJI_MAP[c.energy] || "—"} {c.energy}
-                        </span>
-                      )}
-                      {c.goal && (
-                        <span className="flex items-center gap-1 text-xs bg-slate-800 rounded-full px-3 py-1">
-                          <Target className="w-3 h-3 text-emerald-400" />
-                          {c.goal.length > 30 ? c.goal.slice(0, 30) + "…" : c.goal}
-                        </span>
+                      <h4 className="text-white font-semibold mb-1">{plan.name}</h4>
+                      <p className="text-indigo-300 text-sm mb-3">
+                        {plan.price === 0 ? "Free" : `${plan.price} ${plan.currency} / ${plan.period}`}
+                      </p>
+                      {(plan.features || []).length > 0 && (
+                        <ul className="space-y-1">
+                          {plan.features.map((f: string, fi: number) => (
+                            <li key={fi} className="flex items-center gap-2 text-xs text-slate-400">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" /> {f}
+                            </li>
+                          ))}
+                        </ul>
                       )}
                     </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              {/* Stats grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[
+                  { label: "Current Streak", value: stats.currentStreak, unit: "days", icon: Flame, color: "text-orange-400" },
+                  { label: "Best Streak",    value: stats.longestStreak, unit: "days", icon: TrendingUp, color: "text-violet-400" },
+                  { label: "Sessions",       value: stats.totalSessions, unit: "total", icon: Activity, color: "text-indigo-400" },
+                  { label: "Mindful Min.",   value: stats.mindfulMinutes, unit: "min", icon: Clock, color: "text-emerald-400" },
+                ].map((s, i) => (
+                  <div key={i} className="bg-white/5 border border-white/5 rounded-2xl p-4">
+                    <s.icon className={`w-4 h-4 ${s.color} mb-2`} />
+                    <p className="text-2xl font-bold text-white">{s.value ?? 0}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{s.label}</p>
                   </div>
                 ))}
               </div>
-            )}
-          </div>
 
-          {/* Danger zone */}
-          <div className="border border-rose-500/20 rounded-2xl p-4 bg-rose-500/5">
-            <p className="text-xs text-rose-400 font-semibold mb-3 uppercase tracking-widest">Danger Zone</p>
-            <button
-              onClick={() => { if (confirm(`Delete user "${user.name}"? This cannot be undone.`)) onDelete(user._id); }}
-              className="flex items-center gap-2 text-sm text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 px-4 py-2 rounded-xl transition-all"
-            >
-              <Trash2 className="w-4 h-4" /> Delete this user & all data
-            </button>
-          </div>
+              {/* Last checkin */}
+              {stats.lastCheckInDate && (
+                <div className="flex items-center gap-2 text-sm text-slate-400 bg-white/5 rounded-xl px-4 py-3">
+                  <CalendarCheck className="w-4 h-4 text-emerald-400" />
+                  Last check-in: <span className="text-white font-medium ml-1">{stats.lastCheckInDate}</span>
+                </div>
+              )}
+
+              {/* Role management */}
+              <div className="bg-white/5 border border-white/5 rounded-2xl p-4">
+                <p className="text-xs text-slate-500 uppercase tracking-widest mb-3 font-semibold">Role</p>
+                <div className="relative inline-block">
+                  <button
+                    onClick={() => setRoleDropdown(!roleDropdown)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium ${ROLE_STYLES[user.role] || ROLE_STYLES.user}`}
+                  >
+                    {user.role}
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+                  <AnimatePresence>
+                    {roleDropdown && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }}
+                        className="absolute top-full left-0 mt-1 bg-[#1a1a22] border border-white/10 rounded-xl overflow-hidden shadow-xl z-20 w-36"
+                      >
+                        {["user", "coach", "admin"].map(r => (
+                          <button
+                            key={r}
+                            onClick={() => { onRoleChange(user._id, r); setRoleDropdown(false); }}
+                            className={`w-full text-left px-4 py-2.5 text-sm hover:bg-white/5 transition-colors flex items-center gap-2 ${user.role === r ? "text-white font-medium" : "text-slate-400"}`}
+                          >
+                            {r}
+                            {user.role === r && <span className="ml-auto text-violet-400">✓</span>}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              {/* Checkin history */}
+              <div>
+                <p className="text-xs text-slate-500 uppercase tracking-widest mb-3 font-semibold flex items-center gap-2">
+                  <CalendarCheck className="w-4 h-4" /> Check-in History (last 30)
+                </p>
+                {loading ? (
+                  <div className="text-slate-500 text-sm text-center py-6">Loading...</div>
+                ) : checkins.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500 text-sm bg-white/5 rounded-2xl">
+                    No check-ins recorded yet
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {checkins.map((c, i) => (
+                      <div key={i} className="flex items-center gap-3 bg-white/[0.03] border border-white/5 rounded-xl px-4 py-3">
+                        <span className="text-xs font-mono text-slate-500 w-24 flex-shrink-0">{c.date}</span>
+                        <div className="flex items-center gap-3 flex-1 flex-wrap">
+                          {c.sleep && (
+                            <span className="flex items-center gap-1 text-xs bg-slate-800 rounded-full px-3 py-1">
+                              <Moon className="w-3 h-3 text-indigo-400" />
+                              {EMOJI_MAP[c.sleep] || "—"} {c.sleep}
+                            </span>
+                          )}
+                          {c.energy && (
+                            <span className="flex items-center gap-1 text-xs bg-slate-800 rounded-full px-3 py-1">
+                              <Zap className="w-3 h-3 text-yellow-400" />
+                              {EMOJI_MAP[c.energy] || "—"} {c.energy}
+                            </span>
+                          )}
+                          {c.goal && (
+                            <span className="flex items-center gap-1 text-xs bg-slate-800 rounded-full px-3 py-1">
+                              <Target className="w-3 h-3 text-emerald-400" />
+                              {c.goal.length > 30 ? c.goal.slice(0, 30) + "…" : c.goal}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Danger zone */}
+              <div className="border border-rose-500/20 rounded-2xl p-4 bg-rose-500/5">
+                <p className="text-xs text-rose-400 font-semibold mb-3 uppercase tracking-widest">Danger Zone</p>
+                <button
+                  onClick={() => { if (confirm(`Delete user "${user.name}"? This cannot be undone.`)) onDelete(user._id); }}
+                  className="flex items-center gap-2 text-sm text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 px-4 py-2 rounded-xl transition-all"
+                >
+                  <Trash2 className="w-4 h-4" /> Delete this user & all data
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </motion.div>
     </motion.div>

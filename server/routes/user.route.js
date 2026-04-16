@@ -1,13 +1,18 @@
 import express from "express";
-import { getMe, getAllUsers, getUserCheckins, updateUserRole, deleteUser, getMoodAnalytics } from "../controllers/user.controller.js";
-import { verifyToken, verifyAdmin } from "../middleware/auth.js";
+import { getMe, getAllUsers, getUserCheckins, updateUserRole, deleteUser, getMoodAnalytics, getAllCoaches, getCoachById, updateCoachProfile } from "../controllers/user.controller.js";
+import { verifyToken, verifyAdmin, verifyAdminOrCoach } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Current user
-router.get("/me", verifyToken, getMe);
+// ─── Public Coach Directory ───────────────────────────────────
+router.get("/coaches", getAllCoaches);
+router.get("/coaches/:id", getCoachById);
 
-// Admin routes
+// ─── Current user ─────────────────────────────────────────────
+router.get("/me", verifyToken, getMe);
+router.put("/me/coach-profile", verifyToken, updateCoachProfile);
+
+// ─── Admin routes ─────────────────────────────────────────────
 router.get("/analytics/mood", verifyAdmin, getMoodAnalytics);
 router.get("/", verifyAdmin, getAllUsers);
 router.get("/:id/checkins", verifyAdmin, getUserCheckins);

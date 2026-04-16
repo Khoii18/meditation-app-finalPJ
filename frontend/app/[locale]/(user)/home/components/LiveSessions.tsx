@@ -14,16 +14,24 @@ export function LiveSessions() {
         const res = await fetch("http://localhost:5000/api/live");
         if (res.ok) {
           const data = await res.json();
-          setSchedule(data);
+          if (data.length > 0) {
+            setSchedule(data);
+          } else {
+            setSchedule([
+              { time: "11:00", title: "Live meditation now available", instructor: "Cuong hoang", isLive: true },
+              { time: "12:00", title: "live ngay 2", instructor: "anh", isLive: true }
+            ]);
+          }
         }
       } catch (err) {
-        console.error(err);
+        setSchedule([
+          { time: "11:00", title: "Live meditation now available", instructor: "Cuong hoang", isLive: true },
+          { time: "12:00", title: "live ngay 2", instructor: "anh", isLive: true }
+        ]);
       }
     };
     fetchLive();
   }, []);
-
-  if (schedule.length === 0) return null;
 
   return (
     <section className="px-6 py-6 pb-24">
@@ -40,25 +48,25 @@ export function LiveSessions() {
                  router.push('./live');
                }
             }}
-            className="flex items-center justify-between p-4 rounded-[1.5rem] bg-white dark:bg-[#1C1C1E] shadow-sm border border-slate-100 dark:border-white/5 active:scale-95 transition-transform cursor-pointer"
+            className="flex items-center justify-between p-4 rounded-[1.5rem] bg-[#1C1C1E] shadow-xl border border-white/5 active:scale-95 transition-transform cursor-pointer"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800 rounded-2xl text-indigo-600 dark:text-indigo-400">
-                <span className="text-[10px] font-bold uppercase">{session.time?.split(":")[0] || "18"}</span>
-                <span className="text-[10px] font-bold uppercase leading-none">{session.time?.split(":")[1] || "00"}</span>
+              <div className="w-12 h-12 flex flex-col items-center justify-center bg-indigo-500/10 rounded-2xl text-indigo-400 font-serif">
+                <span className="text-[11px] font-bold uppercase">{session.time?.split(":")[0] || "18"}</span>
+                <span className="text-[11px] font-bold uppercase leading-none">{session.time?.split(":")[1] || "00"}</span>
               </div>
-              <div>
-                <h4 className="font-medium text-slate-800 dark:text-slate-100 text-sm mb-1">{session.title}</h4>
-                <p className="text-xs text-slate-500">{session.instructor}</p>
+              <div className="max-w-[180px]">
+                <h4 className="font-medium text-slate-100 text-[13px] mb-0.5 leading-tight truncate">{session.title}</h4>
+                <p className="text-[11px] text-slate-500 truncate">{session.instructor}</p>
               </div>
             </div>
             
             <div className="flex flex-col items-end gap-1">
               <span className={`text-[9px] uppercase font-bold tracking-wider flex items-center gap-1 ${session.isLive ? 'text-rose-500' : 'text-emerald-500'}`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${session.isLive ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`} />
-                {session.isLive ? 'Live Now' : 'Upcoming'}
+                {session.isLive ? 'LIVE NOW' : 'UPCOMING'}
               </span>
-              <button className={`text-xs font-semibold transition-colors ${session.isLive ? 'text-rose-500 bg-rose-50 dark:bg-rose-500/10 px-2 py-1 rounded-md' : 'text-slate-400 hover:text-indigo-500'}`}>
+              <button className={`text-[11px] font-medium transition-colors ${session.isLive ? 'text-rose-500 bg-rose-500/10 px-3 py-1.5 rounded-lg' : 'text-slate-400 hover:text-indigo-400'}`}>
                  {session.isLive ? 'Join Now' : 'Notify me'}
               </button>
             </div>

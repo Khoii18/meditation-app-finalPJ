@@ -1,6 +1,50 @@
 import User from "../models/user.model.js";
 import Checkin from "../models/checkin.model.js";
 
+// Public: get all coaches with their profiles and packages
+export const getAllCoaches = async (req, res) => {
+  try {
+    const coaches = await User.find({ role: "coach" })
+      .select("-password -stats")
+      .sort({ createdAt: -1 });
+    res.json(coaches);
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};
+
+// Public: get a single coach by ID
+export const getCoachById = async (req, res) => {
+  try {
+    const coach = await User.findOne({ _id: req.params.id, role: "coach" })
+      .select("-password -stats");
+    if (!coach) return res.status(404).json("Coach not found");
+    res.json(coach);
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};
+
+// Coach: update own coach profile & packages
+export const updateCoachProfile = async (req, res) => {
+  try {
+    const { bio, specialties, avatar, plans, introVideo } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user || user.role !== "coach") return res.status(403).json("Coach only");
+
+    if (bio !== undefined)         user.coachProfile.bio = bio;
+    if (specialties !== undefined) user.coachProfile.specialties = specialties;
+    if (avatar !== undefined)      user.coachProfile.avatar = avatar;
+    if (introVideo !== undefined)  user.coachProfile.introVideo = introVideo;
+    if (plans !== undefined)       user.coachProfile.plans = plans;
+
+    await user.save();
+    res.json({ message: "Profile updated", coachProfile: user.coachProfile });
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};
+
 
 export const getMe = async (req, res) => {
   try {
