@@ -33,9 +33,9 @@ function AdminPageContent() {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
   const fetchData = async () => {
-    if (activeTab === "users" || activeTab === "emotions") return;
+    if (activeTab === "users" || activeTab === "emotions" || activeTab === "settings") return;
     try {
-      const isContent = activeTab === "content" || activeTab === "sleep" || activeTab === "plans";
+      const isContent = activeTab === "content" || activeTab === "sleep" || activeTab === "soundscapes" || activeTab === "plans";
       const endpoint = isContent ? "/api/content" : "/api/live";
       const res = await fetch(`http://localhost:5000${endpoint}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -54,7 +54,7 @@ function AdminPageContent() {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure?")) return;
     try {
-      const isContent = activeTab === "content" || activeTab === "sleep" || activeTab === "plans";
+      const isContent = activeTab === "content" || activeTab === "sleep" || activeTab === "soundscapes" || activeTab === "plans";
       const endpoint = isContent ? `/api/content/${id}` : `/api/live/${id}`;
       await fetch(`http://localhost:5000${endpoint}`, {
         method: "DELETE",
@@ -68,7 +68,7 @@ function AdminPageContent() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    const isContent = activeTab === "content" || activeTab === "sleep" || activeTab === "plans";
+    const isContent = activeTab === "content" || activeTab === "sleep" || activeTab === "soundscapes" || activeTab === "plans";
     const endpoint = isContent ? "/api/content" : "/api/live";
     const method = formData._id ? "PUT" : "POST";
     const url = formData._id
@@ -108,18 +108,20 @@ function AdminPageContent() {
   }
 
   const TABS = [
-    { key: "content",   label: "Meditations",  icon: FileText },
-    { key: "sleep",     label: "Sleep Content",icon: Moon },
-    { key: "plans",     label: "Plans",        icon: Layers },
-    { key: "live",      label: "Live Sessions", icon: CalendarDays },
+    { key: "content",     label: "Meditations",   icon: FileText },
+    { key: "soundscapes", label: "Soundscapes",   icon: FileText },
+    { key: "sleep",       label: "Sleep Stories", icon: Moon },
+    { key: "plans",       label: "Plans",         icon: Layers },
+    { key: "live",        label: "Live Sessions", icon: CalendarDays },
     { key: "users",     label: "Users",         icon: Users },
     { key: "emotions",  label: "Emotions",      icon: Smile },
   ];
 
   const filteredData = Array.isArray(data) ? data.filter((d: any) => {
     if (activeTab === "sleep") return d.type?.toLowerCase().includes("sleep");
+    if (activeTab === "soundscapes") return d.type?.toLowerCase().includes("soundscape");
     if (activeTab === "plans") return d.type?.toLowerCase().includes("plan");
-    if (activeTab === "content") return !d.type?.toLowerCase().includes("sleep") && !d.type?.toLowerCase().includes("plan");
+    if (activeTab === "content") return !d.type?.toLowerCase().includes("sleep") && !d.type?.toLowerCase().includes("plan") && !d.type?.toLowerCase().includes("soundscape");
     return true; // live, users, emotions
   }) : [];
 
@@ -183,6 +185,7 @@ function AdminPageContent() {
         showModal={showModal}
         setShowModal={setShowModal}
         handleSave={handleSave}
+        existingData={data}
       />
     </div>
   );

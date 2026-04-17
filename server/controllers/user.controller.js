@@ -1,5 +1,6 @@
 import User from "../models/user.model.js";
 import Checkin from "../models/checkin.model.js";
+import bcrypt from "bcryptjs";
 
 // Public: get all coaches with their profiles and packages
 export const getAllCoaches = async (req, res) => {
@@ -45,6 +46,28 @@ export const updateCoachProfile = async (req, res) => {
   }
 };
 
+export const updateAccountSettings = async (req, res) => {
+  try {
+    const { password, avatar } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json("User not found");
+    
+    if (password) {
+      const hash = await bcrypt.hash(password, 10);
+      user.password = hash;
+    }
+    if (avatar) {
+      user.avatar = avatar;
+    }
+    
+    await user.save();
+    const userObj = user.toObject();
+    delete userObj.password;
+    res.json(userObj);
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};
 
 export const getMe = async (req, res) => {
   try {

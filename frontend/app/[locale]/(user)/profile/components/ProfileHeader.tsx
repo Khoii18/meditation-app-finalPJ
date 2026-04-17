@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Camera, Loader2 } from "lucide-react";
 
 export function ProfileHeader() {
   const [user, setUser] = useState<any>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -35,10 +37,57 @@ export function ProfileHeader() {
   const name = user?.name || "Guest";
   const initial = name.charAt(0).toUpperCase();
 
+  const handleAvatarUpload = async (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const sigRes = await fetch("http://localhost:5000/api/cloudinary/signature", { headers: { Authorization: `Bearer ${token}` } });
+      const { timestamp, signature, cloudName, apiKey } = await sigRes.json();
+      
+      const formDataUpload = new FormData();
+      formDataUpload.append("file", file);
+      formDataUpload.append("api_key", apiKey);
+      formDataUpload.append("timestamp", timestamp);
+      formDataUpload.append("signature", signature);
+      formDataUpload.append("folder", "avatars");
+
+      const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+        method: "POST", body: formDataUpload
+      });
+      const data = await uploadRes.json();
+      
+      if (data.secure_url) {
+        const res = await fetch("http://localhost:5000/api/users/me/settings", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ avatar: data.secure_url })
+        });
+        const updatedUser = await res.json();
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="flex items-center gap-6 mb-8 bg-white dark:bg-[#1C1C1E] p-8 rounded-[2.5rem] border border-slate-100 dark:border-white/5 shadow-sm">
-      <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-white text-3xl font-serif uppercase shadow-inner">
-        {initial}
+      <div className="relative group w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-white text-3xl font-serif uppercase shadow-inner overflow-hidden">
+        {user?.avatar ? (
+          <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+        ) : (
+          initial
+        )}
+        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+          <input type="file" accept="image/*" disabled={uploading} onChange={handleAvatarUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+          {uploading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Camera className="w-6 h-6" />}
+        </div>
       </div>
       <div>
         <h1 className="text-3xl font-serif font-medium text-slate-800 dark:text-slate-100">{name}</h1>

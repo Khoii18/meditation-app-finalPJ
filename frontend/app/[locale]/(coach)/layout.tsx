@@ -35,10 +35,6 @@ export default function CoachLayout({
             <CalendarDays className="w-5 h-5" />
             My Live Sessions
           </Link>
-          <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors font-medium">
-            <Settings className="w-5 h-5" />
-            Settings
-          </a>
         </nav>
         
         <div className="p-6 border-t border-slate-200 dark:border-white/10">

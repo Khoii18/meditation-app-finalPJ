@@ -90,7 +90,7 @@ function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => voi
         exit={{ scale: 0.9, opacity: 0 }}
         transition={{ type: "spring", stiffness: 280, damping: 24 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-[#0E0E14] border border-white/10 rounded-3xl shadow-2xl"
+        className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-[#0E0E14] border border-white/10 rounded-3xl shadow-2xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
       >
         {/* Hero header */}
         <div className="relative h-40 bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 rounded-t-3xl overflow-hidden">

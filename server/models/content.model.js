@@ -8,6 +8,10 @@ const contentSchema = new mongoose.Schema({
   type: { type: String, required: true }, // e.g. "Thiền định", "Thư giãn", "Story", "Sound"
   description: { type: String },
   audioUrl: { type: String },
+  subject: { type: String, default: "" },
+  bgGradient: { type: String, default: "" },
+  iconColor: { type: String, default: "" },
+  iconName: { type: String, default: "" },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" } // coach/admin who created this
 }, { timestamps: true });
 

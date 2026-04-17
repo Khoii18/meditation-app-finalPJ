@@ -33,7 +33,7 @@ function CoachPageContent() {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
   const fetchData = async () => {
-    if (activeTab === "packages") return; // packages managed separately
+    if (activeTab === "packages" || activeTab === "settings" || activeTab === "profile") return; // managed separately
     try {
       const endpoint = activeTab === "content" ? "/api/content" : "/api/live";
       const currentToken = typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -111,7 +111,7 @@ function CoachPageContent() {
             <h1 className="text-3xl font-serif font-bold">Coach Dashboard</h1>
             <p className="text-slate-500 mt-1">Hello {user?.name}! Manage your meditation courses and livestreams.</p>
           </div>
-          {activeTab !== "packages" && activeTab !== "profile" && (
+          {activeTab !== "packages" && activeTab !== "profile" && activeTab !== "settings" && (
             <button 
               onClick={() => { setFormData({}); setShowModal(true); }}
               className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl flex items-center gap-2 font-medium"

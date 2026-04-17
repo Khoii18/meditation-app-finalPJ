@@ -1,5 +1,5 @@
 import express from "express";
-import { getMe, getAllUsers, getUserCheckins, updateUserRole, deleteUser, getMoodAnalytics, getAllCoaches, getCoachById, updateCoachProfile } from "../controllers/user.controller.js";
+import { getMe, getAllUsers, getUserCheckins, updateUserRole, deleteUser, getMoodAnalytics, getAllCoaches, getCoachById, updateCoachProfile, updateAccountSettings } from "../controllers/user.controller.js";
 import { verifyToken, verifyAdmin, verifyAdminOrCoach } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -11,6 +11,7 @@ router.get("/coaches/:id", getCoachById);
 // ─── Current user ─────────────────────────────────────────────
 router.get("/me", verifyToken, getMe);
 router.put("/me/coach-profile", verifyToken, updateCoachProfile);
+router.put("/me/settings", verifyToken, updateAccountSettings);
 
 // ─── Admin routes ─────────────────────────────────────────────
 router.get("/analytics/mood", verifyAdmin, getMoodAnalytics);

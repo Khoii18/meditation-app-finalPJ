@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Flame, PlayCircle, CreditCard, User, LogOut, Sparkles, Moon, Map as MapIcon, Users } from "lucide-react";
+import { Home, Flame, PlayCircle, CreditCard, User, LogOut, Sparkles, Moon, Map as MapIcon, Users, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 

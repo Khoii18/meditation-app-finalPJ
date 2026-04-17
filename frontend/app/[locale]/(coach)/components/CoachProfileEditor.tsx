@@ -120,20 +120,68 @@ export function CoachProfileEditor({ token }: CoachProfileEditorProps) {
           <label className="text-xs text-slate-500 uppercase tracking-widest font-semibold mb-2 flex items-center gap-2">
             <ImageIcon className="w-4 h-4" /> Avatar URL
           </label>
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-center">
             <div className="w-16 h-16 rounded-2xl bg-black/30 border border-white/10 shrink-0 flex items-center justify-center text-slate-500 overflow-hidden">
-              {avatar ? (
+              {avatar && avatar !== "Uploading..." ? (
                 <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />
+              ) : avatar === "Uploading..." ? (
+                <Loader2 className="w-6 h-6 animate-spin text-indigo-400" />
               ) : (
                 <UserCircle className="w-8 h-8 opacity-50" />
               )}
             </div>
-            <input
-              className="flex-1 bg-black/20 border border-white/5 rounded-2xl px-5 py-4 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 transition-colors"
-              placeholder="https://example.com/my-photo.jpg"
-              value={avatar}
-              onChange={(e) => setAvatar(e.target.value)}
-            />
+            <div className="flex-1 flex gap-2">
+              <input
+                className="flex-1 bg-black/20 border border-white/5 rounded-2xl px-5 py-4 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 transition-colors"
+                placeholder="https://example.com/my-photo.jpg"
+                value={avatar}
+                onChange={(e) => setAvatar(e.target.value)}
+              />
+              <label className="shrink-0 bg-white/10 hover:bg-white/20 text-white rounded-2xl px-5 py-4 cursor-pointer flex items-center justify-center transition-colors text-sm font-medium border border-white/10">
+                Upload Image
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    
+                    setAvatar("Uploading...");
+                    
+                    try {
+                      const sigRes = await fetch("http://localhost:5000/api/cloudinary-signature");
+                      const { timestamp, signature, folder, cloudName, apiKey } = await sigRes.json();
+
+                      if (!signature) throw new Error("Could not get signature. Did you configure Cloudinary Keys in server/.env?");
+
+                      const formData = new FormData();
+                      formData.append("file", file);
+                      formData.append("api_key", apiKey);
+                      formData.append("timestamp", timestamp);
+                      formData.append("signature", signature);
+                      formData.append("folder", folder);
+
+                      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                        method: "POST",
+                        body: formData
+                      });
+
+                      const data = await res.json();
+                      if (data.secure_url) {
+                        setAvatar(data.secure_url);
+                      } else {
+                        setAvatar("");
+                        alert("Cloudinary Error: " + (data.error?.message || "Unknown error"));
+                      }
+                    } catch (err: any) {
+                      alert("Upload failed: " + err.message);
+                      setAvatar("");
+                    }
+                  }}
+                />
+              </label>
+            </div>
           </div>
         </div>
 
