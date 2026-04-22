@@ -16,6 +16,14 @@ const userSchema = new mongoose.Schema({
 
   role: { type: String, enum: ["user", "admin", "coach"], default: "user" },
 
+  // Subscription management
+  premiumStatus: {
+    isPremium: { type: Boolean, default: false },
+    planType: { type: String, enum: ["none", "monthly", "annual", "lifetime"], default: "none" },
+    startDate: { type: Date, default: null },
+    expiryDate: { type: Date, default: null }
+  },
+
   // Coach-only profile fields
   coachProfile: {
     bio:         { type: String, default: "" },
@@ -38,7 +46,8 @@ const userSchema = new mongoose.Schema({
       }],
       default: []
     }
-  }
+  },
+  claimedRewards: { type: [String], default: [] }
 }, { timestamps: true });
 
 export default mongoose.model("User", userSchema);

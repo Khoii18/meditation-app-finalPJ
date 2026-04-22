@@ -23,8 +23,8 @@ export default function PricingPage() {
       </button>
 
       <div className="text-center max-w-2xl mx-auto mb-16 pt-12 md:pt-0">
-        <h1 className="text-4xl md:text-5xl font-serif font-medium text-slate-800 dark:text-slate-100 mb-4">Invest in your mind.</h1>
-        <p className="text-lg text-slate-500 dark:text-slate-400">Unlock personalized plans, sleep stories, and expert guidance to find your balance every day.</p>
+        <h1 className="text-4xl md:text-5xl font-serif font-medium text-slate-800 mb-4">Invest in your mind.</h1>
+        <p className="text-lg text-slate-500">Unlock personalized plans, sleep stories, and expert guidance to find your balance every day.</p>
       </div>
 
       <PricingCards />

@@ -78,24 +78,24 @@ export function EmotionsAnalytics({ token }: { token: string }) {
       {/* Controls */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-slate-800 dark:text-white">Community Emotions</h2>
-          <p className="text-sm text-slate-500">{data.total} check-ins in the last {days} days</p>
+          <h2 className="text-xl font-serif font-bold text-slate-800">Community Emotions</h2>
+          <p className="text-sm text-slate-500 font-medium">{data.total} check-ins in the last {days} days</p>
         </div>
         <div className="flex gap-2">
           {[7, 14, 30, 90].map(d => (
             <button
               key={d}
               onClick={() => setDays(d)}
-              className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-all ${
+              className={`px-4 py-2 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all ${
                 days === d
-                  ? "bg-indigo-600 text-white"
-                  : "bg-slate-100 dark:bg-white/5 text-slate-500 hover:bg-slate-200 dark:hover:bg-white/10"
+                  ? "bg-teal-600 text-white shadow-sm shadow-teal-500/20"
+                  : "bg-white text-slate-400 border border-teal-50 hover:bg-teal-50"
               }`}
             >
               {d}d
             </button>
           ))}
-          <button onClick={fetchAnalytics} className="p-1.5 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-500 hover:bg-slate-200 dark:hover:bg-white/10 transition-all">
+          <button onClick={fetchAnalytics} className="p-2 rounded-2xl bg-white border border-teal-50 text-slate-400 hover:bg-teal-50 transition-all">
             <RefreshCw className="w-4 h-4" />
           </button>
         </div>
@@ -104,27 +104,29 @@ export function EmotionsAnalytics({ token }: { token: string }) {
       {/* KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Check-ins", value: data.total, icon: CalendarDays, color: "from-indigo-500 to-violet-500" },
-          { label: "Positive Rate",   value: `${positiveRate}%`, icon: TrendingUp, color: "from-emerald-500 to-teal-500" },
-          { label: "Dominant Mood",   value: `${dominant.emoji} ${dominant.label}`, icon: Smile, color: "from-amber-500 to-orange-500" },
-          { label: "Moods Recorded",  value: totalMoods, icon: Users, color: "from-rose-500 to-pink-500" },
+          { label: "Total Check-ins", value: data.total, icon: CalendarDays, color: "from-teal-500 to-emerald-500" },
+          { label: "Positive Rate",   value: `${positiveRate}%`, icon: TrendingUp, color: "from-teal-400 to-teal-500" },
+          { label: "Dominant Mood",   value: `${dominant.emoji} ${dominant.label}`, icon: Smile, color: "from-amber-400 to-orange-400" },
+          { label: "Moods Recorded",  value: totalMoods, icon: Users, color: "from-rose-400 to-pink-400" },
         ].map((card, i) => (
-          <div key={i} className="bg-white dark:bg-[#1C1C1E] rounded-2xl p-5 border border-slate-100 dark:border-white/5">
-            <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center mb-3`}>
-              <card.icon className="w-4 h-4 text-white" />
+          <div key={i} className="bg-white rounded-3xl p-6 border border-teal-100 shadow-sm">
+            <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${card.color} flex items-center justify-center mb-4 shadow-sm`}>
+              <card.icon className="w-5 h-5 text-white" />
             </div>
-            <p className="text-xl font-bold text-slate-800 dark:text-white">{card.value}</p>
-            <p className="text-xs text-slate-500 mt-0.5">{card.label}</p>
+            <p className="text-2xl font-bold text-slate-800">{card.value}</p>
+            <p className="text-[11px] uppercase tracking-widest font-bold text-slate-400 mt-1">{card.label}</p>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Mood distribution */}
-        <div className="bg-white dark:bg-[#1C1C1E] rounded-3xl p-6 border border-slate-100 dark:border-white/5">
-          <div className="flex items-center gap-2 mb-5">
-            <Smile className="w-5 h-5 text-amber-400" />
-            <h3 className="font-semibold text-slate-800 dark:text-white">Mood Distribution</h3>
+        <div className="bg-white rounded-3xl p-7 border border-teal-100 shadow-sm">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="p-2 bg-amber-50 rounded-lg">
+              <Smile className="w-5 h-5 text-amber-500" />
+            </div>
+            <h3 className="font-serif font-bold text-slate-800">Mood Distribution</h3>
           </div>
           <div className="space-y-3">
             {MOODS.map(m => {
@@ -134,11 +136,11 @@ export function EmotionsAnalytics({ token }: { token: string }) {
                 <div key={m.label} className="flex items-center gap-3">
                   <span className="text-xl w-8 text-center">{m.emoji}</span>
                   <div className="flex-1">
-                    <div className="flex justify-between text-xs text-slate-500 mb-1">
+                    <div className="flex justify-between text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-1.5">
                       <span>{m.label}</span>
-                      <span>{count} ({pct}%)</span>
+                      <span className="text-slate-600">{count} ({pct}%)</span>
                     </div>
-                    <div className="h-2 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-2.5 bg-slate-50 rounded-full overflow-hidden border border-slate-100">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${pct}%` }}
@@ -155,10 +157,12 @@ export function EmotionsAnalytics({ token }: { token: string }) {
 
         {/* Sleep & Energy */}
         <div className="space-y-4">
-          <div className="bg-white dark:bg-[#1C1C1E] rounded-3xl p-6 border border-slate-100 dark:border-white/5">
-            <div className="flex items-center gap-2 mb-4">
-              <Moon className="w-5 h-5 text-indigo-400" />
-              <h3 className="font-semibold text-slate-800 dark:text-white">Sleep Quality</h3>
+          <div className="bg-white rounded-3xl p-7 border border-teal-100 shadow-sm">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="p-2 bg-teal-50 rounded-lg">
+                <Moon className="w-5 h-5 text-teal-600" />
+              </div>
+              <h3 className="font-serif font-bold text-slate-800">Sleep Quality</h3>
             </div>
             <div className="flex gap-4">
               {Object.entries(data.sleepDistribution).map(([k, v]) => {
@@ -175,10 +179,12 @@ export function EmotionsAnalytics({ token }: { token: string }) {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-[#1C1C1E] rounded-3xl p-6 border border-slate-100 dark:border-white/5">
-            <div className="flex items-center gap-2 mb-4">
-              <Zap className="w-5 h-5 text-yellow-400" />
-              <h3 className="font-semibold text-slate-800 dark:text-white">Energy Level</h3>
+          <div className="bg-white rounded-3xl p-7 border border-teal-100 shadow-sm">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="p-2 bg-yellow-50 rounded-lg">
+                <Zap className="w-5 h-5 text-yellow-500" />
+              </div>
+              <h3 className="font-serif font-bold text-slate-800">Energy Level</h3>
             </div>
             <div className="flex gap-4">
               {Object.entries(data.energyDistribution).map(([k, v]) => {
@@ -198,8 +204,8 @@ export function EmotionsAnalytics({ token }: { token: string }) {
       </div>
 
       {/* Recent mood feed */}
-      <div className="bg-white dark:bg-[#1C1C1E] rounded-3xl p-6 border border-slate-100 dark:border-white/5">
-        <h3 className="font-semibold text-slate-800 dark:text-white mb-4">Recent Mood Feed</h3>
+      <div className="bg-white rounded-3xl p-7 border border-teal-100 shadow-sm">
+        <h3 className="font-serif font-bold text-slate-800 mb-6">Recent Mood Feed</h3>
         {data.recent.length === 0 ? (
           <p className="text-slate-400 text-sm text-center py-8">No mood data recorded yet</p>
         ) : (

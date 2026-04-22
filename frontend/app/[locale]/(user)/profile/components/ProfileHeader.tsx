@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Camera, Loader2 } from "lucide-react";
+import { Camera, Loader2, Star } from "lucide-react";
 
 export function ProfileHeader() {
   const [user, setUser] = useState<any>(null);
@@ -90,9 +90,31 @@ export function ProfileHeader() {
         </div>
       </div>
       <div>
-        <h1 className="text-3xl font-serif font-medium text-slate-800 dark:text-slate-100">{name}</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-serif font-medium text-slate-800 dark:text-slate-100">{name}</h1>
+          {user?.premiumStatus?.isPremium && (
+            <span className="bg-gradient-to-r from-amber-400 to-orange-400 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm flex items-center gap-1">
+               <Star className="w-3 h-3 fill-current" /> Premium {user?.premiumStatus?.planType}
+            </span>
+          )}
+        </div>
         <p className="text-slate-500 mt-1">{user?.email || "No email updated"}</p>
-        <button className="mt-3 text-sm font-semibold text-indigo-500 hover:text-indigo-600 bg-indigo-50 px-4 py-1.5 rounded-full outline-none">Upgrade to Pro</button>
+        
+        {user?.premiumStatus?.isPremium ? (
+          <div className="mt-3 text-xs font-medium text-emerald-600 bg-emerald-50 px-4 py-1.5 rounded-full inline-block">
+             Plan active until {new Date(user.premiumStatus.expiryDate).toLocaleDateString()}
+          </div>
+        ) : (
+          <button 
+            onClick={() => {
+              const locale = window.location.pathname.split('/')[1] || 'vi';
+              window.location.href = `/${locale}/pricing`;
+            }}
+            className="mt-3 text-sm font-semibold text-indigo-500 hover:text-white hover:bg-indigo-500 border border-indigo-500 bg-transparent px-6 py-1.5 rounded-full transition-all outline-none"
+          >
+            Upgrade to Pro
+          </button>
+        )}
       </div>
     </div>
   );

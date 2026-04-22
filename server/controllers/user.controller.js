@@ -185,3 +185,41 @@ export const deleteUser = async (req, res) => {
     res.status(500).json(err.message);
   }
 };
+// User: claim a streak reward
+export const claimReward = async (req, res) => {
+  try {
+    const { rewardId } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json("User not found");
+
+    if (user.claimedRewards.includes(rewardId)) {
+      return res.status(400).json("Reward already claimed");
+    }
+
+    // Define reward requirements (logic should match frontend)
+    const rewardsMap = {
+      "streak-1": 1,
+      "streak-3": 3,
+      "streak-7": 7,
+      "streak-14": 14,
+      "streak-30": 30,
+    };
+
+    const required = rewardsMap[rewardId];
+    if (!required) return res.status(400).json("Invalid reward ID");
+
+    // Check if user has ever achieved this streak (using longestStreak for logic)
+    // Or currentStreak if it's meant to be "reach it while active"
+    // Usually rewards are based on achievements, so longestStreak is safer
+    if (user.stats.longestStreak < required) {
+      return res.status(400).json(`You need a ${required}-day streak to claim this reward.`);
+    }
+
+    user.claimedRewards.push(rewardId);
+    await user.save();
+
+    res.json({ message: "Reward claimed successfully!", claimedRewards: user.claimedRewards });
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};

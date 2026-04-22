@@ -104,17 +104,17 @@ function CoachPageContent() {
   }
 
   return (
-    <div className="p-8 pb-32 font-sans text-slate-800 dark:text-slate-200">
+    <div className="p-8 pb-32 font-sans text-slate-800">
       <div className="max-w-6xl mx-auto">
         <header className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-serif font-bold">Coach Dashboard</h1>
+            <h1 className="text-3xl font-serif font-bold text-slate-800">Coach Dashboard</h1>
             <p className="text-slate-500 mt-1">Hello {user?.name}! Manage your meditation courses and livestreams.</p>
           </div>
           {activeTab !== "packages" && activeTab !== "profile" && activeTab !== "settings" && (
             <button 
               onClick={() => { setFormData({}); setShowModal(true); }}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl flex items-center gap-2 font-medium"
+              className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-semibold transition-all shadow-sm shadow-teal-500/20"
             >
               <Plus className="w-5 h-5" /> Add New
             </button>
@@ -122,7 +122,7 @@ function CoachPageContent() {
         </header>
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-6 border-b border-slate-200 dark:border-white/10 pb-2">
+        <div className="flex gap-4 mb-6 border-b border-teal-50 pb-0">
           {[
             { key: "content", label: "My Meditations" },
             { key: "live",    label: "My Live Sessions" },
@@ -132,10 +132,10 @@ function CoachPageContent() {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-2 font-medium transition-colors ${
+              className={`px-4 py-4 font-bold text-xs uppercase tracking-widest transition-all border-b-2 ${
                 activeTab === tab.key
-                  ? "text-indigo-600 border-b-2 border-indigo-600"
-                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                  ? "text-teal-700 border-teal-600 bg-teal-50/50"
+                  : "text-slate-400 border-transparent hover:text-slate-600 hover:bg-slate-50"
               }`}
             >
               {tab.label}

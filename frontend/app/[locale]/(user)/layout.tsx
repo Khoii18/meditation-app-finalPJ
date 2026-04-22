@@ -1,5 +1,6 @@
-import { Sidebar } from "../../../components/layout/Sidebar";
-import { BottomNav } from "../../../components/layout/BottomNav";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { BottomNav } from "@/components/layout/BottomNav";
+import { OnboardingModal } from "@/components/auth/OnboardingModal";
 
 export default function LocaleLayout({
   children,
@@ -7,12 +8,13 @@ export default function LocaleLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen bg-[#F5F5F7] dark:bg-[#000000] text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-500/30">
+    <div className="flex min-h-screen bg-[#F2FBFA] text-slate-900 font-sans">
       <Sidebar />
-      <div className="flex-1 md:ml-64 w-full mx-auto relative pb-20 md:pb-0">
+      <main className="flex-1 md:ml-64 w-full min-w-0 max-w-[100vw] md:max-w-none overflow-x-hidden relative pb-20 md:pb-0 mx-auto">
         {children}
-      </div>
+      </main>
       <BottomNav />
+      <OnboardingModal />
     </div>
   );
 }

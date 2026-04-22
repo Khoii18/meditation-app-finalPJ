@@ -13,13 +13,13 @@ export function CoachFormModal({ formData, setFormData, activeTab, showModal, se
   if (!showModal) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-[#1C1C1E] w-full max-w-lg rounded-3xl p-8 shadow-2xl">
-        <h2 className="text-2xl font-serif font-bold mb-6">{formData._id ? "Edit" : "Add"} {activeTab === 'content' ? "Meditation" : "Live Session"}</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+      <div className="bg-white w-full max-w-lg rounded-3xl p-8 shadow-2xl border border-teal-100">
+        <h2 className="text-2xl font-serif font-bold mb-6 text-slate-800">{formData._id ? "Edit" : "Add"} {activeTab === 'content' ? "Meditation" : "Live Session"}</h2>
         <form onSubmit={handleSave} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Title</label>
-            <input required value={formData.title || ''} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 dark:bg-black/20" />
+            <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Title</label>
+            <input required value={formData.title || ''} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full p-4 rounded-2xl border border-teal-100 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-teal-400 focus:border-teal-400 transition-all" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Instructor (Default is you)</label>
@@ -54,8 +54,8 @@ export function CoachFormModal({ formData, setFormData, activeTab, showModal, se
           )}
           
           <div className="flex gap-4 pt-4">
-            <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-3 bg-slate-100 dark:bg-white/5 rounded-xl font-medium">Cancel</button>
-            <button type="submit" className="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-medium">Save</button>
+            <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-4 bg-slate-100 hover:bg-slate-200 rounded-2xl font-bold text-slate-600 transition-colors">Cancel</button>
+            <button type="submit" className="flex-1 py-4 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl font-bold shadow-md shadow-teal-500/20 transition-all">Save Changes</button>
           </div>
         </form>
       </div>

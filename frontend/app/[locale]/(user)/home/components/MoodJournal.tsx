@@ -43,18 +43,18 @@ export function MoodJournal() {
   };
 
   return (
-    <div className="bg-[#1C1C1E] rounded-[2rem] p-6 lg:p-8 flex flex-col items-center justify-center relative shadow-xl mb-8 border border-white/5 w-full">
-      <h3 className="text-white font-medium text-lg mb-6 text-center">How are you feeling?</h3>
+    <div className="bg-white rounded-[2rem] p-6 lg:p-8 flex flex-col items-center justify-center relative shadow-sm border border-teal-100 w-full">
+      <h3 className="text-slate-800 font-serif font-medium text-xl mb-6 text-center">How are you feeling?</h3>
       
-      <div className="flex items-center justify-between w-full max-w-sm px-1 sm:px-2 gap-2 sm:gap-4">
+      <div className="grid grid-cols-5 w-full max-w-sm gap-2 sm:gap-4 mt-2">
         {MOODS.map((mood) => (
           <button
             key={mood.id}
             onClick={() => handleSelect(mood.id)}
-            className="flex flex-col items-center gap-3 transition-transform hover:-translate-y-1 group relative outline-none"
+            className="flex flex-col items-center justify-start gap-3 transition-transform hover:-translate-y-1 group relative outline-none w-full"
           >
             <motion.div 
-              className={`text-3xl sm:text-4xl leading-none inline-block transition-all duration-300 ${selected && selected !== mood.id ? "opacity-30 grayscale saturate-0" : selected === mood.id ? "scale-125 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" : "grayscale-0"}`}
+              className={`text-3xl sm:text-4xl leading-none inline-block transition-all duration-300 ${selected && selected !== mood.id ? "opacity-40 grayscale saturate-0" : selected === mood.id ? "scale-125" : "grayscale-0"}`}
               animate={
                 selected === mood.id ? { scale: [1, 1.1, 1] } : {}
               }
@@ -62,7 +62,7 @@ export function MoodJournal() {
             >
               {mood.emoji}
             </motion.div>
-            <span className={`text-[10px] sm:text-xs font-medium transition-colors ${selected === mood.id ? "text-slate-200" : "text-slate-500 group-hover:text-slate-300"}`}>
+            <span className={`text-[10px] sm:text-xs font-semibold mt-1 transition-colors text-center w-full truncate ${selected === mood.id ? "text-teal-700" : "text-slate-400 group-hover:text-slate-600"}`}>
               {mood.label}
             </span>
           </button>
@@ -82,22 +82,22 @@ export function MoodJournal() {
                 placeholder="Why do you feel this way? (Optional)"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 resize-none h-24 transition-colors"
+                className="w-full bg-slate-50 border border-teal-100 rounded-2xl px-5 py-4 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 resize-none h-24 transition-colors"
               />
             </div>
             
             <div className="flex items-center justify-between">
               {saved ? (
-                <div className="flex items-center gap-2 text-xs font-medium text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full">
+                <div className="flex items-center gap-2 text-xs font-medium text-teal-600 bg-teal-50 px-3 py-1.5 rounded-full border border-teal-100">
                   <CheckCircle2 className="w-4 h-4" /> Saved to Journey
                 </div>
               ) : (
-                <div className="text-xs text-slate-500 italic">Data syncs to Journey Tab</div>
+                <div className="text-xs text-slate-400 italic">Data syncs to Journey Tab</div>
               )}
               <button
                 onClick={handleSave}
                 disabled={loading || saved}
-                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-teal-500/20"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 {saved ? "Saved" : "Save Log"}

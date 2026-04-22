@@ -12,7 +12,11 @@ const contentSchema = new mongoose.Schema({
   bgGradient: { type: String, default: "" },
   iconColor: { type: String, default: "" },
   iconName: { type: String, default: "" },
-  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" } // coach/admin who created this
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // coach/admin who created this
+  // Access control fields
+  isPremium: { type: Boolean, default: false },  // false = free, true = requires subscription
+  unlockedByStreak: { type: String, default: null }, // e.g. "streak-1", "streak-3"
+  source: { type: String, enum: ["admin", "coach"], default: "admin" } // who owns this content
 }, { timestamps: true });
 
 export default mongoose.model("Content", contentSchema);

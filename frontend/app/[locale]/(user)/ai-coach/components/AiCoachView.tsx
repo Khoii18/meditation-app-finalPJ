@@ -1,37 +1,49 @@
 "use client";
 
-import { useState } from "react";
-import { Sparkles, ArrowRight, Loader2, PlayCircle, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Sparkles, Zap, PlayCircle, Loader2, ShieldCheck, Lock, Crown, Quote, Move, Activity, Eye, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
-export function AiCoachView() {
+export default function AiCoachView() {
   const router = useRouter();
-  const [mood, setMood] = useState("");
+  const pathname = usePathname();
+  const locale = pathname.split('/')[1] || 'vi';
+  const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
-  const [plan, setPlan] = useState<any>(null);
+  const [result, setResult] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
+  const [forcePremium, setForcePremium] = useState(false); 
 
-  const handleGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!mood.trim()) return;
+  useEffect(() => {
+    const localData = localStorage.getItem("user");
+    if (localData) setUser(JSON.parse(localData));
+  }, []);
+
+  const isUserPremium = user?.premiumStatus?.isPremium || user?.claimedRewards?.includes("streak-7");
+  const isInputLocked = forcePremium && !isUserPremium;
+  const isPremiumUI = forcePremium;
+
+  const handleGenerate = async () => {
+    if (isInputLocked) {
+        const locale = window.location.pathname.split('/')[1] || 'vi';
+        router.push(`/${locale}/pricing`);
+        return;
+    }
+    if (!prompt.trim()) return;
     
+    setLoading(true);
     try {
-      setLoading(true);
       const token = localStorage.getItem("token");
-      
-      const res = await fetch("http://localhost:5000/api/coach/plan", {
+      const res = await fetch("http://localhost:5000/api/ai-coach/generate", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ mood })
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ prompt, mode: forcePremium ? "premium" : "standard" }),
       });
 
-      if (!res.ok) throw new Error("Failed to generate plan");
-      
+      if (!res.ok) throw new Error("Failed");
       const data = await res.json();
-      setPlan(data.plan);
+      setResult(data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -39,94 +51,165 @@ export function AiCoachView() {
     }
   };
 
-  return (
-    <div className="w-full max-w-4xl mx-auto px-4 md:px-8 pt-12 pb-24">
-      <header className="mb-12 text-center max-w-2xl mx-auto">
-        <div className="w-16 h-16 bg-gradient-to-tr from-indigo-500 to-violet-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-500/20">
-          <Sparkles className="w-8 h-8 text-white" />
-        </div>
-        <h1 className="text-3xl md:text-4xl font-serif font-medium text-slate-800 dark:text-slate-100 mb-4">Mindful AI Coach</h1>
-        <p className="text-slate-500 dark:text-slate-400">Artificial Intelligence will generate a precise meditation regimen based on your current emotions and biorhythms.</p>
-      </header>
+  if (result) {
+    const isPremiumAI = result.mode.includes("Premium") || result.mode.includes("Neural") || result.mode.includes("Lunaria Eternal");
 
-      {!plan ? (
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-[#1C1C1E] p-8 md:p-12 rounded-[2.5rem] border border-slate-100 dark:border-white/5 shadow-2xl shadow-indigo-500/5 max-w-2xl mx-auto"
-        >
-          <form onSubmit={handleGenerate}>
-            <label className="block text-lg font-medium text-slate-800 dark:text-slate-100 mb-6 text-center">
-              How are you feeling right now?
-            </label>
-            <textarea 
-              value={mood}
-              onChange={(e) => setMood(e.target.value)}
-              placeholder="Example: I'm feeling very stressed about work and having trouble sleeping..."
-              className="w-full h-32 bg-slate-50 dark:bg-[#0A0A0C] border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none transition-shadow mb-6"
-            />
+    if (isPremiumAI) {
+      return (
+        <div className="w-full max-w-5xl mx-auto px-4 py-4 md:py-6">
+           <motion.div initial={{ opacity: 0, scale: 0.99 }} animate={{ opacity: 1, scale: 1 }} className="bg-[#050505] rounded-[2.5rem] border border-indigo-500/20 shadow-2xl overflow-hidden text-white">
+              <div className="p-6 md:p-8 border-b border-white/5 bg-gradient-to-r from-indigo-500/10 to-transparent flex items-center justify-between">
+                 <div className="flex items-center gap-4">
+                    <div className="p-3 bg-indigo-500 rounded-xl shadow-lg shadow-indigo-500/30"><Crown className="w-6 h-6" /></div>
+                    <div>
+                       <h2 className="text-xl md:text-2xl font-serif font-bold tracking-tight">Lunaria Protocol</h2>
+                       <p className="text-[8px] uppercase tracking-[0.3em] font-black text-indigo-400 opacity-60">Divine Grace Edition</p>
+                    </div>
+                 </div>
+                 <div className="hidden md:flex items-center gap-4">
+                    <div className="text-right">
+                       <p className="text-[9px] text-white/40 uppercase font-black">Essence</p>
+                       <p className="text-xs font-bold text-emerald-400">{result.metrics?.essence || "Pure"}</p>
+                    </div>
+                    <div className="w-px h-8 bg-white/10"></div>
+                    <div className="text-right">
+                       <p className="text-[9px] text-white/40 uppercase font-black">Center</p>
+                       <p className="text-xs font-bold text-indigo-400">{result.metrics?.energyCenter || "Root"}</p>
+                    </div>
+                 </div>
+              </div>
+
+              <div className="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
+                 <div className="lg:col-span-4 flex flex-col gap-6">
+                    <section className="bg-white/5 p-5 rounded-2xl border border-white/5">
+                       <h4 className="flex items-center gap-2 text-[10px] font-black text-indigo-300 uppercase mb-3"><Activity className="w-4 h-4" /> Reflection</h4>
+                       <p className="text-base font-serif leading-relaxed italic text-slate-200">"{result.analysis || result.message}"</p>
+                    </section>
+                    <section className="bg-indigo-500/10 p-5 rounded-2xl border border-indigo-500/20">
+                       <h4 className="flex items-center gap-2 text-[10px] font-black text-indigo-300 uppercase mb-3"><Move className="w-4 h-4" /> Posture</h4>
+                       <p className="text-xs leading-relaxed text-slate-300 font-medium">{result.exercise?.posture}</p>
+                    </section>
+                 </div>
+
+                 <div className="lg:col-span-8 flex flex-col gap-8">
+                    <section>
+                       <h4 className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-4">Practice: {result.exercise?.name}</h4>
+                       <div className="space-y-3">
+                          {result.exercise?.steps?.map((step: any, idx: number) => (
+                             <div key={idx} className="p-4 bg-white/[0.03] border border-white/5 rounded-xl hover:bg-white/[0.05] transition-all">
+                                <div className="flex items-start gap-4">
+                                   <span className="w-6 h-6 rounded-lg bg-indigo-500 flex items-center justify-center font-black text-[10px]">{idx + 1}</span>
+                                   <div className="flex-1">
+                                      <p className="text-sm text-slate-200 mb-1">{typeof step === 'string' ? step : step.action}</p>
+                                      {(step.zenWisdom || step.proTip) && (
+                                         <p className="text-[10px] font-bold italic text-emerald-400/80">✦ {step.zenWisdom || step.proTip}</p>
+                                      )}
+                                   </div>
+                                </div>
+                             </div>
+                          ))}
+                       </div>
+                    </section>
+                    {result.exercise?.visualization && (
+                       <section className="p-6 bg-gradient-to-br from-indigo-600/10 via-transparent to-violet-600/10 border border-white/5 rounded-[2rem] text-center">
+                          <h4 className="text-[8px] text-indigo-300 uppercase font-black mb-2">Visualization</h4>
+                          <p className="text-lg font-serif text-slate-100 italic">"{result.exercise.visualization}"</p>
+                       </section>
+                    )}
+                 </div>
+              </div>
+
+              <div className="p-8 bg-white/5 border-t border-white/5 text-center">
+                 <p className="text-base font-serif italic text-white/50 max-w-xl mx-auto">"{result.quote}"</p>
+                 <button onClick={() => setResult(null)} className="mt-4 px-8 py-3 bg-white/5 hover:bg-white/10 rounded-xl font-bold text-[10px] transition-all uppercase tracking-widest border border-white/10">Reset Guide</button>
+              </div>
+           </motion.div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="w-full max-w-3xl mx-auto px-4 py-8">
+         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 p-8 md:p-10">
+            <div className="flex items-center gap-4 mb-8">
+               <div className="p-3 bg-teal-50 text-teal-600 rounded-xl"><Sparkles className="w-5 h-5" /></div>
+               <h3 className="text-xl font-serif font-bold text-slate-800">Sacred Support</h3>
+            </div>
+            <p className="text-lg font-serif italic text-slate-700 leading-relaxed mb-8">"{result.message}"</p>
+            <div className="space-y-3 mb-8">
+               {result.exercise?.steps?.map((step: string, idx: number) => (
+                  <div key={idx} className="p-4 bg-slate-50 rounded-xl flex items-center gap-4">
+                     <span className="w-6 h-6 bg-teal-600 text-white rounded-lg flex items-center justify-center font-black text-[10px]">{idx + 1}</span>
+                     <p className="text-slate-600 text-sm">{step}</p>
+                  </div>
+               ))}
+            </div>
+            <div className="pt-6 border-t border-slate-100 flex flex-col items-center">
+               <p className="text-xl font-serif italic text-teal-800 text-center mb-8">"{result.quote}"</p>
+               <div className="flex gap-4 w-full">
+                  <button onClick={() => router.push(`/${locale}/home`)} className="flex-1 py-4 bg-teal-600 text-white rounded-xl font-bold">Dashboard</button>
+                  <button onClick={() => setResult(null)} className="px-8 py-4 border border-slate-100 text-slate-500 rounded-xl font-bold">Retry</button>
+               </div>
+            </div>
+         </motion.div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full max-w-4xl mx-auto px-4 py-4 md:py-6 overflow-hidden">
+      <div className="flex flex-col items-center mb-6">
+          <div className={`p-4 rounded-3xl mb-4 shadow-xl transition-all duration-500 scale-75 md:scale-100 ${isPremiumUI ? "bg-indigo-500 rotate-12 shadow-indigo-500/40" : "bg-teal-600"}`}>
+             {isPremiumUI ? <Zap className="w-6 h-6 text-white fill-current" /> : <Sparkles className="w-6 h-6 text-white" />}
+          </div>
+          <h1 className="text-3xl md:text-5xl font-serif font-bold text-center mb-2 italic leading-tight">Lunaria</h1>
+          <p className="text-slate-500 text-center max-w-md text-xs md:text-sm mb-6">Your ancient guide to inner stillness.</p>
+
+          <div className="bg-slate-100 dark:bg-white/5 p-1 rounded-full flex items-center gap-1 w-full max-w-sm shadow-inner">
+             <button onClick={() => setForcePremium(false)}
+                className={`flex-1 py-2.5 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-2 ${!forcePremium ? "bg-white dark:bg-slate-800 text-teal-600 shadow-sm" : "text-slate-500"}`}>
+                Standard
+             </button>
+             <button onClick={() => setForcePremium(true)}
+                className={`flex-1 py-2.5 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-2 ${forcePremium ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/30" : "text-slate-500"}`}>
+                Premium
+             </button>
+          </div>
+      </div>
+
+      <div className={`relative transition-all duration-500 p-6 md:p-10 rounded-[3rem] border overflow-hidden ${isPremiumUI ? "bg-[#0A0A0C] border-indigo-500/20 shadow-2xl" : "bg-white border-slate-100 shadow-xl"}`}>
+          <div className="relative z-10 flex flex-col items-center">
+            <h3 className={`text-lg font-serif font-bold mb-6 text-center ${isPremiumUI ? "text-white" : "text-slate-800"}`}>
+              {isPremiumUI ? "Speak your heart to Lunaria..." : "How are you feeling?"}
+            </h3>
+            <div className="relative w-full">
+              <textarea 
+                value={prompt} onChange={(e) => setPrompt(e.target.value)}
+                placeholder={isInputLocked ? "Subscription required..." : "Describe your state..."}
+                disabled={loading || isInputLocked}
+                className={`w-full h-32 md:h-40 p-5 md:p-7 rounded-[2rem] text-base md:text-lg resize-none outline-none transition-all border ${isPremiumUI ? "bg-white/5 border-white/10 text-white placeholder-slate-600 focus:border-indigo-500/50" : "bg-slate-50 border-slate-100 text-slate-800 placeholder-slate-400 focus:border-teal-500/50"} ${isInputLocked ? "opacity-30" : ""}`}
+              />
+              {isInputLocked && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 backdrop-blur-[2px] rounded-[2rem]">
+                   <Lock className="w-6 h-6 text-white" />
+                   <p className="text-white font-black text-[10px] uppercase tracking-widest">Premium Access Required</p>
+                </div>
+              )}
+            </div>
             <button 
-              disabled={loading || !mood.trim()}
-              type="submit"
-              className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50"
-            >
+              onClick={handleGenerate} 
+              disabled={loading || (!prompt.trim() && !isInputLocked)}
+              className={`w-full max-w-md mt-6 py-4 rounded-2xl font-bold text-sm md:text-base flex items-center justify-center gap-3 transition-all hover:scale-[1.01] shadow-xl ${isInputLocked ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-amber-500/20" : isPremiumUI ? "bg-indigo-500 text-white shadow-indigo-500/40" : "bg-teal-600 text-white shadow-teal-500/20"}`}>
               {loading ? (
-                <><Loader2 className="w-5 h-5 animate-spin" /> Generating your plan...</>
+                <> <Loader2 className="w-5 h-5 animate-spin" /> {isPremiumUI ? "Listening..." : "Processing..."} </>
+              ) : isInputLocked ? (
+                <> <Crown className="w-5 h-5" /> Upgrade to UNLOCK </>
               ) : (
-                <><Sparkles className="w-5 h-5" /> Generate Plan Now</>
+                <> <PlayCircle className="w-5 h-5" /> Generate Guide </>
               )}
             </button>
-          </form>
-        </motion.div>
-      ) : (
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-gradient-to-br from-indigo-900 to-[#1b2f42] p-8 md:p-12 rounded-[2.5rem] shadow-2xl relative overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 p-8 opacity-10 transform translate-x-1/4 -translate-y-1/4">
-            <Sparkles className="w-64 h-64 text-white" />
           </div>
-          
-          <div className="relative z-10">
-            <span className="bg-white/20 text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-6 inline-block">Plan Ready</span>
-            <h2 className="text-3xl md:text-4xl font-serif text-white mb-4">{plan.title}</h2>
-            <p className="text-white/80 leading-relaxed max-w-xl mb-10">{plan.description}</p>
-            
-            <div className="space-y-4 mb-10">
-              {plan.steps.map((step: any, idx: number) => (
-                <div key={idx} className="bg-white/10 backdrop-blur-md rounded-2xl p-5 flex items-center gap-6 border border-white/10">
-                  <div className="w-10 h-10 rounded-full bg-white text-indigo-900 font-bold flex items-center justify-center shrink-0">
-                    {idx + 1}
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-medium text-white mb-1">{step.name}</h4>
-                    <p className="text-indigo-200 text-sm flex items-center gap-2">
-                       <Clock className="w-4 h-4"/> {step.duration} • {step.type}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-4">
-              <button 
-                onClick={() => {
-                  // Dùng đường dẫn chuẩn để tránh 404
-                  const locale = window.location.pathname.split('/')[1] || 'vi';
-                  window.location.href = `/${locale}/home`;
-                }}
-                className="bg-white text-indigo-900 px-8 py-4 rounded-full font-bold flex items-center gap-2 hover:scale-105 transition-transform shadow-xl shadow-white/10"
-              >
-                <PlayCircle className="w-6 h-6" /> Start Practice
-              </button>
-              <button onClick={() => setPlan(null)} className="px-8 py-4 rounded-full font-medium text-white hover:bg-white/10 transition-colors">
-                Start Over
-              </button>
-            </div>
-          </div>
-        </motion.div>
-      )}
+      </div>
     </div>
   );
 }

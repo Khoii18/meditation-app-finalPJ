@@ -103,15 +103,15 @@ export function CoachProfileEditor({ token }: CoachProfileEditorProps) {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-2xl mx-auto bg-[#1C1C1E] border border-white/5 rounded-3xl p-8"
+      className="max-w-2xl mx-auto bg-white border border-teal-100 rounded-3xl p-8 shadow-sm"
     >
-      <div className="flex items-center gap-3 mb-8">
-        <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
-          <UserCircle className="w-6 h-6" />
+      <div className="flex items-center gap-4 mb-8">
+        <div className="w-14 h-14 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-600 border border-teal-100">
+          <UserCircle className="w-7 h-7" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-white">Public Profile</h2>
-          <p className="text-slate-400 text-sm">Update how users see you in the Coach Directory</p>
+          <h2 className="text-2xl font-serif font-bold text-slate-800">Public Profile</h2>
+          <p className="text-slate-500 text-sm font-medium">Update how users see you in the Coach Directory</p>
         </div>
       </div>
 
@@ -199,12 +199,12 @@ export function CoachProfileEditor({ token }: CoachProfileEditorProps) {
         </div>
 
         <div>
-          <label className="text-xs text-slate-500 uppercase tracking-widest font-semibold mb-2 flex items-center gap-2">
+          <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2 ml-1">
             Intro Video URL (Optional)
           </label>
-          <div className="flex gap-2 mb-3">
+          <div className="flex gap-3 mb-4">
             <input
-              className="flex-1 bg-black/20 border border-white/5 rounded-2xl px-5 py-4 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 transition-colors"
+              className="flex-1 bg-slate-50 border border-teal-50 rounded-2xl px-5 py-4 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-teal-400 transition-all"
               placeholder="Paste public MP4 or YouTube video URL"
               value={introVideo}
               onChange={(e) => setIntroVideo(e.target.value)}
@@ -274,14 +274,14 @@ export function CoachProfileEditor({ token }: CoachProfileEditorProps) {
           />
         </div>
 
-        <div className="pt-4 border-t border-white/5 flex items-center justify-end">
-          <p className={`mr-4 text-emerald-400 text-sm flex items-center gap-1.5 transition-opacity duration-300 ${saved ? "opacity-100" : "opacity-0"}`}>
-            <CheckCircle2 className="w-4 h-4" /> Saved successfully
+        <div className="pt-6 border-t border-teal-50 flex items-center justify-end">
+          <p className={`mr-4 text-teal-600 text-sm font-bold flex items-center gap-1.5 transition-opacity duration-300 ${saved ? "opacity-100" : "opacity-0"}`}>
+            <CheckCircle2 className="w-4 h-4" /> Profile Updated
           </p>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-xl font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-10 py-4 rounded-2xl font-bold transition-all shadow-md shadow-teal-500/20 disabled:opacity-50"
           >
             {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
             Save Profile

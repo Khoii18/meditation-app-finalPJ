@@ -262,15 +262,15 @@ function CoachCard({ coach, onClick }: { coach: Coach; onClick: () => void }) {
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
       onClick={onClick}
-      className="bg-[#111118] border border-white/8 rounded-3xl overflow-hidden cursor-pointer group hover:border-indigo-500/30 transition-colors"
+      className="bg-white border border-teal-100 rounded-3xl overflow-hidden cursor-pointer group hover:border-teal-300 transition-colors shadow-sm hover:shadow-md"
     >
       {/* Card top gradient */}
-      <div className="h-28 bg-gradient-to-br from-indigo-700 via-violet-700 to-purple-800 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-30"
-          style={{ backgroundImage: "radial-gradient(circle at 30% 70%, white 1px, transparent 1px)", backgroundSize: "30px 30px" }}
+      <div className="h-28 bg-gradient-to-br from-teal-50 via-emerald-50 to-teal-100/50 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.03] text-teal-900"
+          style={{ backgroundImage: "radial-gradient(circle at 30% 70%, currentColor 1px, transparent 1px)", backgroundSize: "30px 30px" }}
         />
         {plans.length > 0 && (
-          <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1.5 text-xs text-white">
+          <div className="absolute top-3 right-3 bg-white/60 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1.5 text-xs text-teal-800 font-medium border border-teal-100/50">
             <BookOpen className="w-3 h-3" /> {plans.length} {plans.length === 1 ? "package" : "packages"}
           </div>
         )}
@@ -278,7 +278,7 @@ function CoachCard({ coach, onClick }: { coach: Coach; onClick: () => void }) {
 
       <div className="p-5">
         {/* Avatar */}
-        <div className="relative z-10 w-16 h-16 rounded-2xl border-4 border-[#111118] bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white text-2xl font-bold -mt-10 mb-4 shadow-xl shrink-0">
+        <div className="relative z-10 w-16 h-16 rounded-2xl border-4 border-white bg-teal-100 flex items-center justify-center text-teal-700 text-2xl font-bold -mt-10 mb-4 shadow-sm shrink-0">
           {profile.avatar ? (
             <img src={profile.avatar} alt={coach.name} className="w-full h-full object-cover rounded-xl" />
           ) : (
@@ -286,12 +286,12 @@ function CoachCard({ coach, onClick }: { coach: Coach; onClick: () => void }) {
           )}
         </div>
 
-        <h3 className="text-lg font-semibold text-white group-hover:text-indigo-300 transition-colors">{coach.name}</h3>
+        <h3 className="text-lg font-semibold text-slate-800 group-hover:text-teal-700 transition-colors">{coach.name}</h3>
 
         {specialties.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-2 mb-3">
             {specialties.slice(0, 3).map((s, i) => (
-              <span key={i} className="text-[11px] bg-white/8 text-slate-400 px-2.5 py-0.5 rounded-full">{s}</span>
+              <span key={i} className="text-[11px] bg-slate-50 text-slate-600 border border-slate-100 px-2.5 py-0.5 rounded-full">{s}</span>
             ))}
           </div>
         )}
@@ -302,12 +302,12 @@ function CoachCard({ coach, onClick }: { coach: Coach; onClick: () => void }) {
           <p className="text-slate-600 text-xs italic mb-4">No bio available yet</p>
         )}
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1 text-xs text-slate-500">
-            <Users className="w-3.5 h-3.5" />
+        <div className="flex items-center justify-between mt-auto">
+          <div className="flex items-center gap-1.5 text-xs text-slate-500">
+            <Users className="w-3.5 h-3.5 shrink-0" />
             <span>{plans.length} package{plans.length !== 1 ? "s" : ""}</span>
           </div>
-          <div className="flex items-center gap-1 text-indigo-400 text-xs font-medium group-hover:gap-2 transition-all">
+          <div className="flex items-center gap-1 text-teal-600 text-xs font-semibold group-hover:gap-2 transition-all">
             View profile <ChevronRight className="w-3.5 h-3.5" />
           </div>
         </div>
@@ -343,28 +343,26 @@ export default function CoachesPage() {
   });
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 md:px-8 pt-12 pb-24">
-      {/* Header */}
-      <header className="mb-10 text-center">
-        <div className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-400 text-xs font-semibold uppercase tracking-widest px-4 py-2 rounded-full border border-indigo-500/20 mb-5">
+    <div className="w-full max-w-5xl mx-auto px-4 md:px-8 pt-10 md:pt-12 pb-28 md:pb-24">
+      <header className="mb-8 md:mb-10">
+        <div className="inline-flex items-center gap-2 bg-teal-50 text-teal-600 text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full border border-teal-200 mb-4">
           <Award className="w-3.5 h-3.5" /> Expert Coaches
         </div>
-        <h1 className="text-4xl md:text-5xl font-serif font-medium text-slate-100 mb-3">
+        <h1 className="text-2xl md:text-3xl font-serif font-medium text-slate-800 mb-1.5">
           Find Your Coach
         </h1>
-        <p className="text-slate-400 max-w-lg mx-auto">
-          Browse our certified meditation coaches and explore their unique programs to find your perfect match.
+        <p className="text-slate-400 text-sm max-w-lg">
+          Browse our certified meditation coaches and explore their unique programs.
         </p>
       </header>
 
-      {/* Search bar */}
-      <div className="mb-8 relative max-w-md mx-auto">
+      <div className="mb-6 relative max-w-md">
         <input
           type="text"
-          placeholder="Search by name, specialty..."
+          placeholder="Search by name or specialty..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-[#111118] border border-white/10 rounded-2xl px-5 py-3.5 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30 transition-all"
+          className="w-full bg-white border border-teal-100 rounded-2xl px-5 py-3 text-sm text-slate-700 placeholder-slate-300 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400/30 transition-all shadow-sm"
         />
       </div>
 

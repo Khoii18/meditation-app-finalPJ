@@ -42,29 +42,29 @@ function PackageForm({ pkg, onChange, onSave, onCancel, saving }: PackageFormPro
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
     >
       <motion.div
         initial={{ scale: 0.93, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.93, opacity: 0 }}
-        className="w-full max-w-lg bg-[#111116] border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+        className="w-full max-w-lg bg-white border border-teal-100 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-white/5 shrink-0">
-          <h3 className="text-lg font-semibold text-white">
+        <div className="flex items-center justify-between px-8 py-6 border-b border-teal-50 shrink-0">
+          <h3 className="text-xl font-serif font-bold text-slate-800">
             {pkg._id ? "Edit Package" : "New Package"}
           </h3>
-          <button onClick={onCancel} className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5">
-            <X className="w-5 h-5" />
+          <button onClick={onCancel} className="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-50">
+            <X className="w-6 h-6" />
           </button>
         </div>
 
         <div className="p-6 space-y-5 overflow-y-auto">
           {/* Name */}
           <div>
-            <label className="text-xs text-slate-500 uppercase tracking-widest font-semibold mb-2 block">Package Name</label>
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Package Name</label>
             <input
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50"
+              className="w-full bg-slate-50 border border-teal-50 rounded-2xl px-5 py-4 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-teal-400 transition-all"
               placeholder="e.g. Beginner Mindfulness"
               value={pkg.name || ""}
               onChange={(e) => onChange({ ...pkg, name: e.target.value })}
@@ -272,18 +272,17 @@ function PackageForm({ pkg, onChange, onSave, onCancel, saving }: PackageFormPro
             <span className="text-sm text-slate-300">Mark as highlighted / popular</span>
           </label>
 
-          {/* Actions */}
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-4 pt-4">
             <button
               onClick={onCancel}
-              className="flex-1 py-3 rounded-xl border border-white/10 text-slate-400 hover:text-white hover:bg-white/5 text-sm transition-colors"
+              className="flex-1 py-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={onSave}
               disabled={saving || !pkg.name}
-              className="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors disabled:opacity-50"
+              className="flex-1 py-4 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-bold shadow-md shadow-teal-500/20 transition-all disabled:opacity-50"
             >
               {saving ? "Saving..." : "Save Package"}
             </button>
@@ -375,13 +374,13 @@ export function CoachMyPackages({ token }: { token: string }) {
   return (
     <div>
       {/* Top controls */}
-      <div className="flex items-center justify-between mb-5">
-        <p className="text-slate-400 text-sm">{plans.length} package{plans.length !== 1 ? "s" : ""} created</p>
+      <div className="flex items-center justify-between mb-8">
+        <p className="text-slate-500 font-medium">{plans.length} package{plans.length !== 1 ? "s" : ""} created</p>
         <button
           onClick={() => setEditing({ name: "", price: 0, currency: "USD", period: "month", features: [], exercises: [], highlighted: false })}
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+          className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-md shadow-teal-500/20"
         >
-          <Plus className="w-4 h-4" /> Add Package
+          <Plus className="w-5 h-5" /> Add Package
         </button>
       </div>
 
@@ -397,10 +396,10 @@ export function CoachMyPackages({ token }: { token: string }) {
           {plans.map((plan) => (
             <div
               key={plan._id}
-              className={`relative rounded-2xl p-5 border ${
+              className={`relative rounded-3xl p-7 border transition-all hover:shadow-lg ${
                 plan.highlighted
-                  ? "bg-gradient-to-br from-indigo-600/20 to-violet-600/10 border-indigo-500/30"
-                  : "bg-white/5 border-white/10"
+                  ? "bg-gradient-to-br from-teal-50 to-white border-teal-200"
+                  : "bg-white border-teal-50"
               }`}
             >
               {plan.highlighted && (

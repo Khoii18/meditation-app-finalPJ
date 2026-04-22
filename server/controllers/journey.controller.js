@@ -1,5 +1,6 @@
 import Workout from "../models/workout.model.js";
 import Checkin from "../models/checkin.model.js";
+import Content from "../models/content.model.js";
 
 export const getTodayJourney = async (req, res) => {
   try {
@@ -27,14 +28,6 @@ export const getTodayJourney = async (req, res) => {
       }
     });
 
-    // Provide generic mock if empty so UI looks good for the assignment
-    if (completedExercises.length === 0) {
-       completedExercises = [
-         { name: "Morning Awakening Stretch" },
-         { name: "5-Min Gratitude Breath" }
-       ];
-    }
-    
     let advice = "You haven't checked in today. Take a moment to log your mood!";
     if (checkin) {
       if (checkin.mood === "Happy" || checkin.mood === "Peaceful") {
@@ -44,10 +37,13 @@ export const getTodayJourney = async (req, res) => {
       }
     }
 
-    const suggestions = [
-      { id: 1, title: "Deep Sleep 101", duration: "10 mins", type: "Sleep" },
-      { id: 2, title: "Focus Breaths", duration: "5 mins", type: "Focus" }
-    ];
+    const dbSuggestions = await Content.aggregate([{ $sample: { size: 2 } }]);
+    const suggestions = dbSuggestions.map(item => ({
+      id: item._id,
+      title: item.title,
+      duration: item.duration,
+      type: item.type
+    }));
 
     res.status(200).json({
       checkin: checkin || null,

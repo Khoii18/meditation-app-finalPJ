@@ -8,8 +8,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Balance - Meditation & Sleep",
-  description: "Your personal mindfulness and sleep coach",
+  title: "Lunaria - Meditation & Spiritual Peace",
+  description: "Your sacred companion for mindfulness and spiritual growth.",
 };
 
 export default function RootLayout({

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell, User } from "lucide-react";
+import { Bell, User, LogIn } from "lucide-react";
 import Link from "next/link";
 
 export function Header() {
-  const [userName, setUserName] = useState("Friend");
+  const [userName, setUserName] = useState<string | null>(null);
 
   useEffect(() => {
     const data = localStorage.getItem("user");
@@ -17,21 +17,34 @@ export function Header() {
     }
   }, []);
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+
   return (
-    <header className="px-6 pt-12 pb-4 flex justify-between items-center z-10 relative">
-      <div className="flex flex-col">
-        <h1 className="text-2xl font-serif font-medium text-slate-800 dark:text-slate-100">
-          Good evening, {userName}
+    <header className="px-4 md:px-6 pt-8 md:pt-10 pb-4 flex justify-between items-center">
+      <div>
+        <p className="text-xs font-semibold tracking-widest uppercase text-teal-500 mb-1">{greeting}</p>
+        <h1 className="text-2xl md:text-3xl font-serif font-medium text-slate-800 leading-tight">
+          {userName ? `Welcome back, ${userName.split(" ")[0]}` : "Welcome to Oasis"}
         </h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Are you ready to relax?</p>
+        <p className="text-sm text-slate-400 mt-1">
+          {userName ? "Ready for today's session?" : "Sign in to track your journey"}
+        </p>
       </div>
-      <div className="flex gap-4 items-center">
-        <button className="text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
-          <Bell className="w-6 h-6" />
+      <div className="flex gap-3 items-center">
+        <button className="w-9 h-9 rounded-xl bg-teal-50 flex items-center justify-center text-teal-500 hover:bg-teal-100 transition-colors">
+          <Bell className="w-4.5 h-4.5" />
         </button>
-        <Link href="./profile" className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden border-2 border-white dark:border-slate-800 shadow-sm hover:scale-105 transition-transform">
-          <User className="w-5 h-5 text-slate-500 dark:text-slate-400" />
-        </Link>
+        {userName ? (
+          <Link href="./profile" className="w-9 h-9 rounded-xl bg-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-teal-200 hover:bg-teal-600 transition-colors">
+            {userName[0].toUpperCase()}
+          </Link>
+        ) : (
+          <Link href="/vi/login" className="flex items-center gap-1.5 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-md shadow-teal-200">
+            <LogIn className="w-3.5 h-3.5" />
+            <span>Sign In</span>
+          </Link>
+        )}
       </div>
     </header>
   );

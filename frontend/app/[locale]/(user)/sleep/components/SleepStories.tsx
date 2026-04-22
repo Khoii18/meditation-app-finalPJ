@@ -64,8 +64,8 @@ export function SleepStories() {
       transition={{ delay: 0.4, duration: 0.6 }}
     >
       <div className="flex justify-between items-center mb-6 px-1">
-        <h2 className="text-xl font-medium text-white flex items-center gap-2">
-          <Headphones className="w-5 h-5 text-indigo-400 group-hover:animate-pulse" /> Sleep Stories
+        <h2 className="text-sm font-semibold tracking-widest uppercase text-slate-500 flex items-center gap-2">
+          <Headphones className="w-4 h-4 text-teal-400 group-hover:animate-pulse" /> Sleep Stories
         </h2>
         
         <div className="flex items-center gap-2">
@@ -105,13 +105,13 @@ export function SleepStories() {
                     target.src = "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600";
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#111115]/90 via-[#111115]/20 to-transparent" />
                 <div className="absolute bottom-0 inset-x-0 p-8">
-                  <span className="bg-indigo-600 text-white text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded mb-3 inline-block shadow-sm">
+                  <span className="bg-[#1C2028] text-teal-400 border border-[#252A36] text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 rounded inline-block shadow-sm">
                     {story.type}
                   </span>
-                  <h3 className="text-2xl font-serif mb-1 group-hover:text-indigo-200 transition-colors">{story.title}</h3>
-                  <p className="text-white/60 text-sm">{story.duration}</p>
+                  <h3 className="text-2xl font-serif text-white mb-1 group-hover:text-teal-300 transition-colors mt-3">{story.title}</h3>
+                  <p className="text-slate-400 text-sm font-medium">{story.duration}</p>
                 </div>
               </Link>
             </motion.div>

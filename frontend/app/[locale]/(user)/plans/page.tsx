@@ -1,18 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { 
-  Sunrise, Coffee, Heart, Mic, CloudLightning, Activity,
-  Leaf, CloudMoon, CloudRain, SunMedium, UserCheck, CheckCircle,
-  HelpCircle, Home, Smile, Zap, RotateCcw, Monitor, Layers, 
-  Map, Target, AlignStartVertical, TrendingUp, Sparkles
-} from "lucide-react";
 import * as Icons from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { useAuth } from "@/hooks/useAuth";
 
-export default function PlansPage() {
+function PlansContent() {
   const [adminPlans, setAdminPlans] = useState<any[]>([]);
+  const { claimedRewards, isPaid } = useAuth();
 
   useEffect(() => {
     fetch("http://localhost:5000/api/content")
@@ -26,17 +23,21 @@ export default function PlansPage() {
       .catch(console.error);
   }, []);
 
-  // Dynamically group plans based on their "subject"
-  const groupedPlans = adminPlans.reduce((groups, plan) => {
+  const groupedPlans: Record<string, any[]> = adminPlans.reduce((groups: Record<string, any[]>, plan: any) => {
     const subj = plan.subject || "Featured Plans";
     if (!groups[subj]) groups[subj] = [];
     groups[subj].push(plan);
     return groups;
-  }, {} as Record<string, any[]>);
+  }, {});
+
 
   return (
-    <div className="w-full min-h-screen bg-[#0A0A0C] text-white overflow-x-hidden pb-32">
-      <div className="w-full max-w-5xl mx-auto px-4 md:px-8 pt-10">
+    <div className="w-full min-h-screen bg-[#F2FBFA] text-slate-800 overflow-x-hidden pb-28 md:pb-16">
+      <div className="w-full max-w-5xl mx-auto px-4 md:px-8 pt-8 md:pt-10">
+        <header className="mb-8">
+          <p className="text-xs font-bold tracking-widest uppercase text-teal-500 mb-1">Your Programs</p>
+          <h1 className="text-2xl md:text-3xl font-serif font-medium text-slate-800">Meditation Plans</h1>
+        </header>
         
         {Object.entries(groupedPlans).map(([subject, subjectPlans], idx) => (
           <motion.div 
@@ -46,30 +47,46 @@ export default function PlansPage() {
             transition={{ delay: idx * 0.1 }}
             className="mb-10"
           >
-            <h2 className="text-[15px] font-semibold text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2">
-              {subject === "Featured Plans" ? <Icons.Sparkles className="w-4 h-4 text-indigo-400"/> : null} 
-              <span className={subject === "Featured Plans" ? "text-indigo-400" : ""}>{subject}</span>
+            <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+              {subject === "Featured Plans" ? <Icons.Sparkles className="w-4 h-4 text-teal-500"/> : null} 
+              <span className={subject === "Featured Plans" ? "text-teal-600" : ""}>{subject}</span>
             </h2>
             
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {subjectPlans.map((plan: any) => {
                 const IconComp = (Icons as any)[plan.iconName] || Icons.Map;
+                
+                const isLocked = plan.unlockedByStreak && !claimedRewards.includes(plan.unlockedByStreak) && !isPaid;
+                const linkHref = isLocked ? "#" : `./plans/${plan._id}`;
+
                 return (
-                  <Link href={`./plans/${plan._id}`} key={plan._id} className="group cursor-pointer">
-                    <div className="bg-[#1C1C1E] rounded-2xl overflow-hidden transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_10px_30px_-15px_rgba(79,70,229,0.5)] border border-indigo-500/20">
-                      <div className="aspect-square relative p-6 bg-slate-800 overflow-hidden flex flex-col justify-end">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
-                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/20 rounded-full translate-y-1/3 -translate-x-1/4" />
+                  <Link href={linkHref} key={plan._id} className={`group ${isLocked ? "cursor-not-allowed" : "cursor-pointer"}`}>
+                    <div className={`bg-white rounded-2xl overflow-hidden transition-all duration-300 ${!isLocked && "group-hover:-translate-y-1 group-hover:shadow-[0_8px_24px_rgba(13,148,136,0.15)]"} border border-teal-100 shadow-sm relative`}>
+                      
+                      {isLocked && (
+                        <div className="absolute inset-0 z-20 bg-slate-900/5 backdrop-blur-[2px] flex flex-col items-center justify-center p-4 text-center">
+                          <div className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center mb-2">
+                            <Icons.Lock className="w-5 h-5 text-slate-400" />
+                          </div>
+                          <p className="text-[10px] font-bold text-slate-700 uppercase tracking-widest">Rewards Only</p>
+                          <p className="text-[9px] text-slate-500 font-medium">Claim in Streaks</p>
+                        </div>
+                      )}
+
+                      <div className={`aspect-square relative p-6 bg-white overflow-hidden flex flex-col items-center justify-center border-b border-teal-50 ${isLocked ? "opacity-30 grayscale" : ""}`}>
+                        {/* Soft geometric shapes in background to mimic Balance's illustrations */}
+                        <div className="absolute top-4 right-4 w-12 h-12 border-2 border-teal-100 rounded-full" />
+                        <div className="absolute bottom-6 left-6 w-8 h-8 bg-teal-50 rounded-lg rotate-45" />
                         
-                        <IconComp className={`absolute inset-0 m-auto w-16 h-16 ${plan.iconColor || 'text-white/50'} opacity-90 transition-transform duration-500 group-hover:scale-110`} strokeWidth={1.5} />
+                        <IconComp className={`relative z-10 w-16 h-16 text-teal-600 opacity-90 transition-transform duration-500 ${!isLocked && "group-hover:scale-110"}`} strokeWidth={1} />
                       </div>
                       
-                      <div className="p-4">
-                        <h4 className="font-semibold text-slate-100 text-[15px] mb-1 group-hover:text-indigo-400 transition-colors">
+                      <div className={`p-4 bg-white text-center ${isLocked ? "opacity-30" : ""}`}>
+                        <h4 className="font-semibold text-slate-800 text-[15px] mb-0.5 transition-colors">
                           {plan.title}
                         </h4>
-                        <p className="text-xs text-slate-500 font-medium tracking-wide">
-                          {plan.duration}
+                        <p className="text-xs text-slate-400 font-medium tracking-wide">
+                          {plan.unlockedByStreak ? "Bonus Content" : (plan.duration || "10 Days")}
                         </p>
                       </div>
                     </div>
@@ -81,5 +98,13 @@ export default function PlansPage() {
         ))}
       </div>
     </div>
+  );
+}
+
+export default function PlansPage() {
+  return (
+    <ProtectedRoute>
+      <PlansContent />
+    </ProtectedRoute>
   );
 }

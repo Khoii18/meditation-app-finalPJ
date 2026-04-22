@@ -126,19 +126,19 @@ function AdminPageContent() {
   }) : [];
 
   return (
-    <div className="p-8 pb-32 font-sans text-slate-800 dark:text-slate-200">
+    <div className="p-8 pb-32 font-sans text-slate-800">
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}
         <header className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-serif font-bold">Admin Dashboard</h1>
-            <p className="text-slate-500 mt-1">Manage Mindfulness app content & users</p>
+            <h1 className="text-3xl font-serif font-bold text-slate-800">Admin Dashboard</h1>
+            <p className="text-slate-500 mt-1">Manage Oasis app content & users</p>
           </div>
           {activeTab !== "users" && (
             <button
               onClick={() => { setFormData({}); setShowModal(true); }}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl flex items-center gap-2 font-medium transition-colors"
+              className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-semibold transition-all shadow-sm shadow-teal-500/20"
             >
               <Plus className="w-5 h-5" /> Add New
             </button>
@@ -146,18 +146,18 @@ function AdminPageContent() {
         </header>
 
         {/* Tab bar */}
-        <div className="flex gap-1 mb-6 border-b border-slate-200 dark:border-white/10 pb-0">
+        <div className="flex gap-1 mb-6 border-b border-teal-50 pb-0">
           {TABS.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className={`flex items-center gap-2 px-5 py-3 font-medium text-sm rounded-t-xl transition-colors border-b-2 ${
+              className={`flex items-center gap-2 px-5 py-4 font-bold text-xs uppercase tracking-widest rounded-t-xl transition-all border-b-2 ${
                 activeTab === key
-                  ? "text-indigo-600 dark:text-indigo-400 border-indigo-600 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-500/10"
-                  : "text-slate-500 border-transparent hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5"
+                  ? "text-teal-700 border-teal-600 bg-teal-50/50"
+                  : "text-slate-400 border-transparent hover:text-slate-600 hover:bg-slate-50"
               }`}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-3.5 h-3.5" />
               {label}
             </button>
           ))}
