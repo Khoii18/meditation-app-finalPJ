@@ -12,7 +12,7 @@ export default function PlanDetailsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/content/${id}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/content/${id}`)
       .then(res => res.json())
       .then(data => {
         setPlan(data);

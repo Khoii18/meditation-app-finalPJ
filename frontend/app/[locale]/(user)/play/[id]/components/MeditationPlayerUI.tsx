@@ -71,7 +71,7 @@ export function MeditationPlayerUI({ id }: MeditationPlayerUIProps) {
           setLoading(false);
           return;
         }
-        const res = await fetch(`http://localhost:5000/api/content/${id}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/content/${id}`);
         if (res.ok) {
           const data = await res.json();
           // Check for lesson index in URL
