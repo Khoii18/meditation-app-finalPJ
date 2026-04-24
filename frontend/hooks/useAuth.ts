@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { API_URL } from "@/config";
 
 export interface AuthUser {
   id: string;
@@ -66,27 +67,27 @@ export function useAuth(): AuthState {
 
   const fetchStatus = useCallback(async (storedToken: string) => {
     try {
-      const res = await fetch("http://localhost:5000/api/subscription/status", {
-        headers: { Authorization: `Bearer ${storedToken}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        console.log("FETCH STATUS SUCCESS:", data);
-        
-        // Brute force bypass for cuong@gmail.com to ensure they can use it
-        const currentStoredUser = localStorage.getItem("user");
-        const isCuong = currentStoredUser && JSON.parse(currentStoredUser).email === "cuong@gmail.com";
-        
-        setIsPaid(data.hasPremium || isCuong || false);
-        setSubscribedCoachIds(data.subscribedCoachIds ?? []);
-      } else {
-        console.error("FETCH STATUS FAILED:", res.status, await res.text());
-      }
-
-      // Fetch full profile for rewards/stats
-      const profileRes = await fetch("http://localhost:5000/api/users/me", {
-        headers: { Authorization: `Bearer ${storedToken}` }
-      });
+        const res = await fetch(`${API_URL}/api/subscription/status`, {
+          headers: { Authorization: `Bearer ${storedToken}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          console.log("FETCH STATUS SUCCESS:", data);
+          
+          // Brute force bypass for cuong@gmail.com to ensure they can use it
+          const currentStoredUser = localStorage.getItem("user");
+          const isCuong = currentStoredUser && JSON.parse(currentStoredUser).email === "cuong@gmail.com";
+          
+          setIsPaid(data.hasPremium || isCuong || false);
+          setSubscribedCoachIds(data.subscribedCoachIds ?? []);
+        } else {
+          console.error("FETCH STATUS FAILED:", res.status, await res.text());
+        }
+  
+        // Fetch full profile for rewards/stats
+        const profileRes = await fetch(`${API_URL}/api/users/me`, {
+          headers: { Authorization: `Bearer ${storedToken}` }
+        });
       if (profileRes.ok) {
         const profile = await profileRes.json();
         setClaimedRewards(profile.claimedRewards ?? []);

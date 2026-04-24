@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Sparkles, Loader2, User, Bot, X, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { API_URL } from "@/config";
 import { useAuth } from "@/hooks/useAuth";
 
 export function MiniAIChat() {
@@ -30,7 +31,7 @@ export function MiniAIChat() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/ai-coach/chat", {
+      const res = await fetch(`${API_URL}/api/ai-coach/chat`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json", 

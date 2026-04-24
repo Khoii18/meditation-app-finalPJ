@@ -5,6 +5,7 @@ import { Play, Loader2, Sparkles, Clock, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { API_URL } from "@/config";
 
 export function ContinueJourney() {
   const router = useRouter();
@@ -19,7 +20,7 @@ export function ContinueJourney() {
         return;
       }
       try {
-        const res = await fetch(`http://localhost:5000/api/content/${user.activePlan}`, {
+        const res = await fetch(`${API_URL}/api/content/${user.activePlan}`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {

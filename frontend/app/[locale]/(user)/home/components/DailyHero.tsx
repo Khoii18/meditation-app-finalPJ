@@ -4,6 +4,7 @@ import { Play } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { API_URL } from "@/config";
 
 export function DailyHero() {
   const [day, setDay] = useState(1);
@@ -19,7 +20,7 @@ export function DailyHero() {
           return;
         }
 
-        const userRes = await fetch("http://localhost:5000/api/users/me", {
+        const userRes = await fetch(`${API_URL}/api/users/me`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
 
@@ -33,7 +34,7 @@ export function DailyHero() {
           setDay(currentDay);
 
           // Fetch admin recommendation for this day
-          const recRes = await fetch("http://localhost:5000/api/recommendations");
+          const recRes = await fetch(`${API_URL}/api/recommendations`);
           if (recRes.ok) {
             const recs = await recRes.json();
             const todayRec = recs.find((r: any) => r.day === currentDay);
