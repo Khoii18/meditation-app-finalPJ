@@ -134,6 +134,20 @@ export const getMyMemberStats = async (req, res) => {
   }
 };
 
+// ─── Coach: Get detailed list of members ──────────────────────────────────────
+export const getMyMembers = async (req, res) => {
+  try {
+    const coachId = req.user.id;
+    const subs = await Subscription.find({ coachId })
+      .populate("userId", "name email avatar stats")
+      .sort({ createdAt: -1 });
+    
+    res.json(subs);
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};
+
 // ─── Coach: Update my coach profile ──────────────────────────────────────────
 export const updateCoachProfile = async (req, res) => {
   try {

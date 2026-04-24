@@ -27,7 +27,7 @@ export function Header() {
       <div>
         <p className="text-xs font-semibold tracking-widest uppercase text-teal-500 mb-1">{greeting}</p>
         <h1 className="text-2xl md:text-3xl font-serif font-medium text-foreground leading-tight">
-          {userName ? `Welcome back, ${userName.split(" ")[0]}` : "Welcome to Oasis"}
+          {userName ? `Welcome back, ${userName.split(" ")[0]}` : "Welcome to Lunaria"}
         </h1>
         <p className="text-sm text-muted mt-1">
           {userName ? "Ready for today's session?" : "Sign in to track your journey"}

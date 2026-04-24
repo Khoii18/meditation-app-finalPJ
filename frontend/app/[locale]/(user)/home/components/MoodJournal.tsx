@@ -22,7 +22,7 @@ export function MoodJournal() {
   const [saved, setSaved] = useState(false);
 
   const handleSelect = (id: string) => {
-    setSelected(id);
+    setSelected(prev => prev === id ? null : id);
     setSaved(false);
   };
 

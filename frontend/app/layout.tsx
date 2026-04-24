@@ -1,15 +1,25 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Lora } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-sans",
-  subsets: ["latin"],
+  subsets: ["latin", "vietnamese"],
+});
+
+const lora = Lora({
+  variable: "--font-serif",
+  subsets: ["latin", "vietnamese"],
 });
 
 export const metadata: Metadata = {
   title: "Lunaria - Meditation & Spiritual Peace",
   description: "Your sacred companion for mindfulness and spiritual growth.",
+  icons: {
+    icon: "/lunaria-logo.svg",
+    shortcut: "/lunaria-logo.svg",
+    apple: "/lunaria-logo.svg",
+  },
 };
 
 export default function RootLayout({
@@ -20,7 +30,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} h-full antialiased`}
+      className={`${inter.variable} ${lora.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>

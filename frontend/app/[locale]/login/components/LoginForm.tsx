@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, Lock, Eye, EyeOff, Loader2, ArrowRight, Wind } from "lucide-react";
 import { motion } from "framer-motion";
@@ -15,7 +15,22 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const QUOTES = [
+    { text: "The present moment is the only moment available to us, and it is the door to all moments.", author: "Thich Nhat Hanh" },
+    { text: "Mindfulness isn't difficult, we just need to remember to do it.", author: "Sharon Salzberg" },
+    { text: "Quiet the mind and the soul will speak.", author: "Ma Jaya Sati Bhagavati" },
+    { text: "Meditation is not evasion; it is a serene encounter with reality.", author: "Thich Nhat Hanh" },
+    { text: "The soul always knows what to do to heal itself. The challenge is to silence the mind.", author: "Caroline Myss" },
+    { text: "Peace comes from within. Do not seek it without.", author: "Buddha" }
+  ];
+
+  const [quote, setQuote] = useState(QUOTES[0]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const randomQuote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+    setQuote(randomQuote);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,19 +96,23 @@ export function LoginForm() {
             transition={{ delay: 0.5, duration: 1.2 }}
           >
             <Wind className="w-10 h-10 text-indigo-400/80 mx-auto mb-8" strokeWidth={1} />
-            <p className="text-white/90 text-2xl font-serif leading-relaxed italic mb-6">
-              "The present moment is the only moment available to us, and it is the door to all moments."
+            <p className="text-white text-[28px] font-serif leading-relaxed italic mb-6 drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
+              "{quote.text}"
             </p>
-            <p className="text-white/40 text-sm tracking-widest uppercase">— Thich Nhat Hanh</p>
+            <p className="text-white/70 text-[10px] tracking-[0.3em] uppercase font-black">— {quote.author}</p>
           </motion.div>
         </div>
 
-        {/* Oasis branding */}
-        <div className="absolute bottom-10 left-0 right-0 flex justify-center">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 shadow-lg" />
-            <span className="text-white/60 font-serif text-lg">Oasis</span>
-          </div>
+        {/* Lunaria branding */}
+        <div className="hidden lg:flex absolute top-12 left-12 items-center gap-3 z-20">
+          <motion.img 
+            src="/lunaria-logo.svg" 
+            alt="Logo" 
+            className="w-10 h-10"
+            animate={{ rotate: [-3, 3, -3] }}
+            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+          />
+          <span className="text-white font-serif text-xl tracking-wide">Lunaria</span>
         </div>
       </div>
 
@@ -119,9 +138,15 @@ export function LoginForm() {
           className="relative z-10 w-full max-w-sm"
         >
           {/* Logo mobile */}
-          <div className="flex items-center gap-2 mb-10 lg:hidden">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500" />
-            <span className="text-white font-serif text-xl">Oasis</span>
+          <div className="flex items-center gap-3 mb-10 lg:hidden">
+            <motion.img 
+              src="/lunaria-logo.svg" 
+              alt="Logo" 
+              className="w-10 h-10"
+              animate={{ rotate: [-3, 3, -3] }}
+              transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+            />
+            <span className="text-white font-serif text-3xl font-medium">Lunaria</span>
           </div>
 
           {/* Heading */}
@@ -220,7 +245,7 @@ export function LoginForm() {
           {/* Footer links */}
           <div className="mt-8 flex flex-col items-center gap-3">
             <p className="text-white/30 text-sm">
-              New to Oasis?{" "}
+              New to Lunaria?{" "}
               <Link href="./register" className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
                 Create account
               </Link>

@@ -12,11 +12,9 @@ export default function AdminLayout({
       {/* Admin Sidebar */}
       <aside className="w-64 border-r border-teal-100 hidden md:flex flex-col bg-white">
         <div className="p-6">
-          <Link href="./../../home" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center shadow-sm shadow-teal-500/20">
-              <span className="text-white font-serif font-bold text-lg leading-none">O</span>
-            </div>
-            <span className="font-serif font-bold text-xl tracking-wide text-slate-800">Oasis<span className="text-teal-600">CMS</span></span>
+          <Link href="./../../home" className="flex items-center gap-3">
+            <img src="/lunaria-logo.svg" alt="" className="w-8 h-8" />
+            <span className="font-serif font-medium text-xl tracking-wide text-slate-800">Lunaria<span className="text-[#8B5CF6]">CMS</span></span>
           </Link>
         </div>
         

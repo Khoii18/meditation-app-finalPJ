@@ -2,7 +2,7 @@ import express from "express";
 import {
   getCoaches, getCoachById,
   subscribe, unsubscribe, getMySubscriptions,
-  getMyMemberStats, updateCoachProfile
+  getMyMemberStats, getMyMembers, updateCoachProfile
 } from "../controllers/subscription.controller.js";
 import { verifyToken, verifyAdminOrCoach } from "../middleware/auth.js";
 import Subscription from "../models/subscription.model.js";
@@ -32,7 +32,11 @@ router.get("/status", verifyToken, async (req, res) => {
     
     console.log(`[SUBS_STATUS] User: ${user.email}, isPremium: ${user.premiumStatus?.isPremium}, subs: ${subs.length}, hasPremium: ${hasPremium}`);
     
-    res.json({ hasPremium, subscribedCoachIds });
+    res.json({ 
+      hasPremium, 
+      subscribedCoachIds,
+      purchasedPackageIds: user.purchasedPackages || []
+    });
   } catch (err) {
     res.status(500).json(err.message);
   }
@@ -45,6 +49,7 @@ router.get("/my-subscriptions",  verifyToken, getMySubscriptions);
 
 // Coach: their own member analytics & profile
 router.get("/my-members",        verifyAdminOrCoach, getMyMemberStats);
+router.get("/my-members/list",   verifyAdminOrCoach, getMyMembers);
 router.put("/my-profile",        verifyAdminOrCoach, updateCoachProfile);
 
 export default router;

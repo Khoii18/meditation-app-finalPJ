@@ -6,6 +6,7 @@ import { CoachTable } from "../components/CoachTable";
 import { CoachFormModal } from "../components/CoachFormModal";
 import { CoachMyPackages } from "../components/CoachMyPackages";
 import { CoachProfileEditor } from "../components/CoachProfileEditor";
+import { CoachMembers } from "../components/CoachMembers";
 import { useSearchParams } from "next/navigation";
 
 function CoachPageContent() {
@@ -37,7 +38,7 @@ function CoachPageContent() {
     try {
       const endpoint = "/api/content";
       const currentToken = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const res = await fetch(`http://localhost:5000${endpoint}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${endpoint}`, {
         headers: currentToken ? { "Authorization": `Bearer ${currentToken}` } : {}
       });
       const json = await res.json();
@@ -55,7 +56,7 @@ function CoachPageContent() {
     if (!confirm("Are you sure?")) return;
     try {
       const endpoint = `/api/content/${id}`;
-      await fetch(`http://localhost:5000${endpoint}`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${endpoint}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -69,7 +70,7 @@ function CoachPageContent() {
     e.preventDefault();
     const endpoint = "/api/content";
     const method = formData._id ? "PUT" : "POST";
-    const url = formData._id ? `http://localhost:5000${endpoint}/${formData._id}` : `http://localhost:5000${endpoint}`;
+    const url = formData._id ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${endpoint}/${formData._id}` : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${endpoint}`;
 
     try {
       await fetch(url, {
@@ -109,23 +110,15 @@ function CoachPageContent() {
         <header className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-serif font-bold text-slate-800">Coach Dashboard</h1>
-            <p className="text-slate-500 mt-1">Hello {user?.name}! Manage your meditation courses.</p>
+            <p className="text-slate-500 mt-1">Hello {user?.name}! Manage your students and course packages.</p>
           </div>
-          {activeTab !== "packages" && activeTab !== "profile" && activeTab !== "settings" && (
-            <button 
-              onClick={() => { setFormData({}); setShowModal(true); }}
-              className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-semibold transition-all shadow-sm shadow-teal-500/20"
-            >
-              <Plus className="w-5 h-5" /> Add New
-            </button>
-          )}
         </header>
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-6 border-b border-teal-50 pb-0">
+        <div className="flex gap-4 mb-8 border-b border-teal-50/50 pb-0">
           {[
-            { key: "content", label: "My Meditations" },
             { key: "packages", label: "My Packages" },
+            { key: "members", label: "My Students" },
             { key: "profile", label: "My Profile" },
           ].map((tab) => (
             <button
@@ -133,7 +126,7 @@ function CoachPageContent() {
               onClick={() => setActiveTab(tab.key)}
               className={`px-4 py-4 font-bold text-xs uppercase tracking-widest transition-all border-b-2 ${
                 activeTab === tab.key
-                  ? "text-teal-700 border-teal-600 bg-teal-50/50"
+                  ? "text-teal-700 border-teal-600 bg-teal-50/30"
                   : "text-slate-400 border-transparent hover:text-slate-600 hover:bg-slate-50"
               }`}
             >
@@ -147,13 +140,12 @@ function CoachPageContent() {
           <CoachProfileEditor token={token || ""} />
         ) : activeTab === "packages" ? (
           <CoachMyPackages token={token || ""} />
+        ) : activeTab === "members" ? (
+          <CoachMembers token={token || ""} />
         ) : (
-          <CoachTable 
-            data={data}
-            activeTab={activeTab}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
+          <div className="py-20 text-center text-slate-400">
+            Select a tab to manage your academy.
+          </div>
         )}
       </div>
 

@@ -6,10 +6,10 @@ export function CoachTable({ data, activeTab, onEdit, onDelete }: { data: any[],
       <table className="w-full text-left">
         <thead>
           <tr className="border-b border-teal-50">
-            <th className="py-4 font-bold text-[11px] uppercase tracking-widest text-slate-400">Title</th>
-            <th className="py-4 font-bold text-[11px] uppercase tracking-widest text-slate-400">{activeTab === 'content' ? 'Image / Category' : 'Instructor'}</th>
-            <th className="py-4 font-bold text-[11px] uppercase tracking-widest text-slate-400">{activeTab === 'content' ? 'Duration' : 'Time'}</th>
-            <th className="py-4 font-bold text-[11px] uppercase tracking-widest text-slate-400 text-right">Actions</th>
+            <th className="py-4 font-bold text-[11px] uppercase tracking-widest text-slate-400">Meditation Essence</th>
+            <th className="py-4 font-bold text-[11px] uppercase tracking-widest text-slate-400">{activeTab === 'content' ? 'Visual Anchor' : 'Guiding Soul'}</th>
+            <th className="py-4 font-bold text-[11px] uppercase tracking-widest text-slate-400">{activeTab === 'content' ? 'Cycle Length' : 'Awakening Time'}</th>
+            <th className="py-4 font-bold text-[11px] uppercase tracking-widest text-slate-400 text-right">Vessel Actions</th>
           </tr>
         </thead>
         <tbody>

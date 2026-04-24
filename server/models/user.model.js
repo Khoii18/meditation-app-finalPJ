@@ -37,6 +37,7 @@ const userSchema = new mongoose.Schema({
     startDate: { type: Date, default: null },
     expiryDate: { type: Date, default: null }
   },
+  purchasedPackages: { type: [String], default: [] },
 
   // Coach-only profile fields
   coachProfile: {

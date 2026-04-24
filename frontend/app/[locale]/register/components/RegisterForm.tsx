@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, Eye, EyeOff, UserCircle, Loader2, ArrowRight, Leaf } from "lucide-react";
 import { motion } from "framer-motion";
@@ -16,6 +16,22 @@ export function RegisterForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState<"user" | "coach">("user");
+
+  const QUOTES = [
+    { text: "Mindfulness isn't difficult. We just need to remember to do it.", author: "Sharon Salzberg" },
+    { text: "The soul always knows what to do to heal itself. The challenge is to silence the mind.", author: "Caroline Myss" },
+    { text: "Quiet the mind and the soul will speak.", author: "Ma Jaya Sati Bhagavati" },
+    { text: "Your goal is not to battle with the mind, but to witness the mind.", author: "Swami Muktananda" },
+    { text: "The act of meditation is being spacious.", author: "Sogyal Rinpoche" },
+    { text: "Peace is a journey of a thousand miles and it must be taken one step at a time.", author: "Lyndon B. Johnson" }
+  ];
+
+  const [quote, setQuote] = useState(QUOTES[0]);
+
+  useEffect(() => {
+    const randomQuote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+    setQuote(randomQuote);
+  }, []);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,16 +81,16 @@ export function RegisterForm() {
           >
             <Leaf className="w-10 h-10 text-emerald-400/80 mx-auto mb-8" strokeWidth={1} />
             <p className="text-white/90 text-2xl font-serif leading-relaxed italic mb-6">
-              "Mindfulness isn't difficult. We just need to remember to do it."
+              "{quote.text}"
             </p>
-            <p className="text-white/40 text-sm tracking-widest uppercase">— Sharon Salzberg</p>
+            <p className="text-white/40 text-sm tracking-widest uppercase">— {quote.author}</p>
           </motion.div>
         </div>
 
         <div className="absolute bottom-10 left-0 right-0 flex justify-center">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 shadow-lg" />
-            <span className="text-white/60 font-serif text-lg">Oasis</span>
+            <span className="text-white/60 font-serif text-lg">Lunaria</span>
           </div>
         </div>
       </div>
@@ -103,7 +119,7 @@ export function RegisterForm() {
           {/* Mobile logo */}
           <div className="flex items-center gap-2 mb-10 lg:hidden">
             <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500" />
-            <span className="text-white font-serif text-xl">Oasis</span>
+            <span className="text-white font-serif text-xl">Lunaria</span>
           </div>
 
           {/* Heading */}

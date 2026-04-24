@@ -73,6 +73,7 @@ app.use("/api/payment", paymentRoute);
 app.use("/api/subscription", subscriptionRoute);
 app.use("/api/recommendations", recommendationRoute);
 import Content from "./models/content.model.js";
+import User from "./models/user.model.js";
 import { seedDatabaseIfNeeded } from "./seedBalance.js";
 
 // CONNECT DB
@@ -81,24 +82,34 @@ mongoose.connect(process.env.MONGO_URI)
     console.log("MongoDB connected");
     await seedDatabaseIfNeeded();
 
-    // FORCE cuong@gmail.com to be premium for testing
+    // FORCE cuong@gmail.com for testing
     try {
-      const User = mongoose.model("User");
-      const cuongUser = await User.findOne({ email: "cuong@gmail.com" });
-      if (cuongUser) {
-        cuongUser.premiumStatus = {
-          isPremium: true,
-          planType: "lifetime",
-          startDate: new Date(),
-          expiryDate: new Date(Date.now() + 365*100*24*60*60*1000)
-        };
-        await cuongUser.save();
-        console.log("✅ SUCCESS: Forced cuong@gmail.com to be Premium Lifetime!");
-      } else {
-        console.log("❌ FAILED: User cuong@gmail.com not found in database.");
+      const email = "cuong@gmail.com";
+      const targetUser = await User.findOne({ email });
+      if (targetUser) {
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Force Premium
+        targetUser.premiumStatus.isPremium = true;
+        targetUser.premiumStatus.planType = "lifetime";
+        targetUser.premiumStatus.startDate = new Date();
+        targetUser.premiumStatus.expiryDate = new Date(Date.now() + 365*100*24*60*60*1000);
+
+        // Force Stats for testing Thriving Tree
+        targetUser.stats.currentStreak = 30;
+        targetUser.stats.longestStreak = 30;
+        targetUser.stats.totalSessions = 50;
+        targetUser.stats.mindfulMinutes = 450;
+        targetUser.stats.lastCheckInDate = today;
+
+        targetUser.markModified('premiumStatus');
+        targetUser.markModified('stats');
+
+        await targetUser.save();
+        console.log(`✅ SUCCESS: Forced ${email} to be Premium & Updated Stats to 30 days!`);
       }
     } catch (err) {
-      console.log("❌ ERROR during force premium script:", err.message);
+      console.log("❌ ERROR during force stats script:", err.message);
     }
   })
   .catch(err => console.log("❌ MongoDB Connection Error:", err));

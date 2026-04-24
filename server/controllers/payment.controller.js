@@ -72,27 +72,37 @@ export const handleSepayWebhook = async (req, res) => {
     transaction.transactionDate = new Date();
     await transaction.save();
 
-    // 2. Tính toán thời hạn gói cước
-    const now = new Date();
-    let expiryDate = new Date();
+    // 2. Xử lý quyền lợi (Subscription hoặc Coach Package)
+    const subscriptionPlans = ["monthly", "annual", "lifetime"];
+    
+    if (subscriptionPlans.includes(transaction.planId)) {
+      const now = new Date();
+      let expiryDate = new Date();
 
-    if (transaction.planId === "monthly") {
-      expiryDate.setDate(now.getDate() + 30);
-    } else if (transaction.planId === "annual") {
-      expiryDate.setDate(now.getDate() + 365);
-    } else if (transaction.planId === "lifetime") {
-      expiryDate.setFullYear(now.getFullYear() + 99); // 99 năm coi như trọn đời
-    }
-
-    // 3. Cập nhật User
-    await User.findByIdAndUpdate(transaction.userId, {
-      $set: {
-        "premiumStatus.isPremium": true,
-        "premiumStatus.planType": transaction.planId,
-        "premiumStatus.startDate": now,
-        "premiumStatus.expiryDate": expiryDate
+      if (transaction.planId === "monthly") {
+        expiryDate.setDate(now.getDate() + 30);
+      } else if (transaction.planId === "annual") {
+        expiryDate.setDate(now.getDate() + 365);
+      } else if (transaction.planId === "lifetime") {
+        expiryDate.setFullYear(now.getFullYear() + 99);
       }
-    });
+
+      await User.findByIdAndUpdate(transaction.userId, {
+        $set: {
+          "premiumStatus.isPremium": true,
+          "premiumStatus.planType": transaction.planId,
+          "premiumStatus.startDate": now,
+          "premiumStatus.expiryDate": expiryDate
+        }
+      });
+      console.log(`User ${transaction.userId} upgraded to ${transaction.planId}`);
+    } else {
+      // It's a specific coach package
+      await User.findByIdAndUpdate(transaction.userId, {
+        $addToSet: { purchasedPackages: transaction.planId }
+      });
+      console.log(`User ${transaction.userId} purchased coach package: ${transaction.planId}`);
+    }
 
     console.log(`User ${transaction.userId} upgraded to ${transaction.planId} until ${expiryDate}`);
 
@@ -123,27 +133,28 @@ export const simulatePayment = async (req, res) => {
     transaction.transactionDate = new Date();
     await transaction.save();
 
-    // 2. Tính toán thời hạn gói cước
-    const now = new Date();
-    let expiryDate = new Date();
+    // 2. Xử lý quyền lợi
+    const subscriptionPlans = ["monthly", "annual", "lifetime"];
+    if (subscriptionPlans.includes(transaction.planId)) {
+      const now = new Date();
+      let expiryDate = new Date();
+      if (transaction.planId === "monthly") expiryDate.setDate(now.getDate() + 30);
+      else if (transaction.planId === "annual") expiryDate.setDate(now.getDate() + 365);
+      else if (transaction.planId === "lifetime") expiryDate.setFullYear(now.getFullYear() + 99);
 
-    if (transaction.planId === "monthly") {
-      expiryDate.setDate(now.getDate() + 30);
-    } else if (transaction.planId === "annual") {
-      expiryDate.setDate(now.getDate() + 365);
-    } else if (transaction.planId === "lifetime") {
-      expiryDate.setFullYear(now.getFullYear() + 99);
+      await User.findByIdAndUpdate(transaction.userId, {
+        $set: {
+          "premiumStatus.isPremium": true,
+          "premiumStatus.planType": transaction.planId,
+          "premiumStatus.startDate": now,
+          "premiumStatus.expiryDate": expiryDate
+        }
+      });
+    } else {
+      await User.findByIdAndUpdate(transaction.userId, {
+        $addToSet: { purchasedPackages: transaction.planId }
+      });
     }
-
-    // 3. Cập nhật User
-    await User.findByIdAndUpdate(transaction.userId, {
-      $set: {
-        "premiumStatus.isPremium": true,
-        "premiumStatus.planType": transaction.planId,
-        "premiumStatus.startDate": now,
-        "premiumStatus.expiryDate": expiryDate
-      }
-    });
 
     res.json({ success: true, message: "Payment simulated successfully!" });
   } catch (error) {

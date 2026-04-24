@@ -71,7 +71,11 @@ export function MeditationPlayerUI({ id }: MeditationPlayerUIProps) {
           setLoading(false);
           return;
         }
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/content/${id}`);
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/content/${id}`, {
+          headers: token ? { "Authorization": `Bearer ${token}` } : {}
+        });
+
         if (res.ok) {
           const data = await res.json();
           // Check for lesson index in URL
@@ -90,6 +94,16 @@ export function MeditationPlayerUI({ id }: MeditationPlayerUIProps) {
           } else {
             setContent(data);
           }
+        } else if (res.status === 403) {
+          const errorData = await res.json();
+          setContent({ 
+            title: "Access Restricted", 
+            instructor: "Subscription Required", 
+            duration: "", 
+            isPremium: true, 
+            type: "Locked",
+            description: errorData.message || "Please subscribe to this coach to unlock this content."
+          });
         } else {
           setContent({ title: "Mindful Session", instructor: "Oasis", duration: "10 min", isPremium: false, type: "Meditation" });
         }

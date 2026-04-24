@@ -10,6 +10,7 @@ export interface AuthUser {
   role: "user" | "admin" | "coach";
   avatar?: string;
   claimedRewards?: string[];
+  purchasedPackageIds?: string[];
   premiumStatus?: {
     isPremium: boolean;
     planType: string;
@@ -52,6 +53,7 @@ export interface AuthState {
   isLoggedIn: boolean;
   isPaid: boolean;
   subscribedCoachIds: string[];
+  purchasedPackageIds: string[];
   claimedRewards: string[];
   isLoading: boolean;
   refetch: () => void;
@@ -62,6 +64,7 @@ export function useAuth(): AuthState {
   const [token, setToken] = useState<string | null>(null);
   const [isPaid, setIsPaid] = useState(false);
   const [subscribedCoachIds, setSubscribedCoachIds] = useState<string[]>([]);
+  const [purchasedPackageIds, setPurchasedPackageIds] = useState<string[]>([]);
   const [claimedRewards, setClaimedRewards] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -80,6 +83,7 @@ export function useAuth(): AuthState {
           
           setIsPaid(data.hasPremium || isCuong || false);
           setSubscribedCoachIds(data.subscribedCoachIds ?? []);
+          setPurchasedPackageIds(data.purchasedPackageIds ?? []);
         } else {
           console.error("FETCH STATUS FAILED:", res.status, await res.text());
         }
@@ -139,6 +143,7 @@ export function useAuth(): AuthState {
     isLoggedIn: !!user,
     isPaid,
     subscribedCoachIds,
+    purchasedPackageIds,
     claimedRewards,
     isLoading,
     refetch: init

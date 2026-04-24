@@ -26,22 +26,36 @@ export function DailyHero() {
 
         if (userRes.ok) {
           const userData = await userRes.json();
-          // Calculate day based on account creation date (max 30 days)
-          // Fallback to now if createdAt is missing
-          const createdAtStr = userData.createdAt || new Date().toISOString();
-          const created = new Date(createdAtStr).getTime();
-          const now = new Date().getTime();
-          const diffDays = Math.floor((now - created) / (1000 * 60 * 60 * 24)) + 1;
-          const currentDay = isNaN(diffDays) ? 1 : Math.min(Math.max(diffDays, 1), 30);
+
+          const currentStreak = userData.stats?.currentStreak || 0;
+          const currentDay = Math.min(currentStreak + 1, 30);
           setDay(currentDay);
 
-          // Fetch admin recommendation for this day
-          const recRes = await fetch(`${API_URL}/api/recommendations`);
-          if (recRes.ok) {
-            const recs = await recRes.json();
-            const todayRec = recs.find((r: any) => r.day === currentDay);
-            if (todayRec) {
-              setSuggestion(todayRec);
+          if (userData.activePlan && userData.activePlan.lessons) {
+            const plan = userData.activePlan;
+            const lessonIndex = currentDay - 1;
+            const lesson = plan.lessons[lessonIndex] || plan.lessons[0];
+            
+              setSuggestion({
+                title: lesson.title,
+                planTitle: plan.title,
+                note: lesson.description || plan.description,
+                contentId: {
+                  _id: plan._id,
+                  image: plan.image,
+                  duration: lesson.duration || plan.duration
+                },
+                lessonIndex: lessonIndex
+              });
+          } else {
+            // Fallback to admin recommendations
+            const recRes = await fetch(`${API_URL}/api/recommendations`);
+            if (recRes.ok) {
+              const recs = await recRes.json();
+              const todayRec = recs.find((r: any) => r.day === currentDay);
+              if (todayRec) {
+                setSuggestion(todayRec);
+              }
             }
           }
         }
@@ -50,9 +64,11 @@ export function DailyHero() {
     fetchData();
   }, []);
 
-  const title = suggestion ? (suggestion.contentId?.title || suggestion.title) : "Starting Your Journey";
+  const title = suggestion ? (suggestion.title || suggestion.contentId?.title) : "Starting Your Journey";
   const note = suggestion?.note || "A mindful start to your day.";
-  const linkHref = suggestion?.contentId ? `./play/${suggestion.contentId._id}` : "./journey";
+  const linkHref = suggestion?.contentId 
+    ? `./play/${suggestion.contentId._id}${suggestion.lessonIndex !== undefined ? `?lessonIndex=${suggestion.lessonIndex}` : ""}`
+    : "./journey";
   const bgImage = suggestion?.contentId?.image || "https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=1200&auto=format&fit=crop";
 
   return (
@@ -78,7 +94,7 @@ export function DailyHero() {
           <div className="relative z-10 h-[300px] flex flex-col justify-between p-8">
             <div className="space-y-4">
               <span className="px-3 py-1 rounded-full bg-teal-500/20 backdrop-blur-md border border-teal-500/30 text-teal-400 text-[9px] font-black uppercase tracking-widest shadow-lg">
-                Day {day} of 30 • Morning Path
+                Day {day} of 30 • {suggestion?.planTitle || "Morning Path"}
               </span>
               
               <div className="max-w-xl">
@@ -91,10 +107,14 @@ export function DailyHero() {
               </div>
 
               <div className="flex items-center gap-4">
-                <button className="flex items-center gap-2 bg-white text-black px-6 py-3 rounded-xl font-black text-xs transition-all hover:scale-105 active:scale-95 shadow-xl">
+                <motion.button 
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                  className="flex items-center gap-2 bg-white text-black px-6 py-3 rounded-xl font-black text-xs transition-all hover:scale-105 active:scale-95 shadow-xl"
+                >
                   <Play className="w-4 h-4 fill-black" />
                   START SESSION
-                </button>
+                </motion.button>
                 {suggestion?.contentId?.duration && (
                   <span className="text-white/60 text-[10px] font-bold uppercase tracking-widest">
                     {suggestion.contentId.duration}

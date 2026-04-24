@@ -9,6 +9,7 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { motion } from "framer-motion";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -32,13 +33,14 @@ export function Sidebar() {
 
       {/* Brand Logo - Elegant & Minimal */}
       <div className="flex items-center gap-3 mb-10 px-2 cursor-pointer group" onClick={() => router.push(`/${locale}/home`)}>
-        <div className="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center shadow-lg shadow-teal-600/20 group-hover:scale-105 transition-transform duration-300">
-           <Flower2 className="text-white w-5 h-5" />
-        </div>
-        <div className="flex flex-col">
-          <span className="font-serif font-bold text-xl tracking-tight text-foreground">Lunaria</span>
-          <span className="text-[7px] uppercase font-black tracking-[0.3em] text-teal-600 mt-0.5 opacity-60">Divine Grace</span>
-        </div>
+        <motion.img 
+          src="/lunaria-logo.svg" 
+          alt="Lunaria" 
+          className="w-10 h-10 group-hover:scale-110 transition-transform duration-300"
+          animate={{ y: [0, -3, 0] }}
+          transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+        />
+        <span className="font-serif font-medium text-2xl tracking-tight text-foreground">Lunaria</span>
       </div>
 
       {/* Navigation */}
@@ -93,7 +95,7 @@ export function Sidebar() {
           <div className="space-y-4">
             <div className="flex items-center gap-3 px-3 py-3 rounded-2xl bg-background/50 border border-border">
               <div className="relative">
-                <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center text-white font-bold text-xs">
+                <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-xs">
                   {user?.name?.[0]?.toUpperCase() || "U"}
                 </div>
                 {user?.premiumStatus?.isPremium && (
