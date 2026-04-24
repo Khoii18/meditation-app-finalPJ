@@ -36,9 +36,26 @@ export function OnboardingModal() {
     }
   }, []);
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (token && experience) {
+        await fetch("http://localhost:5000/api/users/me/onboard", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ goals: selectedGoals, experience })
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
     localStorage.setItem("oasis_onboarded", "true");
     setIsOpen(false);
+    // Reload the page to reflect the new personalized plan!
+    window.location.reload();
   };
 
   const toggleGoal = (id: string) => {

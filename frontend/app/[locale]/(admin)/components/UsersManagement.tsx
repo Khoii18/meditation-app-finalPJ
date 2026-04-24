@@ -32,6 +32,12 @@ interface UserData {
     mindfulMinutes: number;
     lastCheckInDate: string | null;
   };
+  premiumStatus?: {
+    isPremium: boolean;
+    planType: string;
+    startDate: string;
+    expiryDate: string;
+  };
 }
 
 interface Checkin {
@@ -48,9 +54,10 @@ interface UserDetailProps {
   onClose: () => void;
   onRoleChange: (id: string, role: string) => void;
   onDelete: (id: string) => void;
+  onGrantPremium: (id: string) => void;
 }
 
-function UserDetailModal({ user, token, onClose, onRoleChange, onDelete }: UserDetailProps) {
+function UserDetailModal({ user, token, onClose, onRoleChange, onDelete, onGrantPremium }: UserDetailProps) {
   const [checkins, setCheckins] = useState<Checkin[]>([]);
   const [loading, setLoading] = useState(true);
   const [roleDropdown, setRoleDropdown] = useState(false);
@@ -104,15 +111,15 @@ function UserDetailModal({ user, token, onClose, onRoleChange, onDelete }: UserD
 
         {/* Tabs (only if coach) */}
         {isCoach && (
-          <div className="flex gap-1 px-6 pt-4 border-b border-white/5">
+          <div className="flex gap-1 px-8 pt-4 border-b border-slate-100">
             {(["stats", "packages"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setDetailTab(t)}
-                className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                className={`px-4 py-3 text-[13px] font-bold tracking-wide uppercase transition-colors ${
                   detailTab === t
-                    ? "text-indigo-400 border-b-2 border-indigo-500"
-                    : "text-slate-500 hover:text-slate-300"
+                    ? "text-teal-600 border-b-2 border-teal-500"
+                    : "text-slate-400 hover:text-slate-600"
                 }`}
               >
                 {t === "stats" ? "Stats & History" : `Packages (${coachPlans.length})`}
@@ -121,12 +128,12 @@ function UserDetailModal({ user, token, onClose, onRoleChange, onDelete }: UserD
           </div>
         )}
 
-        <div className="p-6 space-y-6">
+        <div className="p-8 space-y-8">
           {/* PACKAGES TAB (Coach only) */}
           {isCoach && detailTab === "packages" ? (
             <div>
               {coachPlans.length === 0 ? (
-                <div className="text-center py-12 text-slate-500 text-sm bg-white/5 rounded-2xl">
+                <div className="text-center py-12 text-slate-400 font-medium text-sm bg-slate-50 border border-slate-100 rounded-3xl">
                   This coach hasn't created any packages yet.
                 </div>
               ) : (
@@ -134,26 +141,26 @@ function UserDetailModal({ user, token, onClose, onRoleChange, onDelete }: UserD
                   {coachPlans.map((plan: any, i: number) => (
                     <div
                       key={i}
-                      className={`relative rounded-2xl p-5 border ${
+                      className={`relative rounded-3xl p-6 border transition-all ${
                         plan.highlighted
-                          ? "bg-gradient-to-br from-indigo-600/20 to-violet-600/10 border-indigo-500/30"
-                          : "bg-white/5 border-white/10"
+                          ? "bg-gradient-to-br from-teal-50/50 to-emerald-50/50 border-teal-200 shadow-sm"
+                          : "bg-white border-slate-100 hover:border-teal-100"
                       }`}
                     >
                       {plan.highlighted && (
-                        <span className="absolute -top-2.5 left-4 bg-gradient-to-r from-indigo-500 to-violet-500 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-0.5 rounded-full">
-                          Popular
-                        </span>
+                         <span className="absolute -top-3 left-6 bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-[10px] font-bold uppercase tracking-widest px-4 py-1 rounded-full shadow-sm">
+                           Popular
+                         </span>
                       )}
-                      <h4 className="text-white font-semibold mb-1">{plan.name}</h4>
-                      <p className="text-indigo-300 text-sm mb-3">
+                      <h4 className="text-slate-800 font-bold mb-1.5">{plan.name}</h4>
+                      <p className="text-teal-600 font-semibold text-sm mb-4">
                         {plan.price === 0 ? "Free" : `${plan.price} ${plan.currency} / ${plan.period}`}
                       </p>
                       {(plan.features || []).length > 0 && (
-                        <ul className="space-y-1">
+                        <ul className="space-y-2">
                           {plan.features.map((f: string, fi: number) => (
-                            <li key={fi} className="flex items-center gap-2 text-xs text-slate-400">
-                              <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" /> {f}
+                            <li key={fi} className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                              <CheckCircle2 className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" /> {f}
                             </li>
                           ))}
                         </ul>
@@ -166,94 +173,140 @@ function UserDetailModal({ user, token, onClose, onRoleChange, onDelete }: UserD
           ) : (
             <>
               {/* Stats grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {[
-                  { label: "Current Streak", value: stats.currentStreak, unit: "days", icon: Flame, color: "text-orange-400" },
-                  { label: "Best Streak",    value: stats.longestStreak, unit: "days", icon: TrendingUp, color: "text-violet-400" },
-                  { label: "Sessions",       value: stats.totalSessions, unit: "total", icon: Activity, color: "text-indigo-400" },
-                  { label: "Mindful Min.",   value: stats.mindfulMinutes, unit: "min", icon: Clock, color: "text-emerald-400" },
+                  { label: "Current Streak", value: stats.currentStreak, unit: "days", icon: Flame, color: "text-orange-500", bg: "bg-orange-50" },
+                  { label: "Best Streak",    value: stats.longestStreak, unit: "days", icon: TrendingUp, color: "text-violet-500", bg: "bg-violet-50" },
+                  { label: "Sessions",       value: stats.totalSessions, unit: "total", icon: Activity, color: "text-indigo-500", bg: "bg-indigo-50" },
+                  { label: "Mindful Min.",   value: stats.mindfulMinutes, unit: "min", icon: Clock, color: "text-emerald-500", bg: "bg-emerald-50" },
                 ].map((s, i) => (
-                  <div key={i} className="bg-white/5 border border-white/5 rounded-2xl p-4">
-                    <s.icon className={`w-4 h-4 ${s.color} mb-2`} />
-                    <p className="text-2xl font-bold text-white">{s.value ?? 0}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">{s.label}</p>
+                  <div key={i} className="bg-white border border-slate-100 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div className={`w-10 h-10 rounded-2xl ${s.bg} flex items-center justify-center mb-4`}>
+                       <s.icon className={`w-5 h-5 ${s.color}`} />
+                    </div>
+                    <p className="text-3xl font-bold text-slate-800">{s.value ?? 0}</p>
+                    <p className="text-[11px] font-bold tracking-widest uppercase text-slate-400 mt-1">{s.label}</p>
                   </div>
                 ))}
               </div>
 
-              {/* Last checkin */}
-              {stats.lastCheckInDate && (
-                <div className="flex items-center gap-2 text-sm text-slate-400 bg-white/5 rounded-xl px-4 py-3">
-                  <CalendarCheck className="w-4 h-4 text-emerald-400" />
-                  Last check-in: <span className="text-white font-medium ml-1">{stats.lastCheckInDate}</span>
+              {/* Role management & Last Check-in combined row */}
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex-1 bg-slate-50 border border-slate-100 rounded-3xl p-5 flex items-center justify-between">
+                  <div>
+                     <p className="text-[11px] text-slate-400 uppercase tracking-widest mb-1.5 font-bold">User Role</p>
+                     <div className="relative inline-block">
+                       <button
+                         onClick={() => setRoleDropdown(!roleDropdown)}
+                         className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl border text-[13px] font-bold uppercase tracking-wider ${ROLE_STYLES[user.role] || ROLE_STYLES.user}`}
+                       >
+                         {user.role}
+                         <ChevronDown className="w-4 h-4 ml-1 opacity-50" />
+                       </button>
+                       <AnimatePresence>
+                         {roleDropdown && (
+                           <motion.div
+                             initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }}
+                             className="absolute top-full left-0 mt-2 bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-xl z-20 w-40"
+                           >
+                             {["user", "coach", "admin"].map(r => (
+                               <button
+                                 key={r}
+                                 onClick={() => { onRoleChange(user._id, r); setRoleDropdown(false); }}
+                                 className={`w-full text-left px-5 py-3 text-[13px] font-bold uppercase tracking-wider hover:bg-slate-50 transition-colors flex items-center gap-2 ${user.role === r ? "text-teal-600 bg-teal-50/50" : "text-slate-500"}`}
+                               >
+                                 {r}
+                                 {user.role === r && <span className="ml-auto text-teal-600">✓</span>}
+                               </button>
+                             ))}
+                           </motion.div>
+                         )}
+                       </AnimatePresence>
+                     </div>
+                  </div>
                 </div>
-              )}
 
-              {/* Role management */}
-              <div className="bg-white/5 border border-white/5 rounded-2xl p-4">
-                <p className="text-xs text-slate-500 uppercase tracking-widest mb-3 font-semibold">Role</p>
-                <div className="relative inline-block">
-                  <button
-                    onClick={() => setRoleDropdown(!roleDropdown)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium ${ROLE_STYLES[user.role] || ROLE_STYLES.user}`}
-                  >
-                    {user.role}
-                    <ChevronDown className="w-3 h-3" />
-                  </button>
-                  <AnimatePresence>
-                    {roleDropdown && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }}
-                        className="absolute top-full left-0 mt-1 bg-[#1a1a22] border border-white/10 rounded-xl overflow-hidden shadow-xl z-20 w-36"
-                      >
-                        {["user", "coach", "admin"].map(r => (
-                          <button
-                            key={r}
-                            onClick={() => { onRoleChange(user._id, r); setRoleDropdown(false); }}
-                            className={`w-full text-left px-4 py-2.5 text-sm hover:bg-white/5 transition-colors flex items-center gap-2 ${user.role === r ? "text-white font-medium" : "text-slate-400"}`}
-                          >
-                            {r}
-                            {user.role === r && <span className="ml-auto text-violet-400">✓</span>}
-                          </button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                {stats.lastCheckInDate && (
+                  <div className="flex-1 bg-emerald-50/50 border border-emerald-100 rounded-3xl p-5 flex flex-col justify-center">
+                    <p className="text-[11px] text-emerald-600/70 uppercase tracking-widest mb-1.5 font-bold">Last Check-in</p>
+                    <div className="flex items-center gap-2 text-emerald-700 font-semibold">
+                      <CalendarCheck className="w-5 h-5" />
+                      {stats.lastCheckInDate}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Premium Status */}
+              <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
+                <p className="text-[11px] text-slate-400 uppercase tracking-widest mb-5 font-bold flex items-center gap-2">
+                  <Trophy className="w-4 h-4" /> Subscription Status
+                </p>
+                {user.premiumStatus?.isPremium ? (
+                  <div className="flex items-center gap-4 bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-100 rounded-2xl px-5 py-4">
+                    <div className="w-10 h-10 rounded-full bg-violet-500 flex items-center justify-center text-white shrink-0 shadow-sm">
+                      <Trophy className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-violet-900 font-bold text-sm uppercase tracking-wider">{user.premiumStatus.planType} Plan</p>
+                      <p className="text-violet-600/80 text-xs mt-0.5">
+                        Active until: {new Date(user.premiumStatus.expiryDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-4 bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 justify-between">
+                     <div className="flex items-center gap-4">
+                       <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 shrink-0">
+                        <User className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-slate-600 font-bold text-sm">Free User</p>
+                        <p className="text-slate-400 text-xs mt-0.5">No active platform subscription.</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => onGrantPremium(user._id)}
+                      className="bg-violet-600 hover:bg-violet-700 text-white text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-xl transition-colors shadow-sm shadow-violet-500/20"
+                    >
+                      Grant Premium
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Checkin history */}
-              <div>
-                <p className="text-xs text-slate-500 uppercase tracking-widest mb-3 font-semibold flex items-center gap-2">
-                  <CalendarCheck className="w-4 h-4" /> Check-in History (last 30)
+              <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
+                <p className="text-[11px] text-slate-400 uppercase tracking-widest mb-5 font-bold flex items-center gap-2">
+                  <CalendarCheck className="w-4 h-4" /> Check-in History (Last 30)
                 </p>
                 {loading ? (
-                  <div className="text-slate-500 text-sm text-center py-6">Loading...</div>
+                  <div className="text-slate-400 font-medium text-sm text-center py-8">Loading records...</div>
                 ) : checkins.length === 0 ? (
-                  <div className="text-center py-8 text-slate-500 text-sm bg-white/5 rounded-2xl">
-                    No check-ins recorded yet
+                  <div className="text-center py-10 text-slate-400 font-medium text-sm bg-slate-50 rounded-2xl border border-slate-100 border-dashed">
+                    No check-ins recorded yet.
                   </div>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {checkins.map((c, i) => (
-                      <div key={i} className="flex items-center gap-3 bg-white/[0.03] border border-white/5 rounded-xl px-4 py-3">
-                        <span className="text-xs font-mono text-slate-500 w-24 flex-shrink-0">{c.date}</span>
+                      <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-4 bg-white border border-slate-100 hover:border-teal-200 transition-colors rounded-2xl px-5 py-4">
+                        <span className="text-sm font-semibold text-slate-700 w-28 flex-shrink-0">{c.date}</span>
                         <div className="flex items-center gap-3 flex-1 flex-wrap">
                           {c.sleep && (
-                            <span className="flex items-center gap-1 text-xs bg-slate-800 rounded-full px-3 py-1">
-                              <Moon className="w-3 h-3 text-indigo-400" />
-                              {EMOJI_MAP[c.sleep] || "—"} {c.sleep}
+                            <span className="flex items-center gap-1.5 text-[12px] font-bold bg-indigo-50 text-indigo-700 rounded-xl px-3 py-1.5 border border-indigo-100">
+                              <Moon className="w-3.5 h-3.5" />
+                              {EMOJI_MAP[c.sleep] || "—"} <span className="capitalize">{c.sleep}</span>
                             </span>
                           )}
                           {c.energy && (
-                            <span className="flex items-center gap-1 text-xs bg-slate-800 rounded-full px-3 py-1">
-                              <Zap className="w-3 h-3 text-yellow-400" />
-                              {EMOJI_MAP[c.energy] || "—"} {c.energy}
+                            <span className="flex items-center gap-1.5 text-[12px] font-bold bg-amber-50 text-amber-700 rounded-xl px-3 py-1.5 border border-amber-100">
+                              <Zap className="w-3.5 h-3.5" />
+                              {EMOJI_MAP[c.energy] || "—"} <span className="capitalize">{c.energy}</span>
                             </span>
                           )}
                           {c.goal && (
-                            <span className="flex items-center gap-1 text-xs bg-slate-800 rounded-full px-3 py-1">
-                              <Target className="w-3 h-3 text-emerald-400" />
+                            <span className="flex items-center gap-1.5 text-[12px] font-bold bg-teal-50 text-teal-700 rounded-xl px-3 py-1.5 border border-teal-100">
+                              <Target className="w-3.5 h-3.5" />
                               {c.goal.length > 30 ? c.goal.slice(0, 30) + "…" : c.goal}
                             </span>
                           )}
@@ -265,11 +318,11 @@ function UserDetailModal({ user, token, onClose, onRoleChange, onDelete }: UserD
               </div>
 
               {/* Danger zone */}
-              <div className="border border-rose-500/20 rounded-2xl p-4 bg-rose-500/5">
-                <p className="text-xs text-rose-400 font-semibold mb-3 uppercase tracking-widest">Danger Zone</p>
+              <div className="border border-rose-200 rounded-3xl p-5 bg-rose-50/50 mt-4">
+                <p className="text-[11px] text-rose-500 font-bold mb-3 uppercase tracking-widest">Danger Zone</p>
                 <button
                   onClick={() => { if (confirm(`Delete user "${user.name}"? This cannot be undone.`)) onDelete(user._id); }}
-                  className="flex items-center gap-2 text-sm text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 px-4 py-2 rounded-xl transition-all"
+                  className="flex items-center gap-2 text-sm font-semibold text-rose-600 hover:text-white hover:bg-rose-500 px-5 py-2.5 rounded-xl transition-colors border border-rose-200 hover:border-rose-500"
                 >
                   <Trash2 className="w-4 h-4" /> Delete this user & all data
                 </button>
@@ -323,6 +376,26 @@ export function UsersManagement({ token }: { token: string }) {
     });
     setUsers(prev => prev.filter(u => u._id !== id));
     setSelected(null);
+  };
+
+  const handleGrantPremium = async (id: string) => {
+    if (!confirm("Are you sure you want to manually grant Monthly Premium to this user?")) return;
+    try {
+      const res = await fetch(`http://localhost:5000/api/users/${id}/premium`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ isPremium: true, planType: "monthly" })
+      });
+      if (res.ok) {
+        const updatedUser = await res.json();
+        setUsers(prev => prev.map(u => u._id === id ? updatedUser : u));
+        setSelected(updatedUser);
+        alert("Premium granted successfully!");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error granting premium.");
+    }
   };
 
   const filtered = filter === "all" ? users : users.filter(u => u.role === filter);
@@ -451,6 +524,7 @@ export function UsersManagement({ token }: { token: string }) {
             onClose={() => setSelected(null)}
             onRoleChange={handleRoleChange}
             onDelete={handleDelete}
+            onGrantPremium={handleGrantPremium}
           />
         )}
       </AnimatePresence>

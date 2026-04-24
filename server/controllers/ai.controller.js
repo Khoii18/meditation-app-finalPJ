@@ -1,4 +1,5 @@
 import User from "../models/user.model.js";
+import Content from "../models/content.model.js";
 
 const generateStandardResponse = (prompt) => {
     const input = prompt.toLowerCase();
@@ -140,5 +141,79 @@ export const generateAiPlan = async (req, res) => {
     console.error("AI Controller Error:", error.message);
     const fallback = generateStandardResponse(req.body.prompt);
     res.json({ ...fallback, mode: "Lunaria Safety Mode" });
+  }
+};
+
+export const chatWithLunaria = async (req, res) => {
+  try {
+    const { prompt } = req.body;
+    if (!prompt) return res.status(400).json("Input required.");
+
+    // 1. Fetch some content from DB to provide context/suggestions
+    const keywords = prompt.toLowerCase().split(' ').filter(w => w.length > 3);
+    let searchCriteria = {};
+    if (keywords.length > 0) {
+      searchCriteria = { 
+        $or: [
+          { title: { $regex: keywords.join('|'), $options: 'i' } },
+          { description: { $regex: keywords.join('|'), $options: 'i' } }
+        ]
+      };
+    }
+
+    const suggestions = await Content.find(searchCriteria).limit(3);
+    const contextStr = suggestions.map(s => `[${s.type}: ${s.title} (ID: ${s._id})]`).join(', ');
+
+    // 2. Build system prompt for Mistral
+    const systemPrompt = `You are Lunaria, a wise and compassionate Ancient Zen Guide.
+    User says: "${prompt}"
+    Available Content for Recommendation: ${contextStr || "None specifically matching, suggest general mindfulness."}
+    
+    Task: 
+    1. Give 1-2 sentences of compassionate Zen advice.
+    2. Recommend 1-2 items from the "Available Content" list above if relevant, otherwise suggest finding a quiet space.
+    
+    Return ONLY JSON:
+    {
+      "message": "your advice here",
+      "recommendation": "your specific suggestion here",
+      "suggestedId": "ID of the most relevant content or null"
+    }`;
+
+    // 3. Call Mistral (Ollama)
+    const response = await fetch("http://localhost:11434/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "mistral",
+        prompt: systemPrompt,
+        stream: false,
+        options: { temperature: 0.7 }
+      })
+    });
+
+    if (!response.ok) throw new Error("Ollama connection failed.");
+
+    const data = await response.json();
+    const aiResponse = data.response;
+
+    const firstBrace = aiResponse.indexOf('{');
+    const lastBrace = aiResponse.lastIndexOf('}');
+    
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      const jsonStr = aiResponse.substring(firstBrace, lastBrace + 1);
+      const result = JSON.parse(jsonStr);
+      return res.json(result);
+    }
+
+    res.json({
+      message: aiResponse.split('\n')[0],
+      recommendation: "Take a deep breath and explore our collection.",
+      suggestedId: null
+    });
+
+  } catch (error) {
+    console.error("Chat Controller Error:", error.message);
+    res.status(500).json({ message: "Lunaria is currently in deep meditation. Please try again sau." });
   }
 };

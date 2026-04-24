@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Sparkles, Zap, PlayCircle, Loader2, ShieldCheck, Lock, Crown, Quote, Move, Activity, Eye, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function AiCoachView() {
   const router = useRouter();
@@ -12,13 +13,8 @@ export default function AiCoachView() {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
-  const [user, setUser] = useState<any>(null);
+  const { user } = useAuth();
   const [forcePremium, setForcePremium] = useState(false); 
-
-  useEffect(() => {
-    const localData = localStorage.getItem("user");
-    if (localData) setUser(JSON.parse(localData));
-  }, []);
 
   const isUserPremium = user?.premiumStatus?.isPremium || user?.claimedRewards?.includes("streak-7");
   const isInputLocked = forcePremium && !isUserPremium;
@@ -130,25 +126,25 @@ export default function AiCoachView() {
 
     return (
       <div className="w-full max-w-3xl mx-auto px-4 py-8">
-         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 p-8 md:p-10">
+         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-surface rounded-[2.5rem] shadow-xl border border-border p-8 md:p-10">
             <div className="flex items-center gap-4 mb-8">
-               <div className="p-3 bg-teal-50 text-teal-600 rounded-xl"><Sparkles className="w-5 h-5" /></div>
-               <h3 className="text-xl font-serif font-bold text-slate-800">Sacred Support</h3>
+               <div className="p-3 bg-teal-500/10 text-teal-600 rounded-xl"><Sparkles className="w-5 h-5" /></div>
+               <h3 className="text-xl font-serif font-bold text-foreground">Sacred Support</h3>
             </div>
-            <p className="text-lg font-serif italic text-slate-700 leading-relaxed mb-8">"{result.message}"</p>
+            <p className="text-lg font-serif italic text-foreground/90 leading-relaxed mb-8">"{result.message}"</p>
             <div className="space-y-3 mb-8">
                {result.exercise?.steps?.map((step: string, idx: number) => (
-                  <div key={idx} className="p-4 bg-slate-50 rounded-xl flex items-center gap-4">
+                  <div key={idx} className="p-4 bg-background border border-border rounded-xl flex items-center gap-4">
                      <span className="w-6 h-6 bg-teal-600 text-white rounded-lg flex items-center justify-center font-black text-[10px]">{idx + 1}</span>
-                     <p className="text-slate-600 text-sm">{step}</p>
+                     <p className="text-muted text-sm">{step}</p>
                   </div>
                ))}
             </div>
-            <div className="pt-6 border-t border-slate-100 flex flex-col items-center">
-               <p className="text-xl font-serif italic text-teal-800 text-center mb-8">"{result.quote}"</p>
+            <div className="pt-6 border-t border-border flex flex-col items-center">
+               <p className="text-xl font-serif italic text-teal-600 dark:text-teal-400 text-center mb-8">"{result.quote}"</p>
                <div className="flex gap-4 w-full">
-                  <button onClick={() => router.push(`/${locale}/home`)} className="flex-1 py-4 bg-teal-600 text-white rounded-xl font-bold">Dashboard</button>
-                  <button onClick={() => setResult(null)} className="px-8 py-4 border border-slate-100 text-slate-500 rounded-xl font-bold">Retry</button>
+                  <button onClick={() => router.push(`/${locale}/home`)} className="flex-1 py-4 bg-teal-600 text-white rounded-xl font-bold shadow-lg shadow-teal-500/20 hover:scale-[1.02] transition-transform">Dashboard</button>
+                  <button onClick={() => setResult(null)} className="px-8 py-4 border border-border text-muted rounded-xl font-bold hover:bg-background transition-colors">Retry</button>
                </div>
             </div>
          </motion.div>
@@ -162,24 +158,24 @@ export default function AiCoachView() {
           <div className={`p-4 rounded-3xl mb-4 shadow-xl transition-all duration-500 scale-75 md:scale-100 ${isPremiumUI ? "bg-indigo-500 rotate-12 shadow-indigo-500/40" : "bg-teal-600"}`}>
              {isPremiumUI ? <Zap className="w-6 h-6 text-white fill-current" /> : <Sparkles className="w-6 h-6 text-white" />}
           </div>
-          <h1 className="text-3xl md:text-5xl font-serif font-bold text-center mb-2 italic leading-tight">Lunaria</h1>
-          <p className="text-slate-500 text-center max-w-md text-xs md:text-sm mb-6">Your ancient guide to inner stillness.</p>
+          <h1 className="text-3xl md:text-5xl font-serif font-bold text-center mb-2 italic leading-tight text-foreground">Lunaria</h1>
+          <p className="text-muted text-center max-w-md text-xs md:text-sm mb-6">Your ancient guide to inner stillness.</p>
 
-          <div className="bg-slate-100 dark:bg-white/5 p-1 rounded-full flex items-center gap-1 w-full max-w-sm shadow-inner">
+          <div className="bg-surface p-1 rounded-full flex items-center gap-1 w-full max-w-sm shadow-inner border border-border">
              <button onClick={() => setForcePremium(false)}
-                className={`flex-1 py-2.5 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-2 ${!forcePremium ? "bg-white dark:bg-slate-800 text-teal-600 shadow-sm" : "text-slate-500"}`}>
+                className={`flex-1 py-2.5 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-2 ${!forcePremium ? "bg-background text-teal-600 shadow-sm border border-border" : "text-muted"}`}>
                 Standard
              </button>
              <button onClick={() => setForcePremium(true)}
-                className={`flex-1 py-2.5 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-2 ${forcePremium ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/30" : "text-slate-500"}`}>
+                className={`flex-1 py-2.5 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-2 ${forcePremium ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/30" : "text-muted"}`}>
                 Premium
              </button>
           </div>
       </div>
 
-      <div className={`relative transition-all duration-500 p-6 md:p-10 rounded-[3rem] border overflow-hidden ${isPremiumUI ? "bg-[#0A0A0C] border-indigo-500/20 shadow-2xl" : "bg-white border-slate-100 shadow-xl"}`}>
+      <div className={`relative transition-all duration-500 p-6 md:p-10 rounded-[3rem] border overflow-hidden ${isPremiumUI ? "bg-[#0A0A0C] border-indigo-500/20 shadow-2xl" : "bg-surface border-border shadow-xl"}`}>
           <div className="relative z-10 flex flex-col items-center">
-            <h3 className={`text-lg font-serif font-bold mb-6 text-center ${isPremiumUI ? "text-white" : "text-slate-800"}`}>
+            <h3 className={`text-lg font-serif font-bold mb-6 text-center ${isPremiumUI ? "text-white" : "text-foreground"}`}>
               {isPremiumUI ? "Speak your heart to Lunaria..." : "How are you feeling?"}
             </h3>
             <div className="relative w-full">
@@ -187,7 +183,7 @@ export default function AiCoachView() {
                 value={prompt} onChange={(e) => setPrompt(e.target.value)}
                 placeholder={isInputLocked ? "Subscription required..." : "Describe your state..."}
                 disabled={loading || isInputLocked}
-                className={`w-full h-32 md:h-40 p-5 md:p-7 rounded-[2rem] text-base md:text-lg resize-none outline-none transition-all border ${isPremiumUI ? "bg-white/5 border-white/10 text-white placeholder-slate-600 focus:border-indigo-500/50" : "bg-slate-50 border-slate-100 text-slate-800 placeholder-slate-400 focus:border-teal-500/50"} ${isInputLocked ? "opacity-30" : ""}`}
+                className={`w-full h-32 md:h-40 p-5 md:p-7 rounded-[2rem] text-base md:text-lg resize-none outline-none transition-all border ${isPremiumUI ? "bg-white/5 border-white/10 text-white placeholder-slate-600 focus:border-indigo-500/50" : "bg-background border-border text-foreground placeholder-muted focus:border-teal-500/50"} ${isInputLocked ? "opacity-30" : ""}`}
               />
               {isInputLocked && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 backdrop-blur-[2px] rounded-[2rem]">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Loader2, Music, X } from "lucide-react";
+import { Loader2, Music, X, Plus, Trash2 } from "lucide-react";
 
 export function AdminFormModal({ formData, setFormData, activeTab, showModal, setShowModal, handleSave, existingData }: any) {
   const [uploading, setUploading] = useState(false);
@@ -9,8 +9,30 @@ export function AdminFormModal({ formData, setFormData, activeTab, showModal, se
   useEffect(() => {
      if (showModal) {
        setIsAddingNewSubject(false);
+       if (!formData.lessons) {
+         setFormData((prev: any) => ({ ...prev, lessons: [] }));
+       }
      }
   }, [showModal]);
+
+  const handleLessonChange = (index: number, field: string, value: string) => {
+    const updatedLessons = [...(formData.lessons || [])];
+    updatedLessons[index] = { ...updatedLessons[index], [field]: value };
+    setFormData({ ...formData, lessons: updatedLessons });
+  };
+
+  const addLesson = () => {
+    setFormData({
+      ...formData,
+      lessons: [...(formData.lessons || []), { title: '', duration: '', description: '', audioUrl: '' }]
+    });
+  };
+
+  const removeLesson = (index: number) => {
+    const updatedLessons = [...(formData.lessons || [])];
+    updatedLessons.splice(index, 1);
+    setFormData({ ...formData, lessons: updatedLessons });
+  };
 
   const existingSubjects = Array.from(new Set(
     (existingData || [])
@@ -38,8 +60,8 @@ export function AdminFormModal({ formData, setFormData, activeTab, showModal, se
       formDataUpload.append("signature", signature);
       formDataUpload.append("folder", folder);
 
-      const isVideo = activeTab === 'content';
-      const endpoint = isVideo ? "/video/upload" : "/auto/upload";
+      const isVideo = false; // We use audio for all now as requested by user
+      const endpoint = "/auto/upload";
       const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}${endpoint}`, {
         method: "POST",
         body: formDataUpload
@@ -104,14 +126,13 @@ export function AdminFormModal({ formData, setFormData, activeTab, showModal, se
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-      <div className="bg-white w-full max-w-lg rounded-3xl p-8 shadow-2xl border border-teal-100">
+      <div className="bg-white w-full max-w-2xl rounded-3xl p-8 shadow-2xl border border-teal-100 max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-serif font-bold mb-6 text-slate-800">
           {formData._id ? "Edit" : "Add"} {
             activeTab === 'content' ? "Meditation" :
             activeTab === 'soundscapes' ? "Soundscape" :
             activeTab === 'sleep' ? "Sleep Story" :
-            activeTab === 'plans' ? "Plan" :
-            "Live Session"
+            activeTab === 'plans' ? "Plan" : ""
           }
         </h2>
         <form onSubmit={handleSave} className="space-y-4">
@@ -132,7 +153,7 @@ export function AdminFormModal({ formData, setFormData, activeTab, showModal, se
               onClick={() => setFormData({...formData, isPremium: !formData.isPremium})}
               className={`relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none ${formData.isPremium ? 'bg-amber-400' : 'bg-slate-300'}`}
             >
-              <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${formData.isPremium ? 'translate-x-6' : 'translate-x-0.5'}`} />
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${formData.isPremium ? 'translate-x-6' : 'translate-x-0'}`} />
             </button>
           </div>
           <div>
@@ -217,40 +238,103 @@ export function AdminFormModal({ formData, setFormData, activeTab, showModal, se
                     </div>
                   )}
                   
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium mb-1">
-                      {activeTab === 'content' ? "Video MP4 File" : "Audio MP3 File"}
-                    </label>
-                    <div className="relative">
-                      <input 
-                        type="file" 
-                        accept={activeTab === 'content' ? "video/*" : "audio/*"}
-                        onChange={handleMediaUpload} 
-                        disabled={uploading}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10" 
-                      />
-                      <div className={`w-full p-3 rounded-xl border flex items-center justify-between transition-colors ${formData.audioUrl ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'border-slate-200 dark:border-white/10 dark:bg-black/20 text-slate-500'}`}>
-                        <span className="truncate pr-2 text-sm">
-                          {uploading ? "Uploading media..." : formData.audioUrl ? "Media Linked ✓" : `Click to upload ${activeTab === 'content' ? '.mp4' : '.mp3'}`}
-                        </span>
-                        {uploading ? <Loader2 className="w-4 h-4 animate-spin text-indigo-500" /> : <Music className="w-4 h-4" />}
+                  {activeTab !== 'plans' && (
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium mb-1">
+                        Audio MP3 File
+                      </label>
+                      <div className="relative">
+                        <input 
+                          type="file" 
+                          accept="audio/*"
+                          onChange={handleMediaUpload} 
+                          disabled={uploading}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10" 
+                        />
+                        <div className={`w-full p-3 rounded-xl border flex items-center justify-between transition-colors ${formData.audioUrl ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'border-slate-200 dark:border-white/10 dark:bg-black/20 text-slate-500'}`}>
+                          <span className="truncate pr-2 text-sm">
+                            {uploading ? "Uploading media..." : formData.audioUrl ? "Media Linked ✓" : `Click to upload .mp3`}
+                          </span>
+                          {uploading ? <Loader2 className="w-4 h-4 animate-spin text-indigo-500" /> : <Music className="w-4 h-4" />}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Description / Intro Text</label>
+                  <textarea 
+                    value={formData.description || ''} 
+                    onChange={e => setFormData({...formData, description: e.target.value})} 
+                    className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 dark:bg-black/20 min-h-[100px]" 
+                    placeholder="Enter description or intro text here..." 
+                  />
+                </div>
+
+                {activeTab === 'plans' && (
+                  <div className="mt-6 border-t pt-4 border-slate-200 dark:border-white/10">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-bold text-slate-700">Plan Lessons</h3>
+                      <button type="button" onClick={addLesson} className="flex items-center gap-1 text-sm bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg hover:bg-indigo-100 font-medium">
+                        <Plus className="w-4 h-4" /> Add Lesson
+                      </button>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {(formData.lessons || []).map((lesson: any, idx: number) => (
+                        <div key={idx} className="p-4 border border-slate-200 rounded-xl bg-slate-50 relative group">
+                          <button type="button" onClick={() => removeLesson(idx)} className="absolute top-2 right-2 text-slate-400 hover:text-rose-500 transition-colors">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                          <div className="grid grid-cols-2 gap-4 mb-3">
+                            <div>
+                              <label className="block text-xs font-medium mb-1 text-slate-500">Lesson Title</label>
+                              <input 
+                                value={lesson.title || ''} 
+                                onChange={e => handleLessonChange(idx, 'title', e.target.value)} 
+                                className="w-full p-2 text-sm rounded-lg border border-slate-200 bg-white" 
+                                placeholder="e.g. Day 1: Introduction" 
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium mb-1 text-slate-500">Duration</label>
+                              <input 
+                                value={lesson.duration || ''} 
+                                onChange={e => handleLessonChange(idx, 'duration', e.target.value)} 
+                                className="w-full p-2 text-sm rounded-lg border border-slate-200 bg-white" 
+                                placeholder="e.g. 10 min" 
+                              />
+                            </div>
+                          </div>
+                          <div className="mb-3">
+                            <label className="block text-xs font-medium mb-1 text-slate-500">Description</label>
+                            <textarea 
+                              value={lesson.description || ''} 
+                              onChange={e => handleLessonChange(idx, 'description', e.target.value)} 
+                              className="w-full p-2 text-sm rounded-lg border border-slate-200 bg-white min-h-[60px]" 
+                              placeholder="Lesson description..." 
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium mb-1 text-slate-500">Audio URL (Optional)</label>
+                            <input 
+                              value={lesson.audioUrl || ''} 
+                              onChange={e => handleLessonChange(idx, 'audioUrl', e.target.value)} 
+                              className="w-full p-2 text-sm rounded-lg border border-slate-200 bg-white" 
+                              placeholder="Paste audio URL here or upload later" 
+                            />
+                          </div>
+                        </div>
+                      ))}
+                      {(!formData.lessons || formData.lessons.length === 0) && (
+                        <p className="text-sm text-slate-500 text-center py-4 italic">No lessons added yet. Click "Add Lesson" to start building this plan.</p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </>
-          ) : (
-             <>
-               <div>
-                 <label className="block text-sm font-medium mb-1">Time</label>
-                 <input required value={formData.time || ''} onChange={e => setFormData({...formData, time: e.target.value})} className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 dark:bg-black/20" placeholder="18:00" />
-               </div>
-               <div className="flex items-center gap-3">
-                 <label className="text-sm font-medium">Is Live Now?</label>
-                 <input type="checkbox" checked={formData.isLive || false} onChange={e => setFormData({...formData, isLive: e.target.checked})} className="w-5 h-5" />
-               </div>
-             </>
-          )}
+          ) : null}
           
           <div className="flex gap-4 pt-4">
             <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-4 bg-slate-100 hover:bg-slate-200 rounded-2xl font-bold text-slate-600 transition-colors">Cancel</button>

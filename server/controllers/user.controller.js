@@ -1,5 +1,6 @@
 import User from "../models/user.model.js";
 import Checkin from "../models/checkin.model.js";
+import Content from "../models/content.model.js";
 import bcrypt from "bcryptjs";
 
 // Public: get all coaches with their profiles and packages
@@ -48,7 +49,7 @@ export const updateCoachProfile = async (req, res) => {
 
 export const updateAccountSettings = async (req, res) => {
   try {
-    const { password, avatar } = req.body;
+    const { password, avatar, name } = req.body;
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json("User not found");
     
@@ -56,9 +57,8 @@ export const updateAccountSettings = async (req, res) => {
       const hash = await bcrypt.hash(password, 10);
       user.password = hash;
     }
-    if (avatar) {
-      user.avatar = avatar;
-    }
+    if (avatar !== undefined) user.avatar = avatar;
+    if (name !== undefined)   user.name = name;
     
     await user.save();
     const userObj = user.toObject();
@@ -69,9 +69,32 @@ export const updateAccountSettings = async (req, res) => {
   }
 };
 
+export const updateUserSettings = async (req, res) => {
+  try {
+    const { notifications, preferences } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json("User not found");
+
+    if (notifications) {
+      user.settings.notifications = { ...user.settings.notifications, ...notifications };
+    }
+    if (preferences) {
+      user.settings.preferences = { ...user.settings.preferences, ...preferences };
+    }
+
+    await user.save();
+    res.json({ message: "Settings updated", settings: user.settings });
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};
+
 export const getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user.id)
+      .select("-password")
+      .populate("activePlan");
+
     if (!user) return res.status(404).json("User not found");
 
     if (!user.stats) {
@@ -82,8 +105,6 @@ export const getMe = async (req, res) => {
       const curr = new Date(today + "T00:00:00Z");
       const diffDays = Math.round((curr - last) / (1000 * 60 * 60 * 24));
 
-      // If they missed more than 1 day since last check-in, streak resets to 0
-      // Note: diffDays === 1 means they checked in yesterday, so streak is still alive
       if (diffDays > 1) {
         user.stats.currentStreak = 0;
         await user.save();
@@ -91,6 +112,37 @@ export const getMe = async (req, res) => {
     }
 
     res.json(user);
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};
+
+export const onboardUser = async (req, res) => {
+  try {
+    const { goals, experience } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json("User not found");
+
+    user.onboardingAnswers = { goals, experience };
+
+    // Balance App Logic: Assign personalized plan
+    let planTitle = "Foundations"; // Default for 'new'
+    if (goals.includes("stress")) planTitle = "Relaxation";
+    else if (goals.includes("sleep")) planTitle = "Sleep";
+    else if (experience === "often") planTitle = "Advanced";
+
+    const selectedPlan = await Content.findOne({ type: { $regex: /plan/i }, title: { $regex: new RegExp(planTitle, "i") } });
+    if (selectedPlan) {
+      user.activePlan = selectedPlan._id;
+      user.planProgress = 0; // start at day 1
+    } else {
+      // Fallback
+      const anyPlan = await Content.findOne({ type: { $regex: /plan/i } });
+      if (anyPlan) user.activePlan = anyPlan._id;
+    }
+
+    await user.save();
+    res.json({ message: "Onboarding complete", user });
   } catch (err) {
     res.status(500).json(err.message);
   }
@@ -219,6 +271,30 @@ export const claimReward = async (req, res) => {
     await user.save();
 
     res.json({ message: "Reward claimed successfully!", claimedRewards: user.claimedRewards });
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};
+
+export const updateUserPremium = async (req, res) => {
+  try {
+    const { isPremium, planType } = req.body;
+    const now = new Date();
+    const expiry = new Date();
+    if (planType === "monthly") expiry.setDate(now.getDate() + 30);
+    else if (planType === "annual") expiry.setDate(now.getDate() + 365);
+    else expiry.setFullYear(now.getFullYear() + 99);
+
+    const user = await User.findByIdAndUpdate(req.params.id, {
+      $set: {
+        "premiumStatus.isPremium": isPremium,
+        "premiumStatus.planType": planType,
+        "premiumStatus.startDate": now,
+        "premiumStatus.expiryDate": expiry
+      }
+    }, { new: true }).select("-password");
+    
+    res.json(user);
   } catch (err) {
     res.status(500).json(err.message);
   }

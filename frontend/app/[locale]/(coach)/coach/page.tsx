@@ -35,7 +35,7 @@ function CoachPageContent() {
   const fetchData = async () => {
     if (activeTab === "packages" || activeTab === "settings" || activeTab === "profile") return; // managed separately
     try {
-      const endpoint = activeTab === "content" ? "/api/content" : "/api/live";
+      const endpoint = "/api/content";
       const currentToken = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       const res = await fetch(`http://localhost:5000${endpoint}`, {
         headers: currentToken ? { "Authorization": `Bearer ${currentToken}` } : {}
@@ -54,7 +54,7 @@ function CoachPageContent() {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure?")) return;
     try {
-      const endpoint = activeTab === "content" ? `/api/content/${id}` : `/api/live/${id}`;
+      const endpoint = `/api/content/${id}`;
       await fetch(`http://localhost:5000${endpoint}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
@@ -67,7 +67,7 @@ function CoachPageContent() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    const endpoint = activeTab === "content" ? "/api/content" : "/api/live";
+    const endpoint = "/api/content";
     const method = formData._id ? "PUT" : "POST";
     const url = formData._id ? `http://localhost:5000${endpoint}/${formData._id}` : `http://localhost:5000${endpoint}`;
 
@@ -109,7 +109,7 @@ function CoachPageContent() {
         <header className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-serif font-bold text-slate-800">Coach Dashboard</h1>
-            <p className="text-slate-500 mt-1">Hello {user?.name}! Manage your meditation courses and livestreams.</p>
+            <p className="text-slate-500 mt-1">Hello {user?.name}! Manage your meditation courses.</p>
           </div>
           {activeTab !== "packages" && activeTab !== "profile" && activeTab !== "settings" && (
             <button 
@@ -125,7 +125,6 @@ function CoachPageContent() {
         <div className="flex gap-4 mb-6 border-b border-teal-50 pb-0">
           {[
             { key: "content", label: "My Meditations" },
-            { key: "live",    label: "My Live Sessions" },
             { key: "packages", label: "My Packages" },
             { key: "profile", label: "My Profile" },
           ].map((tab) => (

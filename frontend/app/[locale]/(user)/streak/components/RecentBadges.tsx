@@ -141,16 +141,16 @@ export function RecentBadges({ currentStreak, longestStreak, claimedRewards, onC
 
   return (
     <>
-      <div className="bg-white dark:bg-[#0F1115] rounded-[2.5rem] border border-slate-100 dark:border-white/[0.05] overflow-hidden shadow-2xl">
+      <div className="bg-surface rounded-[2.5rem] border border-border overflow-hidden shadow-2xl transition-colors duration-500">
         {/* Header */}
-        <div className="px-8 pt-8 pb-6 border-b border-slate-100 dark:border-white/[0.05] bg-gradient-to-br from-white to-slate-50 dark:from-[#15181E] dark:to-[#0F1115]">
+        <div className="px-8 pt-8 pb-6 border-b border-border bg-gradient-to-br from-surface to-background/50">
           <div className="flex items-center gap-2.5 mb-2">
             <Sparkles className="w-5 h-5 text-teal-500" />
-            <h3 className="text-xl font-serif font-bold text-slate-800 dark:text-slate-100">
+            <h3 className="text-xl font-serif font-bold text-foreground">
               Streak Rewards
             </h3>
           </div>
-          <p className="text-xs text-slate-400 font-medium tracking-wide">
+          <p className="text-xs text-muted font-medium tracking-wide">
             Best: <span className="text-teal-500 font-bold">{longestStreak} days</span>
             {" · "}Current: <span className="text-orange-500 font-bold">{currentStreak} days</span>
           </p>
@@ -158,11 +158,11 @@ export function RecentBadges({ currentStreak, longestStreak, claimedRewards, onC
 
         {/* Progress Display */}
         {nextMilestone && (
-          <div className="px-8 py-5 bg-slate-50/50 dark:bg-white/[0.02] border-b border-slate-100 dark:border-white/[0.05]">
+          <div className="px-8 py-5 bg-background/50 border-b border-border">
             <div className="flex justify-between items-end mb-3">
               <div>
-                <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-1">Upcoming Milestone</p>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                <p className="text-[10px] uppercase tracking-widest font-bold text-muted mb-1">Upcoming Milestone</p>
+                <span className="text-xs font-bold text-foreground opacity-90">
                   {nextMilestone.emoji} {nextMilestone.name}
                 </span>
               </div>
@@ -195,7 +195,7 @@ export function RecentBadges({ currentStreak, longestStreak, claimedRewards, onC
                 className={`w-full flex items-center gap-4 p-5 rounded-[1.75rem] transition-all duration-300 text-left relative group
                   ${unlocked
                     ? `bg-gradient-to-r ${m.bgCard} border ${m.border} cursor-pointer`
-                    : "bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/[0.03] cursor-default opacity-40"
+                    : "bg-background border border-border cursor-default opacity-40"
                   }`}
               >
                 {/* Background Glow on unlocked */}
@@ -273,8 +273,7 @@ export function RecentBadges({ currentStreak, longestStreak, claimedRewards, onC
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               onClick={e => e.stopPropagation()}
-              className={`relative w-full max-w-sm rounded-[3rem] border-2 overflow-hidden ${selected.border} shadow-2xl`}
-              style={{ background: "#0A0B0E" }}
+              className={`relative w-full max-w-sm rounded-[3rem] border-2 overflow-hidden ${selected.border} shadow-2xl bg-surface`}
             >
               {/* Animated Light Strips */}
               <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${selected.gradient} opacity-50`} />
@@ -298,7 +297,7 @@ export function RecentBadges({ currentStreak, longestStreak, claimedRewards, onC
                       transition={{ repeat: Infinity, duration: 2 }}
                     >
                       <div className={`w-28 h-28 rounded-[2rem] bg-gradient-to-br ${selected.gradient} p-0.5 shadow-2xl`}>
-                        <div className="w-full h-full rounded-[1.95rem] bg-[#0A0B0E] flex items-center justify-center">
+                        <div className="w-full h-full rounded-[1.95rem] bg-background flex items-center justify-center">
                           <selected.icon className="w-12 h-12 text-white" />
                         </div>
                       </div>
@@ -317,22 +316,22 @@ export function RecentBadges({ currentStreak, longestStreak, claimedRewards, onC
                     <motion.p 
                         initial={{ y: 10, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        className="text-teal-400 font-bold tracking-widest text-[10px] uppercase mb-2"
+                        className="text-teal-500 dark:text-teal-400 font-bold tracking-widest text-[10px] uppercase mb-2"
                     >
                         Milestone Reached!
                     </motion.p>
-                  <h2 className="text-3xl font-serif font-bold text-white mb-2">{selected.name}</h2>
-                  <p className="text-sm text-slate-400 font-medium">{selected.desc}</p>
+                  <h2 className="text-3xl font-serif font-bold text-foreground mb-2">{selected.name}</h2>
+                  <p className="text-sm text-muted font-medium">{selected.desc}</p>
                 </div>
 
                 {/* Reward Highlight */}
-                <div className="bg-white/[0.03] border border-white/[0.05] rounded-3xl p-6 mb-8 text-center">
-                  <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full bg-white/[0.05] border border-white/[0.05]">
+                <div className="bg-background/50 border border-border rounded-3xl p-6 mb-8 text-center">
+                  <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full bg-surface border border-border">
                     <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
-                    <span className="text-[10px] uppercase font-bold tracking-widest text-slate-300">Your Reward</span>
+                    <span className="text-[10px] uppercase font-bold tracking-widest text-muted">Your Reward</span>
                   </div>
-                  <p className="text-white font-bold text-lg mb-2">{selected.reward}</p>
-                  <p className="text-slate-500 text-xs leading-relaxed px-2">
+                  <p className="text-foreground font-bold text-lg mb-2">{selected.reward}</p>
+                  <p className="text-muted text-xs leading-relaxed px-2">
                     {selected.rewardDetail}
                   </p>
                 </div>

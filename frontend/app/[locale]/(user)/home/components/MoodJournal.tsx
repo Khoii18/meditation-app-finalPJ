@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, Loader2, Send } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const MOODS = [
   { id: "Angry", label: "Angry", emoji: "😡" },
@@ -13,6 +14,7 @@ const MOODS = [
 ];
 
 export function MoodJournal() {
+  const { token, refetch } = useAuth();
   const [selected, setSelected] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,14 +29,17 @@ export function MoodJournal() {
     if (!selected) return;
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      await fetch("http://localhost:5000/api/checkins/mood", {
+      const res = await fetch("http://localhost:5000/api/checkins/mood", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ mood: selected, moodNote: note })
       });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      
+      if (res.ok) {
+        setSaved(true);
+        refetch(); // Update streak in sidebar/header
+        setTimeout(() => setSaved(false), 3000);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -43,8 +48,8 @@ export function MoodJournal() {
   };
 
   return (
-    <div className="bg-white rounded-[2rem] p-6 lg:p-8 flex flex-col items-center justify-center relative shadow-sm border border-teal-100 w-full">
-      <h3 className="text-slate-800 font-serif font-medium text-xl mb-6 text-center">How are you feeling?</h3>
+    <div className="bg-surface rounded-[2rem] p-6 lg:p-8 flex flex-col items-center justify-center relative shadow-sm border border-border w-full transition-colors duration-500">
+      <h3 className="text-foreground font-serif font-medium text-xl mb-6 text-center">How are you feeling?</h3>
       
       <div className="grid grid-cols-5 w-full max-w-sm gap-2 sm:gap-4 mt-2">
         {MOODS.map((mood) => (
@@ -62,7 +67,7 @@ export function MoodJournal() {
             >
               {mood.emoji}
             </motion.div>
-            <span className={`text-[10px] sm:text-xs font-semibold mt-1 transition-colors text-center w-full truncate ${selected === mood.id ? "text-teal-700" : "text-slate-400 group-hover:text-slate-600"}`}>
+            <span className={`text-[10px] sm:text-xs font-semibold mt-1 transition-colors text-center w-full truncate ${selected === mood.id ? "text-teal-600 dark:text-teal-400" : "text-muted group-hover:text-foreground opacity-70"}`}>
               {mood.label}
             </span>
           </button>
@@ -82,17 +87,17 @@ export function MoodJournal() {
                 placeholder="Why do you feel this way? (Optional)"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                className="w-full bg-slate-50 border border-teal-100 rounded-2xl px-5 py-4 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 resize-none h-24 transition-colors"
+                className="w-full bg-background border border-border rounded-2xl px-5 py-4 text-sm text-foreground placeholder-muted focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 resize-none h-24 transition-colors"
               />
             </div>
             
             <div className="flex items-center justify-between">
               {saved ? (
-                <div className="flex items-center gap-2 text-xs font-medium text-teal-600 bg-teal-50 px-3 py-1.5 rounded-full border border-teal-100">
+                <div className="flex items-center gap-2 text-xs font-medium text-teal-600 dark:text-teal-400 bg-teal-500/5 px-3 py-1.5 rounded-full border border-teal-500/20">
                   <CheckCircle2 className="w-4 h-4" /> Saved to Journey
                 </div>
               ) : (
-                <div className="text-xs text-slate-400 italic">Data syncs to Journey Tab</div>
+                <div className="text-xs text-muted italic opacity-70">Data syncs to Journey Tab</div>
               )}
               <button
                 onClick={handleSave}

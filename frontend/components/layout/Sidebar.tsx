@@ -18,7 +18,7 @@ export function Sidebar() {
   const locale = pathname.split('/')[1] || 'vi';
 
   return (
-    <aside className="hidden md:flex flex-col w-64 h-screen fixed top-0 left-0 bg-white border-r border-teal-50 py-10 px-6 z-40 shadow-[1px_0_10px_rgba(0,0,0,0.02)]">
+    <aside className="hidden md:flex flex-col w-64 h-screen fixed top-0 left-0 bg-surface border-r border-border py-10 px-6 z-40 shadow-[1px_0_10px_rgba(0,0,0,0.02)] transition-colors duration-500">
       {/* CSS to force hide scrollbar */}
       <style jsx global>{`
         .hide-scrollbar::-webkit-scrollbar {
@@ -36,7 +36,7 @@ export function Sidebar() {
            <Flower2 className="text-white w-5 h-5" />
         </div>
         <div className="flex flex-col">
-          <span className="font-serif font-bold text-xl tracking-tight text-slate-800">Lunaria</span>
+          <span className="font-serif font-bold text-xl tracking-tight text-foreground">Lunaria</span>
           <span className="text-[7px] uppercase font-black tracking-[0.3em] text-teal-600 mt-0.5 opacity-60">Divine Grace</span>
         </div>
       </div>
@@ -52,8 +52,8 @@ export function Sidebar() {
         {/* Growth Section */}
         <div className="space-y-4">
           <div className="px-4 flex items-center justify-between">
-            <p className="text-[9px] font-black tracking-[0.2em] text-slate-300 uppercase">Growth</p>
-            <div className="h-px w-8 bg-slate-100"></div>
+            <p className="text-[9px] font-black tracking-[0.2em] text-muted opacity-50 uppercase">Growth</p>
+            <div className="h-px w-8 bg-border"></div>
           </div>
           <div className="space-y-1">
             <NavItem href={`/${locale}/plans`} icon={<MapIcon className="w-5 h-5" />} label="Plans" isActive={pathname.includes("/plans")} />
@@ -65,8 +65,8 @@ export function Sidebar() {
         {/* Coaching Section */}
         <div className="space-y-4">
           <div className="px-4 flex items-center justify-between">
-            <p className="text-[9px] font-black tracking-[0.2em] text-slate-300 uppercase">Coaching</p>
-            <div className="h-px w-8 bg-slate-100"></div>
+            <p className="text-[9px] font-black tracking-[0.2em] text-muted opacity-50 uppercase">Coaching</p>
+            <div className="h-px w-8 bg-border"></div>
           </div>
           <div className="space-y-1">
             <NavItem href={`/${locale}/coaches`} icon={<Users className="w-5 h-5" />} label="Coaches" isActive={pathname.includes("/coaches")} />
@@ -77,8 +77,8 @@ export function Sidebar() {
         {/* Sanctuary Section */}
         <div className="space-y-4">
           <div className="px-4 flex items-center justify-between">
-            <p className="text-[9px] font-black tracking-[0.2em] text-slate-300 uppercase">Sanctuary</p>
-            <div className="h-px w-8 bg-slate-100"></div>
+            <p className="text-[9px] font-black tracking-[0.2em] text-muted opacity-50 uppercase">Sanctuary</p>
+            <div className="h-px w-8 bg-border"></div>
           </div>
           <div className="space-y-1">
             <NavItem href={`/${locale}/sleep`} icon={<Moon className="w-5 h-5" />} label="Dreamscape" isActive={pathname.includes("/sleep")} />
@@ -91,28 +91,28 @@ export function Sidebar() {
       <div className="mt-8 pt-8 border-t border-slate-50">
         {isLoggedIn ? (
           <div className="space-y-4">
-            <div className="flex items-center gap-3 px-3 py-3 rounded-2xl bg-slate-50/80 border border-slate-100">
+            <div className="flex items-center gap-3 px-3 py-3 rounded-2xl bg-background/50 border border-border">
               <div className="relative">
                 <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center text-white font-bold text-xs">
                   {user?.name?.[0]?.toUpperCase() || "U"}
                 </div>
                 {user?.premiumStatus?.isPremium && (
-                  <div className="absolute -top-1.5 -right-1.5 p-0.5 bg-amber-400 rounded-full border border-white">
+                  <div className="absolute -top-1.5 -right-1.5 p-0.5 bg-amber-400 rounded-full border border-background">
                     <Shield className="w-2 h-2 text-white fill-current" />
                   </div>
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-slate-800 truncate leading-none mb-1">{user?.name}</p>
+                <p className="text-sm font-bold text-foreground truncate leading-none mb-1">{user?.name}</p>
                 <div className="flex items-center gap-1">
                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                   <p className="text-[8px] text-slate-400 font-bold uppercase tracking-tighter">Mind Aware</p>
+                   <p className="text-[8px] text-muted font-bold uppercase tracking-tighter">Mind Aware</p>
                 </div>
               </div>
             </div>
             <button
               onClick={() => { localStorage.removeItem("user"); localStorage.removeItem("token"); window.location.href = `/${locale}/login`; }}
-              className="flex items-center gap-3 px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-rose-500 transition-all w-full rounded-xl hover:bg-rose-50/50"
+              className="flex items-center gap-3 px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted hover:text-rose-500 transition-all w-full rounded-xl hover:bg-rose-50/10"
             >
               <LogOut className="w-5 h-5" /> Log Out
             </button>
@@ -132,7 +132,7 @@ function NavItem({ href, icon, label, isActive }: { href: string; icon: React.Re
       className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[13px] font-bold transition-all duration-300 group ${
         isActive
           ? "bg-teal-600 text-white shadow-lg shadow-teal-600/20"
-          : "text-slate-500 hover:bg-slate-50 hover:text-teal-600"
+          : "text-muted hover:bg-background hover:text-teal-600"
       }`}
     >
       <span className={`transition-all duration-300 ${isActive ? "text-white" : "text-teal-500 group-hover:scale-110"}`}>

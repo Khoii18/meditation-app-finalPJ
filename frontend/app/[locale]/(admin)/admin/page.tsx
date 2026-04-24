@@ -6,6 +6,8 @@ import { AdminTable } from "../components/AdminTable";
 import { AdminFormModal } from "../components/AdminFormModal";
 import { UsersManagement } from "../components/UsersManagement";
 import { EmotionsAnalytics } from "../components/EmotionsAnalytics";
+import { PaymentsManagement } from "../components/PaymentsManagement";
+import { RoutineManagement } from "../components/RoutineManagement";
 import { useSearchParams } from "next/navigation";
 
 function AdminPageContent() {
@@ -33,10 +35,9 @@ function AdminPageContent() {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
   const fetchData = async () => {
-    if (activeTab === "users" || activeTab === "emotions" || activeTab === "settings") return;
+    if (activeTab === "users" || activeTab === "emotions" || activeTab === "settings" || activeTab === "payments") return;
     try {
-      const isContent = activeTab === "content" || activeTab === "sleep" || activeTab === "soundscapes" || activeTab === "plans";
-      const endpoint = isContent ? "/api/content" : "/api/live";
+      const endpoint = "/api/content";
       const res = await fetch(`http://localhost:5000${endpoint}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
@@ -54,8 +55,7 @@ function AdminPageContent() {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure?")) return;
     try {
-      const isContent = activeTab === "content" || activeTab === "sleep" || activeTab === "soundscapes" || activeTab === "plans";
-      const endpoint = isContent ? `/api/content/${id}` : `/api/live/${id}`;
+      const endpoint = `/api/content/${id}`;
       await fetch(`http://localhost:5000${endpoint}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
@@ -68,8 +68,7 @@ function AdminPageContent() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    const isContent = activeTab === "content" || activeTab === "sleep" || activeTab === "soundscapes" || activeTab === "plans";
-    const endpoint = isContent ? "/api/content" : "/api/live";
+    const endpoint = "/api/content";
     const method = formData._id ? "PUT" : "POST";
     const url = formData._id
       ? `http://localhost:5000${endpoint}/${formData._id}`
@@ -112,9 +111,10 @@ function AdminPageContent() {
     { key: "soundscapes", label: "Soundscapes",   icon: FileText },
     { key: "sleep",       label: "Sleep Stories", icon: Moon },
     { key: "plans",       label: "Plans",         icon: Layers },
-    { key: "live",        label: "Live Sessions", icon: CalendarDays },
-    { key: "users",     label: "Users",         icon: Users },
+    {key: "users",     label: "Users",         icon: Users },
+    { key: "payments",  label: "Payments",      icon: FileText },
     { key: "emotions",  label: "Emotions",      icon: Smile },
+    { key: "routine",   label: "Routine",       icon: CalendarDays },
   ];
 
   const filteredData = Array.isArray(data) ? data.filter((d: any) => {
@@ -135,7 +135,7 @@ function AdminPageContent() {
             <h1 className="text-3xl font-serif font-bold text-slate-800">Admin Dashboard</h1>
             <p className="text-slate-500 mt-1">Manage Oasis app content & users</p>
           </div>
-          {activeTab !== "users" && (
+          {activeTab !== "users" && activeTab !== "payments" && activeTab !== "emotions" && (
             <button
               onClick={() => { setFormData({}); setShowModal(true); }}
               className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-semibold transition-all shadow-sm shadow-teal-500/20"
@@ -166,8 +166,12 @@ function AdminPageContent() {
         {/* Tab content */}
         {activeTab === "users" ? (
           <UsersManagement token={token || ""} />
+        ) : activeTab === "payments" ? (
+          <PaymentsManagement token={token || ""} />
         ) : activeTab === "emotions" ? (
           <EmotionsAnalytics token={token || ""} />
+        ) : activeTab === "routine" ? (
+          <RoutineManagement token={token || ""} />
         ) : (
           <AdminTable
             data={filteredData}

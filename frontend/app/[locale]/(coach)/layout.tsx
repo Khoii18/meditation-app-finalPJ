@@ -31,10 +31,6 @@ export default function CoachLayout({
             <FileText className="w-5 h-5" />
             My Meditations
           </Link>
-          <Link href="?tab=live" className="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-500 hover:bg-teal-50/50 hover:text-teal-600 transition-colors font-medium">
-            <CalendarDays className="w-5 h-5" />
-            My Live Sessions
-          </Link>
         </nav>
         
         <div className="p-6 border-t border-teal-50">

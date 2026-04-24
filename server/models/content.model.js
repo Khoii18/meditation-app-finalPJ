@@ -16,7 +16,14 @@ const contentSchema = new mongoose.Schema({
   // Access control fields
   isPremium: { type: Boolean, default: false },  // false = free, true = requires subscription
   unlockedByStreak: { type: String, default: null }, // e.g. "streak-1", "streak-3"
-  source: { type: String, enum: ["admin", "coach"], default: "admin" } // who owns this content
+  source: { type: String, enum: ["admin", "coach"], default: "admin" }, // who owns this content
+  // Lessons for plans
+  lessons: [{
+    title: { type: String },
+    description: { type: String },
+    audioUrl: { type: String },
+    duration: { type: String }
+  }]
 }, { timestamps: true });
 
 export default mongoose.model("Content", contentSchema);

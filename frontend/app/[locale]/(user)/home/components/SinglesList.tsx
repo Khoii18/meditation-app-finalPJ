@@ -45,8 +45,8 @@ export function SinglesList() {
       className="w-full"
     >
       <div className="mb-4 flex justify-between items-center">
-        <h3 className="text-xl font-serif font-medium text-slate-800">Singles</h3>
-        <button className="text-sm text-teal-600 font-semibold hover:text-teal-700 transition-colors">View All</button>
+        <h3 className="text-xl font-serif font-medium text-foreground">Singles</h3>
+        <button className="text-sm text-teal-600 dark:text-teal-400 font-semibold hover:text-teal-700 transition-colors">View All</button>
       </div>
 
       <div
@@ -62,7 +62,7 @@ export function SinglesList() {
             className="min-w-[150px] max-w-[150px] snap-start flex-shrink-0"
           >
             <Link href={`./play/${routine._id}`} className="group flex flex-col gap-2">
-              <div className="relative rounded-2xl overflow-hidden bg-teal-50 shadow-sm transition-all duration-300 group-hover:shadow-[0_8px_24px_rgba(13,148,136,0.2)] group-hover:-translate-y-1">
+              <div className="relative rounded-2xl overflow-hidden bg-surface shadow-sm transition-all duration-300 group-hover:shadow-[0_8px_24px_rgba(13,148,136,0.2)] group-hover:-translate-y-1 border border-border">
                 <div className="aspect-square">
                   <img
                     src={routine.image || 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=400'}
@@ -85,8 +85,8 @@ export function SinglesList() {
               </div>
               <div className="px-0.5">
                 <p className="text-[10px] uppercase font-bold tracking-wider text-teal-500 mb-0.5">{routine.type || 'Session'}</p>
-                <h4 className="text-xs font-semibold text-slate-700 leading-snug">{routine.title}</h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">{routine.duration || '10 min'}</p>
+                <h4 className="text-xs font-semibold text-foreground opacity-90 leading-snug">{routine.title}</h4>
+                <p className="text-[11px] text-muted mt-0.5">{routine.duration || '10 min'}</p>
               </div>
             </Link>
           </motion.div>

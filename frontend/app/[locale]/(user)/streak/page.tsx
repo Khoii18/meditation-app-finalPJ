@@ -39,12 +39,12 @@ function StreakContent() {
   }, []);
 
   return (
-    <div className="w-full min-h-screen bg-[#F2FBFA] text-slate-800">
+    <div className="w-full min-h-screen bg-background text-foreground transition-colors duration-500">
       <div className="w-full max-w-7xl mx-auto px-4 md:px-8 xl:px-12 pt-8 md:pt-10 pb-28 md:pb-10">
         <header className="mb-8">
           <p className="text-xs font-bold tracking-widest uppercase text-teal-500 mb-1">Your Stats</p>
-          <h1 className="text-2xl md:text-3xl font-serif font-medium text-slate-800">Meditation Journey</h1>
-          <p className="text-slate-400 mt-1 text-sm">Consistency is the key to mindfulness.</p>
+          <h1 className="text-2xl md:text-3xl font-serif font-medium text-foreground">Meditation Journey</h1>
+          <p className="text-muted mt-1 text-sm">Consistency is the key to mindfulness.</p>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-8">

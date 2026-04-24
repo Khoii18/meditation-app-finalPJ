@@ -14,6 +14,20 @@ const userSchema = new mongoose.Schema({
     lastCheckInDate: { type: String, default: null }
   },
 
+  // Balance App Logic
+  activePlan: { type: mongoose.Schema.Types.ObjectId, ref: "Content", default: null },
+  planProgress: { type: Number, default: 0 },
+  skills: {
+    focus: { type: Number, default: 0 },
+    relaxation: { type: Number, default: 0 },
+    breathControl: { type: Number, default: 0 },
+    awareness: { type: Number, default: 0 }
+  },
+  onboardingAnswers: {
+    goals: [String],
+    experience: String
+  },
+
   role: { type: String, enum: ["user", "admin", "coach"], default: "user" },
 
   // Subscription management
@@ -47,7 +61,21 @@ const userSchema = new mongoose.Schema({
       default: []
     }
   },
-  claimedRewards: { type: [String], default: [] }
+  claimedRewards: { type: [String], default: [] },
+  settings: {
+    notifications: {
+      dailyReminders: { type: Boolean, default: true },
+      newContent: { type: Boolean, default: true },
+      systemUpdates: { type: Boolean, default: true },
+      communityActivity: { type: Boolean, default: false }
+    },
+    preferences: {
+      narratorVoice: { type: String, default: "Serena (Calm)" },
+      ambientVolume: { type: Number, default: 40 },
+      defaultDuration: { type: String, default: "15m" },
+      theme: { type: String, default: "system" }
+    }
+  }
 }, { timestamps: true });
 
 export default mongoose.model("User", userSchema);

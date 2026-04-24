@@ -6,6 +6,7 @@ import {
 } from "../controllers/subscription.controller.js";
 import { verifyToken, verifyAdminOrCoach } from "../middleware/auth.js";
 import Subscription from "../models/subscription.model.js";
+import User from "../models/user.model.js";
 
 const router = express.Router();
 
@@ -16,12 +17,22 @@ router.get("/coaches/:id",      getCoachById);
 // User: check their subscription status (hasPremium, subscribedCoachIds)
 router.get("/status", verifyToken, async (req, res) => {
   try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json("User not found");
+
     const subs = await Subscription.find({
       userId: req.user.id,
       status: "active"
     });
+    
     const subscribedCoachIds = subs.map(s => String(s.coachId));
-    res.json({ hasPremium: subs.length > 0, subscribedCoachIds });
+    
+    // hasPremium if they bought a platform package or subscribed to a coach
+    const hasPremium = user.premiumStatus?.isPremium || subs.length > 0;
+    
+    console.log(`[SUBS_STATUS] User: ${user.email}, isPremium: ${user.premiumStatus?.isPremium}, subs: ${subs.length}, hasPremium: ${hasPremium}`);
+    
+    res.json({ hasPremium, subscribedCoachIds });
   } catch (err) {
     res.status(500).json(err.message);
   }

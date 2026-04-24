@@ -10,9 +10,24 @@
   --border: #E0F2F0;
 }
 
+/* Force override when .dark class is present on html or body */
+html.dark, body.dark, .dark {
+  --background: #080C0B !important;
+  --foreground: #F8FAFC !important;
+  --surface: #121212 !important;
+  --accent: #14B8A6 !important;
+  --accent-light: #134E4A !important;
+  --muted: #94A3B8 !important;
+  --border: #1E292B !important;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
 }
 
 body {

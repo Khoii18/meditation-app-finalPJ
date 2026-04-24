@@ -77,7 +77,7 @@ export function ProfileHeader() {
   };
 
   return (
-    <div className="flex items-center gap-6 mb-8 bg-white dark:bg-[#1C1C1E] p-8 rounded-[2.5rem] border border-slate-100 dark:border-white/5 shadow-sm">
+    <div className="flex items-center gap-6 mb-8 bg-surface p-8 rounded-[2.5rem] border border-border shadow-sm transition-colors duration-500">
       <div className="relative group w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-white text-3xl font-serif uppercase shadow-inner overflow-hidden">
         {user?.avatar ? (
           <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
@@ -91,14 +91,14 @@ export function ProfileHeader() {
       </div>
       <div>
         <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-serif font-medium text-slate-800 dark:text-slate-100">{name}</h1>
+          <h1 className="text-3xl font-serif font-medium text-foreground">{name}</h1>
           {user?.premiumStatus?.isPremium && (
             <span className="bg-gradient-to-r from-amber-400 to-orange-400 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm flex items-center gap-1">
                <Star className="w-3 h-3 fill-current" /> Premium {user?.premiumStatus?.planType}
             </span>
           )}
         </div>
-        <p className="text-slate-500 mt-1">{user?.email || "No email updated"}</p>
+        <p className="text-muted mt-1">{user?.email || "No email updated"}</p>
         
         {user?.premiumStatus?.isPremium ? (
           <div className="mt-3 text-xs font-medium text-emerald-600 bg-emerald-50 px-4 py-1.5 rounded-full inline-block">
