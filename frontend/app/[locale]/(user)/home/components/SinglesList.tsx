@@ -44,9 +44,9 @@ export function SinglesList() {
       transition={{ delay: 0.2 }}
       className="w-full"
     >
-      <div className="mb-4 flex justify-between items-center">
-        <h3 className="text-xl font-serif font-medium text-foreground">Singles</h3>
-        <button className="text-sm text-teal-600 dark:text-teal-400 font-semibold hover:text-teal-700 transition-colors">View All</button>
+      <div className="mb-2 flex justify-between items-center">
+        <h3 className="text-sm font-serif font-bold text-foreground uppercase tracking-widest opacity-60">Singles</h3>
+        <button className="text-[10px] text-teal-600 dark:text-teal-400 font-bold hover:text-teal-700 transition-colors">View All</button>
       </div>
 
       <div

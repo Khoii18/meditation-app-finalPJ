@@ -10,22 +10,32 @@ import { MiniAIChat } from "./components/MiniAIChat";
 
 export default function HomeDashboard() {
   return (
-    <div className="w-full max-w-[1600px] mx-auto px-4 md:px-8 xl:px-10 pb-28 md:pb-10 transition-all duration-500">
+    <div className="w-full h-screen mx-auto px-4 md:px-6 overflow-hidden flex flex-col transition-all duration-700 bg-background/50">
       <Header />
       <DailyCheckInModal />
       
-      <main className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-10">
+      <main className="flex-1 mt-2 grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden pb-4">
         {/* Left Column (Hero & Content) */}
-        <div className="lg:col-span-8 xl:col-span-9 flex flex-col gap-8">
-          <DailyHero />
-          <SinglesList />
+        <div className="lg:col-span-8 xl:col-span-8 flex flex-col gap-4 overflow-hidden">
+          <div className="flex-shrink-0">
+            <DailyHero />
+          </div>
+          <div className="flex-1 min-h-0 overflow-y-auto pr-2 scrollbar-hide">
+            <SinglesList />
+          </div>
         </div>
 
         {/* Right Column (Sidebar Stats & AI) */}
-        <div className="lg:col-span-4 xl:col-span-3 flex flex-col gap-6 md:gap-8 sticky top-6 self-start">
-          <ContinueJourney />
-          <MoodJournal />
-          <MiniAIChat />
+        <div className="lg:col-span-4 xl:col-span-4 flex flex-col gap-4 overflow-hidden h-full">
+          <div className="flex-shrink-0">
+            <ContinueJourney />
+          </div>
+          <div className="flex-shrink-0">
+            <MoodJournal />
+          </div>
+          <div className="flex-1 min-h-0 flex flex-col">
+            <MiniAIChat />
+          </div>
         </div>
       </main>
     </div>

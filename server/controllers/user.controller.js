@@ -49,11 +49,21 @@ export const updateCoachProfile = async (req, res) => {
 
 export const updateAccountSettings = async (req, res) => {
   try {
-    const { password, avatar, name } = req.body;
+    const { password, currentPassword, avatar, name, email } = req.body;
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json("User not found");
     
+    if (email && email !== user.email) {
+      const existing = await User.findOne({ email });
+      if (existing) return res.status(400).json("Email already in use");
+      user.email = email;
+    }
+
     if (password) {
+      if (!currentPassword) return res.status(400).json("Current password is required to set a new one");
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) return res.status(401).json("Current password incorrect");
+      
       const hash = await bcrypt.hash(password, 10);
       user.password = hash;
     }

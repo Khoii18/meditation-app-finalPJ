@@ -214,6 +214,13 @@ export const chatWithLunaria = async (req, res) => {
 
   } catch (error) {
     console.error("Chat Controller Error:", error.message);
-    res.status(500).json({ message: "Lunaria is currently in deep meditation. Please try again sau." });
+    // Fallback to standard response if AI fails
+    const fallback = generateStandardResponse(prompt);
+    res.json({
+      message: fallback.message,
+      recommendation: "May you find peace in the simplicity of breath. Try our general mindfulness sessions.",
+      suggestedId: null,
+      mode: "Lunaria Safety Mode"
+    });
   }
 };

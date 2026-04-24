@@ -1,31 +1,44 @@
 "use client";
 
-import { Settings, Moon, Bell, Shield, CircleHelp } from "lucide-react";
+import { Settings, Moon, Bell, Shield, CircleHelp, User } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { NotificationModal } from "@/components/modals/NotificationModal";
+import { AccountSettingsModal } from "@/components/modals/AccountSettingsModal";
 
-export function SettingsGroup() {
+export function SettingsGroup({ user, onUserUpdate }: { user: any, onUserUpdate: (u: any) => void }) {
   const params = useParams();
   const locale = params.locale || 'vi';
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
       <div>
-        <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4 px-2">Settings</h3>
+        <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4 px-2">Account & Display</h3>
         <div className="bg-surface rounded-3xl border border-border overflow-hidden">
+          <button onClick={() => setIsAccountOpen(true)} className="w-full text-left outline-none">
+            <SettingRowStatic icon={<User className="w-5 h-5"/>} title="Personal Info" subtitle="Name, email, password" />
+          </button>
+          <div className="h-px bg-border" />
           <SettingRow href={`/${locale}/profile/appearance`} icon={<Moon className="w-5 h-5"/>} title="Appearance" subtitle="Light mode" />
           <div className="h-px bg-border" />
           <button onClick={() => setIsNotifOpen(true)} className="w-full text-left outline-none">
             <SettingRowStatic icon={<Bell className="w-5 h-5"/>} title="Notifications" subtitle="Daily reminders & Live alerts" />
           </button>
-          <NotificationModal isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
           <div className="h-px bg-border" />
           <SettingRow href={`/${locale}/profile/preferences`} icon={<Settings className="w-5 h-5"/>} title="Preferences" subtitle="Voice, sound, length" />
         </div>
       </div>
+
+      <AccountSettingsModal 
+        isOpen={isAccountOpen} 
+        onClose={() => setIsAccountOpen(false)} 
+        user={user}
+        onUpdate={onUserUpdate}
+      />
+      <NotificationModal isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
 
       <div>
         <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4 px-2">Support</h3>

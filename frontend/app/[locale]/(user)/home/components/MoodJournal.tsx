@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, Loader2, Send } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { API_URL } from "@/config";
 
 const MOODS = [
   { id: "Angry", label: "Angry", emoji: "😡" },
@@ -29,7 +30,7 @@ export function MoodJournal() {
     if (!selected) return;
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/checkins/mood", {
+      const res = await fetch(`${API_URL}/api/checkins/mood`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ mood: selected, moodNote: note })
@@ -48,10 +49,10 @@ export function MoodJournal() {
   };
 
   return (
-    <div className="bg-surface rounded-[2rem] p-6 lg:p-8 flex flex-col items-center justify-center relative shadow-sm border border-border w-full transition-colors duration-500">
-      <h3 className="text-foreground font-serif font-medium text-xl mb-6 text-center">How are you feeling?</h3>
+    <div className="bg-surface rounded-[2rem] p-6 flex flex-col items-center justify-center relative shadow-sm border border-border w-full transition-colors duration-500">
+      <h3 className="text-foreground font-serif font-medium text-lg mb-4 text-center">How are you feeling?</h3>
       
-      <div className="grid grid-cols-5 w-full max-w-sm gap-2 sm:gap-4 mt-2">
+      <div className="grid grid-cols-5 w-full max-w-[320px] gap-2 mt-1">
         {MOODS.map((mood) => (
           <button
             key={mood.id}
