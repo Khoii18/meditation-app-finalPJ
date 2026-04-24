@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { Crown } from "lucide-react";
+import { API_URL } from "@/config";
 
 export function SinglesList() {
   const [routines, setRoutines] = useState<any[]>([]);
@@ -21,7 +22,7 @@ export function SinglesList() {
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/content");
+        const res = await fetch(`${API_URL}/api/content`);
         if (res.ok) {
           const data = await res.json();
           setRoutines(data.length > 0 ? data : FALLBACK_DATA);

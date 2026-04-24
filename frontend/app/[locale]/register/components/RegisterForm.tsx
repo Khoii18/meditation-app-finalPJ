@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Mail, Lock, Eye, EyeOff, UserCircle, Loader2, ArrowRight, Leaf } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { API_URL } from "@/config";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -21,7 +22,7 @@ export function RegisterForm() {
     if (!name || !email || !password) { setError("Please fill in all fields"); return; }
     try {
       setLoading(true); setError("");
-      const res = await fetch("http://localhost:5000/api/auth/register", {
+      const res = await fetch(`${API_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password, role }),

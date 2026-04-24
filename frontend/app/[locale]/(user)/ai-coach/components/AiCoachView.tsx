@@ -5,6 +5,7 @@ import { Sparkles, Zap, PlayCircle, Loader2, ShieldCheck, Lock, Crown, Quote, Mo
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { API_URL } from "@/config";
 
 export default function AiCoachView() {
   const router = useRouter();
@@ -31,7 +32,7 @@ export default function AiCoachView() {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/api/ai-coach/generate", {
+      const res = await fetch(`${API_URL}/api/ai-coach/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({ prompt, mode: forcePremium ? "premium" : "standard" }),

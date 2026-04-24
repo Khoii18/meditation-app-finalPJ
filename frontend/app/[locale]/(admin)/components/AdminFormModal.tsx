@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Loader2, Music, X, Plus, Trash2 } from "lucide-react";
+import { API_URL } from "@/config";
 
 export function AdminFormModal({ formData, setFormData, activeTab, showModal, setShowModal, handleSave, existingData }: any) {
   const [uploading, setUploading] = useState(false);
@@ -47,7 +48,7 @@ export function AdminFormModal({ formData, setFormData, activeTab, showModal, se
     setUploading(true);
     try {
       const token = localStorage.getItem("token");
-      const sigRes = await fetch("http://localhost:5000/api/cloudinary-signature", {
+      const sigRes = await fetch(`${API_URL}/api/cloudinary-signature`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!sigRes.ok) throw new Error("Signature fail: " + await sigRes.text());
@@ -89,7 +90,7 @@ export function AdminFormModal({ formData, setFormData, activeTab, showModal, se
     setUploadingImage(true);
     try {
       const token = localStorage.getItem("token");
-      const sigRes = await fetch("http://localhost:5000/api/cloudinary-signature", {
+      const sigRes = await fetch(`${API_URL}/api/cloudinary-signature`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!sigRes.ok) throw new Error("Signature fail: " + await sigRes.text());

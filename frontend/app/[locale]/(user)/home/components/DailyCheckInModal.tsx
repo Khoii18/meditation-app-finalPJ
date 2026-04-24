@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight } from "lucide-react";
+import { API_URL } from "@/config";
 
 export function DailyCheckInModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,7 +15,7 @@ export function DailyCheckInModal() {
       if (!token) return;
 
       try {
-        const res = await fetch("http://localhost:5000/api/users/me", {
+        const res = await fetch(`${API_URL}/api/users/me`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {
@@ -62,7 +63,7 @@ export function DailyCheckInModal() {
       // API Call
       try {
         const token = localStorage.getItem("token");
-        await fetch("http://localhost:5000/api/checkins", {
+        await fetch(`${API_URL}/api/checkins`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, Lock, Eye, EyeOff, Loader2, ArrowRight, Wind } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { API_URL } from "@/config";
 
 export function LoginForm() {
   const router = useRouter();
@@ -21,7 +22,7 @@ export function LoginForm() {
     if (!email || !password) { setError("Please enter your email and password"); return; }
     try {
       setLoading(true); setError("");
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
