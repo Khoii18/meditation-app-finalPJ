@@ -1,6 +1,7 @@
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { OnboardingModal } from "@/components/auth/OnboardingModal";
+import { AdminChat } from "@/components/chat/AdminChat";
 
 export default function LocaleLayout({
   children,
@@ -15,6 +16,7 @@ export default function LocaleLayout({
       </main>
       <BottomNav />
       <OnboardingModal />
+      <AdminChat />
     </div>
   );
 }

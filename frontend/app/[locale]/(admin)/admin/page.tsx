@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { Plus, Users, FileText, CalendarDays, Smile, Moon, Layers } from "lucide-react";
+import { Plus, Users, FileText, CalendarDays, Smile, Moon, Layers, Mail } from "lucide-react";
 import { AdminTable } from "../components/AdminTable";
 import { AdminFormModal } from "../components/AdminFormModal";
 import { UsersManagement } from "../components/UsersManagement";
 import { EmotionsAnalytics } from "../components/EmotionsAnalytics";
 import { PaymentsManagement } from "../components/PaymentsManagement";
 import { RoutineManagement } from "../components/RoutineManagement";
+import { AdminMessages } from "../components/AdminMessages";
 import { useSearchParams } from "next/navigation";
 
 function AdminPageContent() {
@@ -111,10 +112,11 @@ function AdminPageContent() {
     { key: "soundscapes", label: "Soundscapes",   icon: FileText },
     { key: "sleep",       label: "Sleep Stories", icon: Moon },
     { key: "plans",       label: "Plans",         icon: Layers },
-    {key: "users",     label: "Users",         icon: Users },
-    { key: "payments",  label: "Payments",      icon: FileText },
-    { key: "emotions",  label: "Emotions",      icon: Smile },
-    { key: "routine",   label: "Routine",       icon: CalendarDays },
+    { key: "users",       label: "Users",         icon: Users },
+    { key: "payments",    label: "Payments",      icon: FileText },
+    { key: "emotions",    label: "Emotions",      icon: Smile },
+    { key: "messages",    label: "Messages",      icon: Mail },
+    { key: "routine",     label: "Routine",       icon: CalendarDays },
   ];
 
   const filteredData = Array.isArray(data) ? data.filter((d: any) => {
@@ -145,31 +147,16 @@ function AdminPageContent() {
           )}
         </header>
 
-        {/* Tab bar */}
-        <div className="flex gap-1 mb-6 border-b border-teal-50 pb-0">
-          {TABS.map(({ key, label, icon: Icon }) => (
-            <button
-              key={key}
-              onClick={() => setActiveTab(key)}
-              className={`flex items-center gap-2 px-5 py-4 font-bold text-xs uppercase tracking-widest rounded-t-xl transition-all border-b-2 ${
-                activeTab === key
-                  ? "text-teal-700 border-teal-600 bg-teal-50/50"
-                  : "text-slate-400 border-transparent hover:text-slate-600 hover:bg-slate-50"
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {label}
-            </button>
-          ))}
-        </div>
-
         {/* Tab content */}
-        {activeTab === "users" ? (
+        <div className="pt-4">
+          {activeTab === "users" ? (
           <UsersManagement token={token || ""} />
         ) : activeTab === "payments" ? (
           <PaymentsManagement token={token || ""} />
         ) : activeTab === "emotions" ? (
           <EmotionsAnalytics token={token || ""} />
+        ) : activeTab === "messages" ? (
+          <AdminMessages token={token || ""} />
         ) : activeTab === "routine" ? (
           <RoutineManagement token={token || ""} />
         ) : (
@@ -181,6 +168,7 @@ function AdminPageContent() {
           />
         )}
       </div>
+    </div>
 
       <AdminFormModal
         formData={formData}

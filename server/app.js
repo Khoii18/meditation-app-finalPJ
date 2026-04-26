@@ -21,6 +21,8 @@ import journeyRoute from "./routes/journey.route.js";
 import aiRoute from "./routes/ai.route.js";
 import paymentRoute from "./routes/payment.route.js";
 import recommendationRoute from "./routes/recommendation.route.js";
+import messageRoute from "./routes/message.route.js";
+import reviewRoute from "./routes/review.route.js";
 import { generateSignature } from "./controllers/Cloudinary.controller.js";
 
 const app = express();
@@ -72,6 +74,8 @@ app.use("/api/ai-coach", aiRoute);
 app.use("/api/payment", paymentRoute);
 app.use("/api/subscription", subscriptionRoute);
 app.use("/api/recommendations", recommendationRoute);
+app.use("/api/messages", messageRoute);
+app.use("/api/reviews", reviewRoute);
 import Content from "./models/content.model.js";
 import User from "./models/user.model.js";
 import { seedDatabaseIfNeeded } from "./seedBalance.js";

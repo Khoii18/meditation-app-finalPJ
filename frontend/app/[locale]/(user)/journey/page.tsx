@@ -10,6 +10,7 @@ interface JourneyData {
   completedExercises: any[];
   advice: string;
   suggestions: any[];
+  skills?: any;
 }
 
 function JourneyContent() {
@@ -236,58 +237,41 @@ function JourneyContent() {
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white border border-teal-100 rounded-3xl p-6 shadow-sm"
+              className="bg-white dark:bg-surface border border-teal-100 dark:border-white/5 rounded-3xl p-6 shadow-sm"
             >
-              <h2 className="text-base font-semibold text-slate-700 mb-6">Meditation Skills</h2>
+              <h2 className="text-base font-semibold text-slate-700 dark:text-white mb-6">Meditation Skills</h2>
               <div className="space-y-6">
                 
-                {/* Simulated Skill 1 */}
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full border border-teal-100 flex items-center justify-center flex-shrink-0">
-                    <Activity className="w-6 h-6 text-teal-500" strokeWidth={1.5} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between mb-1">
-                      <span className="font-semibold text-sm text-slate-800">Breath Focus</span>
-                      <span className="text-xs text-slate-400">Level 2</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-teal-500 w-2/3 rounded-full" />
-                    </div>
-                  </div>
-                </div>
+                {[
+                  { name: "Breath Focus", key: "focus", icon: <Activity className="w-6 h-6 text-teal-500" strokeWidth={1.5} /> },
+                  { name: "Body Scan", key: "relaxation", icon: <Sparkles className="w-6 h-6 text-teal-400" strokeWidth={1.5} /> },
+                  { name: "Mindful Awareness", key: "awareness", icon: <CheckCircle2 className="w-6 h-6 text-violet-400" strokeWidth={1.5} /> },
+                  { name: "Breath Control", key: "breathControl", icon: <Clock className="w-6 h-6 text-slate-400" strokeWidth={1.5} /> }
+                ].map(skill => {
+                  const points = (data?.skills as any)?.[skill.key] || 0;
+                  const level = Math.floor(points / 20) + 1;
+                  const progress = ((points % 20) / 20) * 100;
 
-                {/* Simulated Skill 2 */}
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full border border-teal-100 flex items-center justify-center flex-shrink-0">
-                    <Sparkles className="w-6 h-6 text-teal-400" strokeWidth={1.5} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between mb-1">
-                      <span className="font-semibold text-sm text-slate-800">Body Scan</span>
-                      <span className="text-xs text-slate-400">Level 1</span>
+                  return (
+                    <div key={skill.key} className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full border border-teal-100 dark:border-white/10 flex items-center justify-center flex-shrink-0">
+                        {skill.icon}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex justify-between mb-1">
+                          <span className="font-semibold text-sm text-slate-800 dark:text-white/90">{skill.name}</span>
+                          <span className="text-xs text-slate-400">Level {level}</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-teal-500 rounded-full transition-all duration-1000" 
+                            style={{ width: `${Math.max(5, progress)}%` }} 
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-teal-400 w-1/3 rounded-full" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Simulated Skill 3 */}
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full border border-teal-100 flex items-center justify-center flex-shrink-0 opacity-50">
-                    <Clock className="w-6 h-6 text-slate-400" strokeWidth={1.5} />
-                  </div>
-                  <div className="flex-1 opacity-50">
-                    <div className="flex justify-between mb-1">
-                      <span className="font-semibold text-sm text-slate-500">Labeling</span>
-                      <span className="text-xs text-slate-400">Level 1</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-slate-300 w-1/4 rounded-full" />
-                    </div>
-                  </div>
-                </div>
+                  );
+                })}
 
               </div>
             </motion.div>

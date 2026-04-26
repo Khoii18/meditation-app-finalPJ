@@ -7,6 +7,7 @@ import { CoachFormModal } from "../components/CoachFormModal";
 import { CoachMyPackages } from "../components/CoachMyPackages";
 import { CoachProfileEditor } from "../components/CoachProfileEditor";
 import { CoachMembers } from "../components/CoachMembers";
+import { CoachMessages } from "../components/CoachMessages";
 import { useSearchParams } from "next/navigation";
 
 function CoachPageContent() {
@@ -119,6 +120,7 @@ function CoachPageContent() {
           {[
             { key: "packages", label: "My Packages" },
             { key: "members", label: "My Students" },
+            { key: "messages", label: "Messages" },
             { key: "profile", label: "My Profile" },
           ].map((tab) => (
             <button
@@ -142,6 +144,8 @@ function CoachPageContent() {
           <CoachMyPackages token={token || ""} />
         ) : activeTab === "members" ? (
           <CoachMembers token={token || ""} />
+        ) : activeTab === "messages" ? (
+          <CoachMessages token={token || ""} />
         ) : (
           <div className="py-20 text-center text-slate-400">
             Select a tab to manage your academy.

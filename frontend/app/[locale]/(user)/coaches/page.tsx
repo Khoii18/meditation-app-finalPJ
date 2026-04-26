@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Star, Clock, CheckCircle2, X, ChevronRight,
   Sparkles, Users, Award, BookOpen, Loader2, PlayCircle, Lock, Crown,
-  ShieldCheck, Mail, QrCode, CreditCard, AlertCircle, Check
+  ShieldCheck, Mail, QrCode, CreditCard, AlertCircle, Check, Send
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { AuthGateway } from "@/components/auth/AuthGateway";
@@ -42,13 +42,73 @@ interface Coach {
 }
 
 function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => void }) {
-  const { isLoggedIn, token, isPaid, subscribedCoachIds, purchasedPackageIds, refetch } = useAuth();
+  const { isLoggedIn, user, token, isPaid, purchasedPackageIds, refetch } = useAuth();
   const [playingMedia, setPlayingMedia] = useState<{ url: string; thumbnail?: string; planName?: string; exTitle?: string } | null>(null);
   const [subscribing, setSubscribing] = useState<string | null>(null);
   const [paymentData, setPaymentData] = useState<any>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
   const [showAuthGateway, setShowAuthGateway] = useState(false);
+
+  // New States for Messaging & Reviews
+  const [messageInput, setMessageInput] = useState("");
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
+  const [userRating, setUserRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [isPostingReview, setIsPostingReview] = useState(false);
+  const [coachReviews, setCoachReviews] = useState<any[]>([]);
+  const [isReviewsLoading, setIsReviewsLoading] = useState(true);
+  const [showChatModal, setShowChatModal] = useState(false);
+
+  useEffect(() => {
+    fetchReviews();
+  }, [coach._id]);
+
+  const fetchReviews = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/reviews/coach/${coach._id}`);
+      const data = await res.json();
+      if (Array.isArray(data)) setCoachReviews(data);
+    } catch (e) {
+    } finally {
+      setIsReviewsLoading(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!isLoggedIn) { setShowAuthGateway(true); return; }
+    setIsSendingMessage(true);
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ receiverId: coach._id, content: messageInput })
+      });
+      setMessageInput("");
+      alert("Tin nhắn đã được gửi tới Coach!");
+    } catch (e) {
+    } finally {
+      setIsSendingMessage(false);
+    }
+  };
+
+  const handlePostReview = async () => {
+    if (!isLoggedIn) { setShowAuthGateway(true); return; }
+    setIsPostingReview(true);
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/reviews`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ coachId: coach._id, rating: userRating, comment: reviewComment })
+      });
+      setReviewComment("");
+      setUserRating(0);
+      fetchReviews();
+    } catch (e) {
+    } finally {
+      setIsPostingReview(false);
+    }
+  };
 
   const profile = coach.coachProfile || {};
   const plans = profile.plans || [];
@@ -152,7 +212,15 @@ function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => voi
                <div><p className="text-xl font-bold text-slate-900 dark:text-white">4.9</p><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rating</p></div>
              </div>
              <div className="w-full space-y-3">
-               <button className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-bold text-sm">Send Message</button>
+               <button 
+                 onClick={() => {
+                   if (!isLoggedIn) { setShowAuthGateway(true); return; }
+                   setShowChatModal(true);
+                 }}
+                 className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-bold text-sm hover:scale-[1.02] transition-transform shadow-lg active:scale-95"
+               >
+                 Send Message
+               </button>
              </div>
           </div>
 
@@ -238,12 +306,125 @@ function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => voi
                   <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-serif italic">"{profile.bio}"</p>
                 </section>
               )}
+
+              {/* Review & Rating Section */}
+              <section>
+                <div className="flex items-center justify-between mb-10">
+                  <h3 className="text-3xl font-serif font-medium text-slate-900 dark:text-white">Community Reviews</h3>
+                  <div className="h-[1px] flex-1 mx-10 bg-slate-100 dark:border-white/5" />
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-10">
+                   {/* Post Review Form */}
+                   <div className="md:col-span-1 space-y-6">
+                      <div className="bg-indigo-500/5 rounded-3xl p-8 border border-indigo-500/10">
+                        <p className="text-xs font-black uppercase tracking-widest text-indigo-500 mb-6">Leave a Review</p>
+                        
+                        <div className="flex gap-2 mb-6">
+                          {[1, 2, 3, 4, 5].map(star => (
+                            <button 
+                              key={star} 
+                              onClick={() => setUserRating(star)}
+                              className={`transition-all ${userRating >= star ? 'text-amber-400 scale-110' : 'text-slate-300'}`}
+                            >
+                              <Star className="w-6 h-6 fill-current" />
+                            </button>
+                          ))}
+                        </div>
+
+                        <textarea 
+                          value={reviewComment}
+                          onChange={(e) => setReviewComment(e.target.value)}
+                          placeholder="Chia sẻ trải nghiệm của bạn..."
+                          className="w-full bg-white dark:bg-[#0A0A0B] border border-indigo-100 dark:border-white/10 rounded-2xl p-4 text-xs min-h-[100px] mb-4 focus:outline-none"
+                        />
+
+                        <button 
+                          onClick={handlePostReview}
+                          disabled={isPostingReview || userRating === 0}
+                          className="w-full py-4 bg-indigo-500 text-white rounded-2xl font-bold text-xs shadow-lg shadow-indigo-500/20 hover:bg-indigo-600 transition-colors disabled:opacity-50"
+                        >
+                          {isPostingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : "Đăng đánh giá"}
+                        </button>
+                      </div>
+                   </div>
+
+                   {/* Reviews List */}
+                   <div className="md:col-span-2 space-y-6">
+                      {isReviewsLoading ? (
+                        <div className="py-20 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-slate-200" /></div>
+                      ) : coachReviews.length === 0 ? (
+                        <div className="py-20 text-center bg-slate-50 dark:bg-white/5 rounded-[2.5rem] border border-dashed border-slate-200 dark:border-white/10">
+                           <p className="text-slate-400 text-sm">Chưa có đánh giá nào. Hãy là người đầu tiên!</p>
+                        </div>
+                      ) : (
+                        coachReviews.map((rev: any, i: number) => (
+                          <div key={i} className="p-8 bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-[2rem] shadow-sm flex gap-5">
+                             <img src={rev.userId?.avatar || "/default-avatar.png"} className="w-12 h-12 rounded-2xl object-cover shrink-0" />
+                             <div className="space-y-2 flex-1">
+                                <div className="flex justify-between items-center">
+                                   <h4 className="font-bold text-slate-900 dark:text-white text-sm">{rev.userId?.name}</h4>
+                                   <span className="text-[10px] text-slate-400">{new Date(rev.createdAt).toLocaleDateString()}</span>
+                                </div>
+                                <div className="flex gap-1">
+                                   {[...Array(5)].map((_, si) => <Star key={si} className={`w-3 h-3 fill-current ${si < rev.rating ? 'text-amber-400' : 'text-slate-200'}`} />)}
+                                </div>
+                                <p className="text-sm text-slate-500 dark:text-slate-300 leading-relaxed italic">"{rev.comment}"</p>
+                             </div>
+                          </div>
+                        ))
+                      )}
+                   </div>
+                </div>
+              </section>
             </div>
           </div>
         </motion.div>
       </motion.div>
 
       <AnimatePresence>
+        {showChatModal && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowChatModal(false)} />
+             <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="relative bg-white dark:bg-[#121214] w-full max-w-lg rounded-[2.5rem] p-10 shadow-2xl border border-white/10">
+                <button onClick={() => setShowChatModal(false)} className="absolute top-8 right-8 p-2 text-slate-400 hover:text-rose-500"><X className="w-5 h-5" /></button>
+                
+                <div className="flex items-center gap-5 mb-10">
+                  <img src={profile.avatar} className="w-16 h-16 rounded-2xl object-cover" />
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">Message {coach.name}</h3>
+                    <p className="text-sm text-slate-400">Gửi tin nhắn trực tiếp cho Mentor của bạn</p>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Your Message</label>
+                    <textarea 
+                      value={messageInput}
+                      onChange={(e) => setMessageInput(e.target.value)}
+                      placeholder="Bạn muốn hỏi gì về lộ trình này?"
+                      className="w-full bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-3xl p-6 text-sm text-slate-900 dark:text-white min-h-[180px] focus:outline-none focus:border-indigo-500 transition-all resize-none"
+                    />
+                  </div>
+
+                  <button 
+                    onClick={async () => {
+                      await handleSendMessage();
+                      setShowChatModal(false);
+                    }}
+                    disabled={isSendingMessage || !messageInput.trim()}
+                    className="w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[2rem] font-bold text-sm shadow-2xl flex items-center justify-center gap-3 hover:-translate-y-1 transition-all disabled:opacity-50"
+                  >
+                    {isSendingMessage ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                    Gửi tin nhắn ngay
+                  </button>
+                  <p className="text-center text-[10px] text-slate-400 font-medium">Coach thường phản hồi trong vòng 24h</p>
+                </div>
+             </motion.div>
+          </div>
+        )}
+
         {showPaymentModal && paymentData && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/80 backdrop-blur-md" onClick={() => setShowPaymentModal(false)} />

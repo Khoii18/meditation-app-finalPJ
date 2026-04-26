@@ -142,10 +142,23 @@ export function MeditationPlayerUI({ id }: MeditationPlayerUIProps) {
     ? content.audioUrl 
     : "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
 
+  const handleComplete = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/journey/complete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ contentId: id, durationMinutes: content?.duration ? parseInt(content.duration) : 5 })
+      });
+    } catch (e) {
+      console.error("Failed to complete session", e);
+    }
+  };
+
   return (
     <div className={`fixed inset-0 z-[100] flex flex-col font-sans overflow-hidden transition-colors duration-1000`} style={{ backgroundColor: bgColor }}>
       
-      <audio ref={audioRef} src={audioSrc} preload="auto" onEnded={() => setIsPlaying(false)} />
+      <audio ref={audioRef} src={audioSrc} preload="auto" onEnded={() => { setIsPlaying(false); handleComplete(); }} />
 
       {/* Top Bar */}
       <div className="relative z-20 flex justify-between items-start px-8 py-10">
