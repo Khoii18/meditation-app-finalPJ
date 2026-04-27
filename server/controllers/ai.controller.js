@@ -149,7 +149,6 @@ export const chatWithLunaria = async (req, res) => {
     const { prompt } = req.body;
     if (!prompt) return res.status(400).json("Input required.");
 
-    // 1. Fetch some content from DB to provide context/suggestions
     const keywords = prompt.toLowerCase().split(' ').filter(w => w.length > 3);
     let searchCriteria = {};
     if (keywords.length > 0) {
@@ -164,7 +163,6 @@ export const chatWithLunaria = async (req, res) => {
     const suggestions = await Content.find(searchCriteria).limit(3);
     const contextStr = suggestions.map(s => `[${s.type}: ${s.title} (ID: ${s._id})]`).join(', ');
 
-    // 2. Build system prompt for Mistral
     const systemPrompt = `You are Lunaria, a wise and compassionate Ancient Zen Guide.
     User says: "${prompt}"
     Available Content for Recommendation: ${contextStr || "None specifically matching, suggest general mindfulness."}
@@ -180,7 +178,6 @@ export const chatWithLunaria = async (req, res) => {
       "suggestedId": "ID of the most relevant content or null"
     }`;
 
-    // 3. Call Mistral (Ollama)
     const response = await fetch("http://localhost:11434/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -214,7 +211,6 @@ export const chatWithLunaria = async (req, res) => {
 
   } catch (error) {
     console.error("Chat Controller Error:", error.message);
-    // Fallback to standard response if AI fails
     const fallback = generateStandardResponse(prompt);
     res.json({
       message: fallback.message,

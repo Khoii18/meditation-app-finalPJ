@@ -3,7 +3,6 @@ import Checkin from "../models/checkin.model.js";
 import Content from "../models/content.model.js";
 import bcrypt from "bcryptjs";
 
-// Public: get all coaches with their profiles and packages
 export const getAllCoaches = async (req, res) => {
   try {
     const coaches = await User.find({ role: "coach" })
@@ -15,7 +14,6 @@ export const getAllCoaches = async (req, res) => {
   }
 };
 
-// Public: get a single coach by ID
 export const getCoachById = async (req, res) => {
   try {
     const coach = await User.findOne({ _id: req.params.id, role: "coach" })
@@ -27,7 +25,6 @@ export const getCoachById = async (req, res) => {
   }
 };
 
-// Coach: update own coach profile & packages
 export const updateCoachProfile = async (req, res) => {
   try {
     const { bio, specialties, avatar, plans, introVideo } = req.body;
@@ -135,8 +132,7 @@ export const onboardUser = async (req, res) => {
 
     user.onboardingAnswers = { goals, experience };
 
-    // Balance App Logic: Assign personalized plan
-    let planTitle = "Foundations"; // Default for 'new'
+    let planTitle = "Foundations";
     if (goals.includes("stress")) planTitle = "Relaxation";
     else if (goals.includes("sleep")) planTitle = "Sleep";
     else if (experience === "often") planTitle = "Advanced";
@@ -144,9 +140,8 @@ export const onboardUser = async (req, res) => {
     const selectedPlan = await Content.findOne({ type: { $regex: /plan/i }, title: { $regex: new RegExp(planTitle, "i") } });
     if (selectedPlan) {
       user.activePlan = selectedPlan._id;
-      user.planProgress = 0; // start at day 1
+      user.planProgress = 0;
     } else {
-      // Fallback
       const anyPlan = await Content.findOne({ type: { $regex: /plan/i } });
       if (anyPlan) user.activePlan = anyPlan._id;
     }
@@ -158,7 +153,6 @@ export const onboardUser = async (req, res) => {
   }
 };
 
-// Admin: get all users with stats
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find().select("-password").sort({ createdAt: -1 });
@@ -168,7 +162,6 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-// Admin: get mood analytics across all users
 export const getMoodAnalytics = async (req, res) => {
   try {
     const days = parseInt(req.query.days) || 30;
@@ -181,7 +174,6 @@ export const getMoodAnalytics = async (req, res) => {
       .populate('userId', 'name')
       .sort({ date: -1 });
 
-    // Mood distribution
     const moodCount = { Angry: 0, Sad: 0, Neutral: 0, Peaceful: 0, Happy: 0 };
     const sleepCount = {};
     const energyCount = {};
@@ -220,7 +212,6 @@ export const getUserCheckins = async (req, res) => {
   }
 };
 
-// Admin: update a user's role
 export const updateUserRole = async (req, res) => {
   try {
     const { role } = req.body;
@@ -237,7 +228,6 @@ export const updateUserRole = async (req, res) => {
   }
 };
 
-// Admin: delete a user
 export const deleteUser = async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
@@ -247,7 +237,6 @@ export const deleteUser = async (req, res) => {
     res.status(500).json(err.message);
   }
 };
-// User: claim a streak reward
 export const claimReward = async (req, res) => {
   try {
     const { rewardId } = req.body;
@@ -258,7 +247,6 @@ export const claimReward = async (req, res) => {
       return res.status(400).json("Reward already claimed");
     }
 
-    // Define reward requirements (logic should match frontend)
     const rewardsMap = {
       "streak-1": 1,
       "streak-3": 3,
@@ -270,9 +258,6 @@ export const claimReward = async (req, res) => {
     const required = rewardsMap[rewardId];
     if (!required) return res.status(400).json("Invalid reward ID");
 
-    // Check if user has ever achieved this streak (using longestStreak for logic)
-    // Or currentStreak if it's meant to be "reach it while active"
-    // Usually rewards are based on achievements, so longestStreak is safer
     if (user.stats.longestStreak < required) {
       return res.status(400).json(`You need a ${required}-day streak to claim this reward.`);
     }

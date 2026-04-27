@@ -9,12 +9,10 @@ export const generateSignature = (req, res) => {
     });
 
     const timestamp = Math.round((new Date).getTime() / 1000);
-    
-    // Yêu cầu thư mục nhận file (phải giống hệt lúc upload)
+
     const folder = "meditation-app-packages";
     const resource_type = "auto";
 
-    // Khóa ký bao gồm cả folder và resource_type nếu frontend gửi lên
     const signature = cloudinary.utils.api_sign_request({
       timestamp: timestamp,
       folder: folder,

@@ -10,7 +10,6 @@
   --border: #E0F2F0;
 }
 
-/* Force override when .dark class is present on html or body */
 html.dark, body.dark, .dark {
   --background: #080C0B !important;
   --foreground: #F8FAFC !important;
@@ -39,7 +38,6 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Scrollbar hidden globally for clean look */
 * {
   scrollbar-width: thin;
   scrollbar-color: #99F6E4 transparent;
@@ -54,7 +52,6 @@ body {
   border-radius: 9999px;
 }
 
-/* Smooth page transitions */
 html {
   scroll-behavior: smooth;
 }

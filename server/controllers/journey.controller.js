@@ -76,7 +76,6 @@ export const completeSession = async (req, res) => {
     const content = await Content.findById(contentId);
     if (!content) return res.status(404).json("Content not found");
 
-    // Map content subject/type to skills
     let skillToUpdate = "focus";
     const sub = (content.subject || "").toLowerCase();
     const type = (content.type || "").toLowerCase();
@@ -86,7 +85,6 @@ export const completeSession = async (req, res) => {
     else if (sub.includes("awareness") || sub.includes("labeling") || sub.includes("nhận thức")) skillToUpdate = "awareness";
     else skillToUpdate = "breathControl";
 
-    // Update User
     await User.findByIdAndUpdate(userId, {
       $inc: { 
         [`skills.${skillToUpdate}`]: 5,
@@ -95,7 +93,6 @@ export const completeSession = async (req, res) => {
       }
     });
 
-    // Log Workout
     await Workout.create({
       userId,
       contentTitle: content.title,

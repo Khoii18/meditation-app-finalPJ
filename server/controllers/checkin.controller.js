@@ -5,7 +5,6 @@ export const addCheckin = async (req, res) => {
   try {
     const { sleep, energy, goal, mood, moodNote } = req.body;
     
-    // YYYY-MM-DD
     const today = new Date().toISOString().split('T')[0];
 
     const userId = req.user.id;
@@ -13,33 +12,26 @@ export const addCheckin = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Ensure stats object exists
     if (!user.stats) {
       user.stats = { currentStreak: 0, longestStreak: 0, totalSessions: 0, mindfulMinutes: 0, lastCheckInDate: null };
     }
 
-    // Checking if already checked in today
     if (user.stats.lastCheckInDate === today) {
       return res.status(400).json({ message: "Already checked in today.", streak: user.stats.currentStreak });
     }
 
-    // Logic for Streak
     let newStreak = 1;
 
     if (user.stats.lastCheckInDate) {
-      // Compare YYYY-MM-DD strings directly to avoid timezone issues
       const last = new Date(user.stats.lastCheckInDate + "T00:00:00Z");
       const curr = new Date(today + "T00:00:00Z");
       const diffDays = Math.round((curr - last) / (1000 * 60 * 60 * 24));
 
       if (diffDays === 1) {
-        // Consecutive day → continue streak
         newStreak = user.stats.currentStreak + 1;
       } else if (diffDays === 0) {
-        // Same day — shouldn't happen (caught above), but just in case
         newStreak = user.stats.currentStreak;
       }
-      // diffDays > 1 → missed a day → streak resets to 1
     }
 
     user.stats.currentStreak = newStreak;
@@ -80,8 +72,6 @@ export const updateMood = async (req, res) => {
     let checkin = await Checkin.findOne({ userId, date: today });
 
     if (!checkin) {
-      // If no check-in exists, we create one. 
-      // This counts as a daily check-in, so we MUST update the streak as well.
       const user = await User.findById(userId);
       if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -89,7 +79,6 @@ export const updateMood = async (req, res) => {
         user.stats = { currentStreak: 0, longestStreak: 0, totalSessions: 0, mindfulMinutes: 0, lastCheckInDate: null };
       }
 
-      // Check if they already checked in today (just in case)
       if (user.stats.lastCheckInDate !== today) {
         let newStreak = 1;
         if (user.stats.lastCheckInDate) {
@@ -130,4 +119,3 @@ export const updateMood = async (req, res) => {
     res.status(500).json(error.message);
   }
 };
-

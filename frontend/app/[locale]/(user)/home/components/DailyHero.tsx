@@ -78,7 +78,7 @@ export function DailyHero() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="relative w-full h-[300px] rounded-[2.5rem] overflow-hidden cursor-pointer group shadow-xl border border-white/10"
+          className="relative w-full h-[300px] rounded-3xl md:rounded-[2.5rem] overflow-hidden cursor-pointer group shadow-xl border border-white/10"
         >
           {/* Unified Background Layer */}
           <div className="absolute inset-0 z-0 h-[300px]">

@@ -2,14 +2,12 @@ import User from "../models/user.model.js";
 import Subscription from "../models/subscription.model.js";
 import Checkin from "../models/checkin.model.js";
 
-// ─── Public: Get all coaches ──────────────────────────────────────────────────
 export const getCoaches = async (req, res) => {
   try {
     const coaches = await User.find({ role: "coach" })
       .select("name coachProfile createdAt")
       .lean();
 
-    // Attach member counts
     const withCounts = await Promise.all(coaches.map(async (c) => {
       const memberCount = await Subscription.countDocuments({ coachId: c._id, status: "active" });
       return { ...c, memberCount };
@@ -21,7 +19,6 @@ export const getCoaches = async (req, res) => {
   }
 };
 
-// ─── Public: Get single coach ─────────────────────────────────────────────────
 export const getCoachById = async (req, res) => {
   try {
     const coach = await User.findOne({ _id: req.params.id, role: "coach" })
@@ -35,17 +32,14 @@ export const getCoachById = async (req, res) => {
   }
 };
 
-// ─── User: Subscribe to a coach ───────────────────────────────────────────────
 export const subscribe = async (req, res) => {
   try {
     const { coachId, planName } = req.body;
     const userId = req.user.id;
 
-    // Verify coach exists
     const coach = await User.findOne({ _id: coachId, role: "coach" });
     if (!coach) return res.status(404).json("Coach not found");
 
-    // Upsert subscription
     const sub = await Subscription.findOneAndUpdate(
       { userId, coachId },
       { planName, status: "active", startDate: new Date() },
@@ -57,7 +51,6 @@ export const subscribe = async (req, res) => {
   }
 };
 
-// ─── User: Cancel subscription ────────────────────────────────────────────────
 export const unsubscribe = async (req, res) => {
   try {
     const { coachId } = req.params;
@@ -71,7 +64,6 @@ export const unsubscribe = async (req, res) => {
   }
 };
 
-// ─── User: Get my subscriptions ───────────────────────────────────────────────
 export const getMySubscriptions = async (req, res) => {
   try {
     const subs = await Subscription.find({ userId: req.user.id, status: "active" })
@@ -82,14 +74,12 @@ export const getMySubscriptions = async (req, res) => {
   }
 };
 
-// ─── Coach: Get member stats (NO personal info, aggregate only) ───────────────
 export const getMyMemberStats = async (req, res) => {
   try {
     const coachId = req.user.id;
 
-    // Get all active subscribers
     const subs = await Subscription.find({ coachId, status: "active" })
-      .populate("userId", "stats"); // only stats, NO name/email
+      .populate("userId", "stats");
 
     const totalMembers  = subs.length;
     const avgStreak     = subs.reduce((sum, s) => sum + (s.userId?.stats?.currentStreak || 0), 0) / (totalMembers || 1);
@@ -99,7 +89,6 @@ export const getMyMemberStats = async (req, res) => {
       return s.userId?.stats?.lastCheckInDate === today;
     }).length;
 
-    // Aggregate mood data for members only
     const memberIds = subs.map(s => s.userId?._id).filter(Boolean);
     const since30   = new Date(); since30.setDate(since30.getDate() - 30);
     const since30Str = since30.toISOString().split("T")[0];
@@ -114,7 +103,6 @@ export const getMyMemberStats = async (req, res) => {
       if (c.mood && moodCount[c.mood] !== undefined) moodCount[c.mood]++;
     });
 
-    // Plan distribution
     const planDist = subs.reduce((acc, s) => {
       acc[s.planName] = (acc[s.planName] || 0) + 1;
       return acc;
@@ -134,7 +122,6 @@ export const getMyMemberStats = async (req, res) => {
   }
 };
 
-// ─── Coach: Get detailed list of members ──────────────────────────────────────
 export const getMyMembers = async (req, res) => {
   try {
     const coachId = req.user.id;
@@ -148,7 +135,6 @@ export const getMyMembers = async (req, res) => {
   }
 };
 
-// ─── Coach: Update my coach profile ──────────────────────────────────────────
 export const updateCoachProfile = async (req, res) => {
   try {
     const { bio, specialties, avatar, plans } = req.body;

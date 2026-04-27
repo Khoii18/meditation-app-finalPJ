@@ -1,9 +1,6 @@
 import Transaction from "../models/transaction.model.js";
 import User from "../models/user.model.js";
 
-/**
- * 1. Tạo QR thanh toán & Lưu vào DB (Pending)
- */
 export const generatePaymentQR = async (req, res) => {
   try {
     const { amount, planId, description } = req.body;
@@ -44,9 +41,6 @@ export const generatePaymentQR = async (req, res) => {
   }
 };
 
-/**
- * 2. Xử lý Webhook từ SePay (Nâng cấp Gói cước thực tế)
- */
 export const handleSepayWebhook = async (req, res) => {
   try {
     const payload = req.body;
@@ -66,13 +60,11 @@ export const handleSepayWebhook = async (req, res) => {
 
     if (!transaction) return res.status(200).send("Transaction not found");
 
-    // 1. Cập nhật trạng thái giao dịch
     transaction.status = "COMPLETED";
     transaction.sepayTransactionId = sepayId;
     transaction.transactionDate = new Date();
     await transaction.save();
 
-    // 2. Xử lý quyền lợi (Subscription hoặc Coach Package)
     const subscriptionPlans = ["monthly", "annual", "lifetime"];
     
     if (subscriptionPlans.includes(transaction.planId)) {
@@ -97,14 +89,11 @@ export const handleSepayWebhook = async (req, res) => {
       });
       console.log(`User ${transaction.userId} upgraded to ${transaction.planId}`);
     } else {
-      // It's a specific coach package
       await User.findByIdAndUpdate(transaction.userId, {
         $addToSet: { purchasedPackages: transaction.planId }
       });
       console.log(`User ${transaction.userId} purchased coach package: ${transaction.planId}`);
     }
-
-    console.log(`User ${transaction.userId} upgraded to ${transaction.planId} until ${expiryDate}`);
 
     return res.status(200).send("OK");
   } catch (error) {
@@ -113,9 +102,6 @@ export const handleSepayWebhook = async (req, res) => {
   }
 };
 
-/**
- * 2.5 Giả lập thanh toán thành công (Cho môi trường Dev/Local)
- */
 export const simulatePayment = async (req, res) => {
   try {
     const { transactionCode } = req.body;
@@ -127,13 +113,11 @@ export const simulatePayment = async (req, res) => {
 
     if (!transaction) return res.status(404).json({ message: "Transaction not found or already completed." });
 
-    // 1. Cập nhật trạng thái giao dịch
     transaction.status = "COMPLETED";
     transaction.sepayTransactionId = `MOCK_${Date.now()}`;
     transaction.transactionDate = new Date();
     await transaction.save();
 
-    // 2. Xử lý quyền lợi
     const subscriptionPlans = ["monthly", "annual", "lifetime"];
     if (subscriptionPlans.includes(transaction.planId)) {
       const now = new Date();
@@ -162,9 +146,6 @@ export const simulatePayment = async (req, res) => {
   }
 };
 
-/**
- * 3. Lấy danh sách giao dịch cho Admin
- */
 export const getAllTransactions = async (req, res) => {
   try {
     const transactions = await Transaction.find()
@@ -176,9 +157,6 @@ export const getAllTransactions = async (req, res) => {
   }
 };
 
-/**
- * 4. Xử lý giao dịch thủ công (dành cho Admin, để vá các giao dịch cũ/lỗi)
- */
 export const resolveTransaction = async (req, res) => {
   try {
     const { transactionId, planId } = req.body;
@@ -186,13 +164,11 @@ export const resolveTransaction = async (req, res) => {
     const transaction = await Transaction.findById(transactionId);
     if (!transaction) return res.status(404).json({ message: "Transaction not found" });
 
-    // Cập nhật giao dịch
     transaction.status = "COMPLETED";
     transaction.planId = planId;
     transaction.transactionDate = new Date();
     await transaction.save();
 
-    // Tính toán thời hạn gói cước
     const now = new Date();
     let expiryDate = new Date();
     if (planId === "monthly") {
@@ -203,7 +179,6 @@ export const resolveTransaction = async (req, res) => {
       expiryDate.setFullYear(now.getFullYear() + 99);
     }
 
-    // Cập nhật User
     await User.findByIdAndUpdate(transaction.userId, {
       $set: {
         "premiumStatus.isPremium": true,
@@ -219,9 +194,6 @@ export const resolveTransaction = async (req, res) => {
   }
 };
 
-/**
- * 5. Từ chối giao dịch & Thu hồi quyền lợi (Admin)
- */
 export const rejectTransaction = async (req, res) => {
   try {
     const { transactionId } = req.body;
@@ -231,7 +203,6 @@ export const rejectTransaction = async (req, res) => {
     transaction.status = "FAILED";
     await transaction.save();
 
-    // Thu hồi quyền lợi (trở về free)
     await User.findByIdAndUpdate(transaction.userId, {
       $set: {
         "premiumStatus.isPremium": false,
@@ -246,9 +217,6 @@ export const rejectTransaction = async (req, res) => {
   }
 };
 
-/**
- * 6. Xoá giao dịch (Admin)
- */
 export const deleteTransaction = async (req, res) => {
   try {
     await Transaction.findByIdAndDelete(req.params.id);

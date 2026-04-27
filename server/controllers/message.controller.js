@@ -13,11 +13,10 @@ export const sendMessage = async (req, res) => {
       isAdminChat
     });
 
-    // Auto-reply logic for Admin
     if (isAdminChat) {
       setTimeout(async () => {
         await Message.create({
-          senderId: receiverId, // Admin ID
+          senderId: receiverId,
           receiverId: senderId,
           content: "Xin chào! Đây là tin nhắn tự động từ hệ thống Lunaria. Chúng tôi đã tiếp nhận yêu cầu của bạn về vấn đề tài khoản/thanh toán. Một nhân viên hỗ trợ sẽ phản hồi bạn sớm nhất có thể. Cảm ơn bạn đã kiên nhẫn!",
           isAdminChat: true,
