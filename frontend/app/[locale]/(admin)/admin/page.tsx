@@ -9,6 +9,7 @@ import { EmotionsAnalytics } from "../components/EmotionsAnalytics";
 import { PaymentsManagement } from "../components/PaymentsManagement";
 import { RoutineManagement } from "../components/RoutineManagement";
 import { AdminMessages } from "../components/AdminMessages";
+import { SessionStatsPanel } from "../components/SessionStatsPanel";
 import { useSearchParams } from "next/navigation";
 
 function AdminPageContent() {
@@ -117,6 +118,7 @@ function AdminPageContent() {
     { key: "emotions",    label: "Emotions",      icon: Smile },
     { key: "messages",    label: "Messages",      icon: Mail },
     { key: "routine",     label: "Routine",       icon: CalendarDays },
+    { key: "sessions",    label: "Sessions",      icon: FileText },
   ];
 
   const filteredData = Array.isArray(data) ? data.filter((d: any) => {
@@ -124,9 +126,8 @@ function AdminPageContent() {
     if (activeTab === "soundscapes") return d.type?.toLowerCase().includes("soundscape");
     if (activeTab === "plans") return d.type?.toLowerCase().includes("plan");
     if (activeTab === "content") return !d.type?.toLowerCase().includes("sleep") && !d.type?.toLowerCase().includes("plan") && !d.type?.toLowerCase().includes("soundscape");
-    return true; // live, users, emotions
+    return true;
   }) : [];
-
   return (
     <div className="p-8 pb-32 font-sans text-slate-800">
       <div className="max-w-6xl mx-auto">
@@ -137,7 +138,7 @@ function AdminPageContent() {
             <h1 className="text-3xl font-serif font-bold text-slate-800">Admin Dashboard</h1>
             <p className="text-slate-500 mt-1">Manage Oasis app content & users</p>
           </div>
-          {activeTab !== "users" && activeTab !== "payments" && activeTab !== "emotions" && (
+          {activeTab !== "users" && activeTab !== "payments" && activeTab !== "emotions" && activeTab !== "sessions" && (
             <button
               onClick={() => { setFormData({}); setShowModal(true); }}
               className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-semibold transition-all shadow-sm shadow-teal-500/20"
@@ -159,6 +160,8 @@ function AdminPageContent() {
           <AdminMessages token={token || ""} />
         ) : activeTab === "routine" ? (
           <RoutineManagement token={token || ""} />
+        ) : activeTab === "sessions" ? (
+          <SessionStatsPanel token={token || ""} />
         ) : (
           <AdminTable
             data={filteredData}

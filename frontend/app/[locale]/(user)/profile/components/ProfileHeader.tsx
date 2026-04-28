@@ -79,7 +79,7 @@ export function ProfileHeader() {
   return (
     <div className="flex items-center gap-6 mb-8 bg-surface p-8 rounded-[2.5rem] border border-border shadow-sm transition-colors duration-500">
       <div className="relative group w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-white text-3xl font-serif uppercase shadow-inner overflow-hidden">
-        {user?.avatar ? (
+        {user?.avatar && user.avatar !== "" ? (
           <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
         ) : (
           initial

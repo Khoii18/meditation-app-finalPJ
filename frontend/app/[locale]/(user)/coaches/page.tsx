@@ -5,10 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Star, Clock, CheckCircle2, X, ChevronRight,
   Sparkles, Users, Award, BookOpen, Loader2, PlayCircle, Lock, Crown,
-  ShieldCheck, Mail, QrCode, CreditCard, AlertCircle, Check, Send
+  ShieldCheck, Mail, Check, Send
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useRouter, usePathname } from "next/navigation";
 import { AuthGateway } from "@/components/auth/AuthGateway";
+import { API_URL } from "@/config";
 
 interface Exercise {
   title: string;
@@ -43,14 +45,11 @@ interface Coach {
 
 function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => void }) {
   const { isLoggedIn, user, token, isPaid, purchasedPackageIds, refetch } = useAuth();
+  const router = useRouter();
   const [playingMedia, setPlayingMedia] = useState<{ url: string; thumbnail?: string; planName?: string; exTitle?: string } | null>(null);
-  const [subscribing, setSubscribing] = useState<string | null>(null);
-  const [paymentData, setPaymentData] = useState<any>(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [isSimulating, setIsSimulating] = useState(false);
   const [showAuthGateway, setShowAuthGateway] = useState(false);
 
-  // New States for Messaging & Reviews
+
   const [messageInput, setMessageInput] = useState("");
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [userRating, setUserRating] = useState(0);
@@ -60,16 +59,20 @@ function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => voi
   const [isReviewsLoading, setIsReviewsLoading] = useState(true);
   const [showChatModal, setShowChatModal] = useState(false);
 
+  const pathname = usePathname();
+  const locale = pathname.split('/')[1] || 'vi';
+
   useEffect(() => {
     fetchReviews();
   }, [coach._id]);
 
   const fetchReviews = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/reviews/coach/${coach._id}`);
+      const res = await fetch(`${API_URL}/api/reviews/coach/${coach._id}`);
       const data = await res.json();
       if (Array.isArray(data)) setCoachReviews(data);
     } catch (e) {
+      console.error("Reviews fetch failed", e);
     } finally {
       setIsReviewsLoading(false);
     }
@@ -79,14 +82,15 @@ function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => voi
     if (!isLoggedIn) { setShowAuthGateway(true); return; }
     setIsSendingMessage(true);
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/messages`, {
+      await fetch(`${API_URL}/api/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ receiverId: coach._id, content: messageInput })
       });
       setMessageInput("");
-      alert("Tin nhắn đã được gửi tới Coach!");
+      alert("Message sent to Coach!");
     } catch (e) {
+      console.error("Message send failed", e);
     } finally {
       setIsSendingMessage(false);
     }
@@ -96,7 +100,7 @@ function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => voi
     if (!isLoggedIn) { setShowAuthGateway(true); return; }
     setIsPostingReview(true);
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/reviews`, {
+      await fetch(`${API_URL}/api/reviews`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ coachId: coach._id, rating: userRating, comment: reviewComment })
@@ -105,63 +109,14 @@ function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => voi
       setUserRating(0);
       fetchReviews();
     } catch (e) {
+      console.error("Review post failed", e);
     } finally {
       setIsPostingReview(false);
     }
   };
 
-  const profile = coach.coachProfile || {};
-  const plans = profile.plans || [];
-  const specialties = profile.specialties || [];
-
-  const handleSubscribe = async (planName: string, price: number) => {
-    if (!isLoggedIn) {
-      setShowAuthGateway(true);
-      return;
-    }
-    if (!token) return;
-    setSubscribing(planName);
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/payment/create-qr`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
-          amount: price * 25000,
-          planId: planName,
-          description: `Enroll in ${planName} by ${coach.name}`
-        })
-      });
-      const result = await res.json();
-      if (result.success) {
-        setPaymentData(result.data);
-        setShowPaymentModal(true);
-      }
-    } catch (e) {
-      console.error("Payment initiation failed", e);
-    } finally {
-      setSubscribing(null);
-    }
-  };
-
-  const simulatePayment = async () => {
-    if (!paymentData || isSimulating) return;
-    setIsSimulating(true);
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/payment/simulate-payment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transactionCode: paymentData.content })
-      });
-      const result = await res.json();
-      if (result.success) {
-        refetch();
-        setShowPaymentModal(false);
-        setPaymentData(null);
-      }
-    } catch (e) {
-    } finally {
-      setIsSimulating(false);
-    }
+  const handleGetPremium = () => {
+    router.push(`/${locale}/pricing`);
   };
 
   const renderVideoPlayer = (url: string, thumbnail?: string) => {
@@ -191,12 +146,15 @@ function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => voi
     );
   };
 
+  const profile = coach.coachProfile || {};
+  const plans = profile.plans || [];
+  const specialties = profile.specialties || [];
+
   return (
     <>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-8">
         <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xl" onClick={onClose} />
         <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="relative w-full max-w-6xl h-[90vh] bg-white dark:bg-[#0A0A0B] rounded-[3.5rem] shadow-2xl overflow-hidden border border-white/20 flex flex-col md:flex-row">
-          {/* Left: Bio */}
           <div className="w-full md:w-80 h-full bg-slate-50 dark:bg-[#121214] border-r border-slate-100 dark:border-white/5 p-10 flex flex-col items-center text-center">
              <div className="relative group mb-8">
                <img src={profile.avatar} alt={coach.name} className="relative w-32 h-32 rounded-[2.5rem] object-cover border-4 border-white dark:border-[#121214] shadow-2xl" />
@@ -211,20 +169,28 @@ function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => voi
                <div className="w-[1px] h-10 bg-slate-200 dark:bg-white/10" />
                <div><p className="text-xl font-bold text-slate-900 dark:text-white">4.9</p><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rating</p></div>
              </div>
-             <div className="w-full space-y-3">
-               <button 
-                 onClick={() => {
-                   if (!isLoggedIn) { setShowAuthGateway(true); return; }
-                   setShowChatModal(true);
-                 }}
-                 className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-bold text-sm hover:scale-[1.02] transition-transform shadow-lg active:scale-95"
-               >
-                 Send Message
-               </button>
+             <div className="w-full">
+                <div className="relative group">
+                  <input 
+                    type="text" 
+                    placeholder="Message Coach..." 
+                    value={messageInput}
+                    onChange={(e) => setMessageInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                    className="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl py-4 pl-5 pr-14 text-[10px] font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 transition-all shadow-sm"
+                  />
+                  <button 
+                    onClick={handleSendMessage}
+                    disabled={isSendingMessage || !messageInput.trim()}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-slate-900 dark:bg-indigo-500 text-white rounded-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all disabled:opacity-50 shadow-lg"
+                  >
+                    {isSendingMessage ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-400 mt-3 font-medium">Coach usually responds within a few hours</p>
              </div>
           </div>
 
-          {/* Right: Content */}
           <div className="flex-1 h-full flex flex-col relative bg-white dark:bg-[#0A0A0B]">
             <button onClick={onClose} className="absolute top-8 right-8 p-3 rounded-full bg-slate-100 dark:bg-white/5 text-slate-400 hover:text-rose-500 z-20"><X className="w-6 h-6" /></button>
             <div className="flex-1 overflow-y-auto p-10 md:p-14 space-y-20 pt-10 custom-scrollbar">
@@ -246,7 +212,7 @@ function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => voi
                           if (canPlay && !playingMedia && plan.exercises?.[0]) {
                             setPlayingMedia({ url: plan.exercises[0].audioUrl, thumbnail: plan.exercises[0].thumbnail, planName: plan.name, exTitle: plan.exercises[0].title });
                           } else if (!canPlay) {
-                            handleSubscribe(plan.name, plan.price);
+                            handleGetPremium();
                           }
                         }}
                       >
@@ -266,7 +232,7 @@ function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => voi
                                   key={ei} 
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    canPlay ? setPlayingMedia({ url: ex.audioUrl, thumbnail: ex.thumbnail, planName: plan.name, exTitle: ex.title }) : handleSubscribe(plan.name, plan.price);
+                                    canPlay ? setPlayingMedia({ url: ex.audioUrl, thumbnail: ex.thumbnail, planName: plan.name, exTitle: ex.title }) : handleGetPremium();
                                   }} 
                                   className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-semibold transition-all hover:translate-x-1 ${
                                     playingMedia?.exTitle === ex.title && playingMedia?.planName === plan.name ? "bg-indigo-500/20 text-indigo-400" : "text-slate-600 dark:text-slate-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10"
@@ -281,18 +247,17 @@ function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => voi
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (!plan.highlighted) return;
-                              if (!isOwned) handleSubscribe(plan.name, plan.price);
+                              if (!isOwned) handleGetPremium();
                             }} 
                             className={`w-full py-4.5 rounded-[1.5rem] font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 ${
                               !plan.highlighted 
                                 ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20" 
                                 : isOwned 
                                   ? "bg-slate-50 dark:bg-white/5 text-slate-400" 
-                                  : "bg-slate-900 dark:bg-indigo-500 text-white shadow-xl hover:bg-indigo-600 hover:-translate-y-0.5"
+                                  : "bg-indigo-600 text-white shadow-xl hover:bg-indigo-700 hover:-translate-y-0.5"
                             }`}
                           >
-                            {subscribing === plan.name ? <Loader2 className="w-4 h-4 animate-spin" /> : !plan.highlighted ? <><CheckCircle2 className="w-4 h-4" /> Free Community Access</> : isOwned ? <><ShieldCheck className="w-5 h-5 opacity-50" /> {isPaid ? "Included with Premium" : "Enrolled"}</> : <><Crown className="w-4 h-4" /> Enroll Now • {(plan.price * 25000).toLocaleString('vi-VN')}đ</>}
+                            {!plan.highlighted ? <><CheckCircle2 className="w-4 h-4" /> Free Community Access</> : isOwned ? <><ShieldCheck className="w-5 h-5 opacity-50" /> {isPaid ? "Included with Premium" : "Enrolled"}</> : <><Crown className="w-4 h-4" /> Get Premium to Unlock</>}
                           </button>
                         </div>
                       </div>
@@ -307,7 +272,6 @@ function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => voi
                 </section>
               )}
 
-              {/* Review & Rating Section */}
               <section>
                 <div className="flex items-center justify-between mb-10">
                   <h3 className="text-3xl font-serif font-medium text-slate-900 dark:text-white">Community Reviews</h3>
@@ -315,7 +279,6 @@ function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => voi
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-10">
-                   {/* Post Review Form */}
                    <div className="md:col-span-1 space-y-6">
                       <div className="bg-indigo-500/5 rounded-3xl p-8 border border-indigo-500/10">
                         <p className="text-xs font-black uppercase tracking-widest text-indigo-500 mb-6">Leave a Review</p>
@@ -335,8 +298,8 @@ function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => voi
                         <textarea 
                           value={reviewComment}
                           onChange={(e) => setReviewComment(e.target.value)}
-                          placeholder="Chia sẻ trải nghiệm của bạn..."
-                          className="w-full bg-white dark:bg-[#0A0A0B] border border-indigo-100 dark:border-white/10 rounded-2xl p-4 text-xs min-h-[100px] mb-4 focus:outline-none"
+                          placeholder="Share your experience..."
+                          className="w-full bg-white dark:bg-[#0A0A0B] border border-indigo-100 dark:border-white/10 rounded-2xl p-4 text-sm text-slate-700 dark:text-white min-h-[100px] mb-4 focus:outline-none focus:border-indigo-500 transition-all"
                         />
 
                         <button 
@@ -344,23 +307,25 @@ function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => voi
                           disabled={isPostingReview || userRating === 0}
                           className="w-full py-4 bg-indigo-500 text-white rounded-2xl font-bold text-xs shadow-lg shadow-indigo-500/20 hover:bg-indigo-600 transition-colors disabled:opacity-50"
                         >
-                          {isPostingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : "Đăng đánh giá"}
+                          {isPostingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : "Post Review"}
                         </button>
                       </div>
                    </div>
 
-                   {/* Reviews List */}
                    <div className="md:col-span-2 space-y-6">
                       {isReviewsLoading ? (
                         <div className="py-20 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-slate-200" /></div>
                       ) : coachReviews.length === 0 ? (
                         <div className="py-20 text-center bg-slate-50 dark:bg-white/5 rounded-[2.5rem] border border-dashed border-slate-200 dark:border-white/10">
-                           <p className="text-slate-400 text-sm">Chưa có đánh giá nào. Hãy là người đầu tiên!</p>
+                           <p className="text-slate-400 text-sm">No reviews yet. Be the first to leave one!</p>
                         </div>
                       ) : (
                         coachReviews.map((rev: any, i: number) => (
                           <div key={i} className="p-8 bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-[2rem] shadow-sm flex gap-5">
-                             <img src={rev.userId?.avatar || "/default-avatar.png"} className="w-12 h-12 rounded-2xl object-cover shrink-0" />
+                             <img 
+                               src={rev.userId?.avatar && rev.userId.avatar !== "" ? rev.userId.avatar : `https://ui-avatars.com/api/?name=${encodeURIComponent(rev.userId?.name || "User")}&background=random&color=fff`} 
+                               className="w-12 h-12 rounded-2xl object-cover shrink-0 border border-slate-100 dark:border-white/10" 
+                             />
                              <div className="space-y-2 flex-1">
                                 <div className="flex justify-between items-center">
                                    <h4 className="font-bold text-slate-900 dark:text-white text-sm">{rev.userId?.name}</h4>
@@ -403,7 +368,7 @@ function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => voi
                     <textarea 
                       value={messageInput}
                       onChange={(e) => setMessageInput(e.target.value)}
-                      placeholder="Bạn muốn hỏi gì về lộ trình này?"
+                      placeholder="What would you like to ask about this path?"
                       className="w-full bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-3xl p-6 text-sm text-slate-900 dark:text-white min-h-[180px] focus:outline-none focus:border-indigo-500 transition-all resize-none"
                     />
                   </div>
@@ -417,33 +382,14 @@ function CoachDetailModal({ coach, onClose }: { coach: Coach; onClose: () => voi
                     className="w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[2rem] font-bold text-sm shadow-2xl flex items-center justify-center gap-3 hover:-translate-y-1 transition-all disabled:opacity-50"
                   >
                     {isSendingMessage ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                    Gửi tin nhắn ngay
+                    Send Message
                   </button>
-                  <p className="text-center text-[10px] text-slate-400 font-medium">Coach thường phản hồi trong vòng 24h</p>
+                  <p className="text-center text-[10px] text-slate-400 font-medium">Coach usually responds within 24h</p>
                 </div>
              </motion.div>
           </div>
         )}
 
-        {showPaymentModal && paymentData && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/80 backdrop-blur-md" onClick={() => setShowPaymentModal(false)} />
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative bg-white dark:bg-[#121214] w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl border border-white/10 text-center">
-              <button onClick={() => setShowPaymentModal(false)} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-rose-500"><X className="w-5 h-5" /></button>
-              <div className="p-3 bg-indigo-500/10 text-indigo-500 rounded-2xl inline-block mb-4"><QrCode className="w-8 h-8" /></div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Secure Enrollment</h3>
-              <p className="text-sm text-slate-500 mb-6">Scan QR to pay with SePay</p>
-              <div className="bg-white p-4 rounded-3xl inline-block border-4 border-indigo-500/10 shadow-lg mb-6"><img src={paymentData.qrDataURL} alt="QR" className="w-56 h-56 object-contain" /></div>
-              <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl text-left text-xs space-y-2 border border-slate-100 dark:border-white/5 mb-6">
-                <div className="flex justify-between"><span className="text-slate-400">Description</span><span className="text-indigo-500 font-bold">{paymentData.content}</span></div>
-                <div className="flex justify-between pt-2 border-t border-slate-100 dark:border-white/5"><span className="text-slate-400">Total Amount</span><span className="text-xl font-black text-indigo-500">{paymentData.amount.toLocaleString('vi-VN')}đ</span></div>
-              </div>
-              <button onClick={simulatePayment} disabled={isSimulating} className="w-full py-4 bg-indigo-500 text-white rounded-2xl font-bold text-sm shadow-xl flex items-center justify-center gap-2">
-                {isSimulating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Simulate Payment (Dev)
-              </button>
-            </motion.div>
-          </div>
-        )}
       </AnimatePresence>
       <AuthGateway isOpen={showAuthGateway} onClose={() => setShowAuthGateway(false)} />
     </>
@@ -480,7 +426,7 @@ export default function CoachesPage() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/users/coaches`)
+    fetch(`${API_URL}/api/users/coaches`)
       .then((r) => r.json())
       .then((data) => {
         setCoaches(Array.isArray(data) ? data : []);

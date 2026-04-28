@@ -10,6 +10,7 @@ router.get("/coaches/:id", getCoachById);
 
 // ─── Current user ─────────────────────────────────────────────
 router.get("/me", verifyToken, getMe);
+router.post("/me/skills", verifyToken, updateSkills);
 router.post("/me/onboard", verifyToken, onboardUser);
 router.post("/me/claim-reward", verifyToken, claimReward);
 router.put("/me/coach-profile", verifyToken, updateCoachProfile);

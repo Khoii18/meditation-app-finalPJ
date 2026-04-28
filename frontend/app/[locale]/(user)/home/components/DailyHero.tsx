@@ -64,8 +64,9 @@ export function DailyHero() {
     fetchData();
   }, []);
 
-  const title = suggestion ? (suggestion.title || suggestion.contentId?.title) : "Starting Your Journey";
-  const note = suggestion?.note || "A mindful start to your day.";
+  const isCompleted = day >= 30;
+  const title = suggestion ? (suggestion.title || suggestion.contentId?.title) : (isCompleted ? "Journey Completed!" : "Starting Your Journey");
+  const note = suggestion?.note || (isCompleted ? "You've reached the peak of this path. Carry this peace with you." : "A mindful start to your day.");
   const linkHref = suggestion?.contentId 
     ? `./play/${suggestion.contentId._id}${suggestion.lessonIndex !== undefined ? `?lessonIndex=${suggestion.lessonIndex}` : ""}`
     : "./journey";
@@ -93,8 +94,8 @@ export function DailyHero() {
           {/* Compact Content Layer */}
           <div className="relative z-10 h-[300px] flex flex-col justify-between p-8">
             <div className="space-y-4">
-              <span className="px-3 py-1 rounded-full bg-teal-500/20 backdrop-blur-md border border-teal-500/30 text-teal-400 text-[9px] font-black uppercase tracking-widest shadow-lg">
-                Day {day} of 30 • {suggestion?.planTitle || "Morning Path"}
+              <span className="px-3 py-1 rounded-full bg-teal-500/20 backdrop-blur-md border border-teal-500/30 text-teal-400 text-[10px] font-black uppercase tracking-widest shadow-lg">
+                {isCompleted ? "COMPLETED" : `Day ${day} of 30`} • {suggestion?.planTitle || "Morning Path"}
               </span>
               
               <div className="max-w-xl">

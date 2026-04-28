@@ -5,8 +5,9 @@ const messageSchema = new mongoose.Schema({
   receiverId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   content: { type: String, required: true },
   isRead: { type: Boolean, default: false },
-  isAdminChat: { type: Boolean, default: false },
-  autoReplied: { type: Boolean, default: false }
+   isAdminChat: { type: Boolean, default: false },
+   autoReplied: { type: Boolean, default: false },
+   isEdited: { type: Boolean, default: false }
 }, { timestamps: true });
 
 export default mongoose.model("Message", messageSchema);

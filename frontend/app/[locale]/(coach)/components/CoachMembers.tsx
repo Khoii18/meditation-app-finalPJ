@@ -132,7 +132,7 @@ export function CoachMembers({ token }: { token: string }) {
                   <td className="px-8 py-5">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
-                        {member.userId?.avatar ? (
+                        {member.userId?.avatar && member.userId.avatar !== "" ? (
                           <img src={member.userId.avatar} alt="" className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-slate-400">

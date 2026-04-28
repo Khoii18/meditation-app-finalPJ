@@ -63,27 +63,31 @@ export function MiniAIChat() {
       }
     } catch (err: any) {
       console.error("Chatbot Fetch Exception:", err);
-      setChat(prev => [...prev, { role: "bot", text: "Connection to Lunaria lost. Please check your internet." }]);
       setChat(prev => [...prev, { role: "bot", text: "Connection to Lunaria lost." }]);
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
-    <div className="flex flex-col flex-1 min-h-0">
-      <div className="bg-surface rounded-[2rem] border border-border shadow-sm flex flex-col h-full overflow-hidden">
+    <motion.div 
+      drag
+      dragMomentum={false}
+      whileDrag={{ scale: 1.02, zIndex: 50 }}
+      className="flex flex-col flex-1 min-h-0 z-10 cursor-default"
+    >
+      <div className="bg-surface/80 backdrop-blur-xl rounded-[2rem] border border-border shadow-2xl flex flex-col h-full overflow-hidden">
         {/* Header */}
-        <div className="p-3 border-b border-border flex items-center justify-between bg-surface/50">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-teal-500/10 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-teal-600" />
+        <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between bg-white/40 backdrop-blur-md cursor-grab active:cursor-grabbing">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-teal-500/10 flex items-center justify-center border border-teal-500/20 shadow-inner">
+              <Sparkles className="w-5 h-5 text-teal-600" />
             </div>
             <div>
-              <h3 className="font-serif font-bold text-sm text-foreground leading-none mb-0.5">Lunaria AI</h3>
-              <div className="flex items-center gap-1">
-                <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[8px] font-bold text-muted uppercase tracking-wider">Active Guide</span>
+              <h3 className="font-serif font-bold text-[15px] text-foreground leading-none mb-1">Lunaria AI</h3>
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                <span className="text-[9px] font-black text-teal-600/60 uppercase tracking-[0.1em]">Active Guide</span>
               </div>
             </div>
           </div>
@@ -102,8 +106,10 @@ export function MiniAIChat() {
           ) : (
             chat.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[85%] p-2.5 rounded-2xl text-[11px] leading-relaxed shadow-sm ${
-                  msg.role === "user" ? "bg-teal-600 text-white" : "bg-white border border-border text-foreground"
+                <div className={`max-w-[85%] p-3 rounded-2xl text-[12px] leading-relaxed shadow-sm transition-all ${
+                  msg.role === "user" 
+                    ? "bg-teal-600 text-white rounded-tr-sm" 
+                    : "bg-background/80 backdrop-blur-md border border-border/50 text-foreground rounded-tl-sm"
                 }`}>
                   {msg.text}
                   {msg.suggestedId && (
@@ -129,7 +135,7 @@ export function MiniAIChat() {
         </div>
 
         {/* Input Area */}
-        <div className="p-3 bg-surface border-t border-border">
+        <div className="p-4 bg-white/40 backdrop-blur-md border-t border-border/50">
           <form 
             onSubmit={(e) => { e.preventDefault(); handleSend(); }}
             className="relative flex items-center gap-2"
@@ -138,19 +144,19 @@ export function MiniAIChat() {
               type="text"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Ask anything..."
-              className="flex-1 bg-background border border-border rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-teal-500 transition-all"
+              placeholder="Ask your guide..."
+              className="flex-1 bg-white/60 dark:bg-black/20 border border-border/50 rounded-2xl px-4 py-2.5 text-[13px] focus:outline-none focus:border-teal-500/50 focus:ring-4 focus:ring-teal-500/5 transition-all shadow-inner"
             />
             <button 
               type="submit"
               disabled={loading || !message.trim()}
-              className="w-8 h-8 bg-teal-600 hover:bg-teal-500 text-white rounded-xl flex items-center justify-center transition-all disabled:opacity-50 shadow-md"
+              className="w-10 h-10 bg-teal-600 hover:bg-teal-500 text-white rounded-2xl flex items-center justify-center transition-all disabled:opacity-50 shadow-lg shadow-teal-500/20 active:scale-95"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-4.5 h-4.5" />
             </button>
           </form>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -93,22 +93,24 @@ export function Sidebar() {
       <div className="mt-8 pt-8 border-t border-slate-50">
         {isLoggedIn ? (
           <div className="space-y-4">
-            <div className="flex items-center gap-3 px-3 py-3 rounded-2xl bg-background/50 border border-border">
+            <div className="flex items-center gap-3 px-3 py-3 rounded-2xl bg-teal-50 dark:bg-white/5 border border-teal-100 dark:border-white/10 shadow-sm">
               <div className="relative">
-                <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-xs">
+                <div className="w-10 h-10 rounded-xl bg-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-teal-200">
                   {user?.name?.[0]?.toUpperCase() || "U"}
                 </div>
                 {user?.premiumStatus?.isPremium && (
-                  <div className="absolute -top-1.5 -right-1.5 p-0.5 bg-amber-400 rounded-full border border-background">
-                    <Shield className="w-2 h-2 text-white fill-current" />
+                  <div className="absolute -top-1.5 -right-1.5 p-1 bg-amber-400 rounded-full border-2 border-white dark:border-slate-900 shadow-sm">
+                    <Shield className="w-2.5 h-2.5 text-white fill-current" />
                   </div>
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-foreground truncate leading-none mb-1">{user?.name}</p>
-                <div className="flex items-center gap-1">
+                <p className="text-sm font-bold text-foreground truncate leading-none mb-1.5 capitalize">
+                  {user?.name}
+                </p>
+                <div className="flex items-center gap-1.5">
                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                   <p className="text-[8px] text-muted font-bold uppercase tracking-tighter">Mind Aware</p>
+                   <p className="text-[9px] text-teal-600 dark:text-teal-400 font-black uppercase tracking-widest opacity-80">Mind Aware</p>
                 </div>
               </div>
             </div>

@@ -33,7 +33,7 @@ export default function HomeDashboard() {
           <div className="flex-shrink-0">
             <MoodJournal />
           </div>
-          <div className="md:flex-1 min-h-[400px] md:min-h-0 flex flex-col">
+          <div className="md:flex-1 min-h-[400px] md:min-h-0 flex flex-col pb-4">
             <MiniAIChat />
           </div>
         </div>

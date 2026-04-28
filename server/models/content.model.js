@@ -21,6 +21,8 @@ const contentSchema = new mongoose.Schema({
   lessons: [{
     title: { type: String },
     description: { type: String },
+    suggestion: { type: String },
+    type: { type: String, enum: ["Thiền định", "Hơi thở", "Thư giãn", "Ngủ"], default: "Thiền định" },
     audioUrl: { type: String },
     duration: { type: String }
   }]

@@ -294,3 +294,25 @@ export const updateUserPremium = async (req, res) => {
     res.status(500).json(err.message);
   }
 };
+
+export const updateSkills = async (req, res) => {
+  try {
+    const { skill, points } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json("User not found");
+
+    if (!user.skills) {
+      user.skills = { focus: 0, relaxation: 0, breathControl: 0, awareness: 0 };
+    }
+
+    if (user.skills[skill] !== undefined) {
+      user.skills[skill] += points;
+      await user.save();
+      res.json({ message: "Skills updated", skills: user.skills });
+    } else {
+      res.status(400).json("Invalid skill key");
+    }
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};

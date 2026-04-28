@@ -2,20 +2,44 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { X, Heart, Clock, User, Play, Loader2 } from "lucide-react";
+import { X, Heart, Clock, User, Play, Loader2, ChevronDown } from "lucide-react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function PlanDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
   const [plan, setPlan] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showCoachProfile, setShowCoachProfile] = useState(false);
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/content/${id}`)
       .then(res => res.json())
-      .then(data => {
-        setPlan(data);
+      .then(async data => {
+        let finalData = { ...data };
+        
+        // Match coach string to real coach profile
+        if (typeof finalData.instructor === 'string') {
+          try {
+            const coachesRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/users/coaches`);
+            if (coachesRes.ok) {
+              const coaches = await coachesRes.json();
+              const matchedCoach = coaches.find((c: any) => c.name.trim().toLowerCase() === finalData.instructor.trim().toLowerCase());
+              if (matchedCoach) {
+                finalData.instructor = {
+                  name: matchedCoach.name,
+                  avatar: matchedCoach.coachProfile?.avatar || matchedCoach.avatar,
+                  bio: matchedCoach.coachProfile?.bio || ""
+                };
+              }
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
+
+        setPlan(finalData);
         setLoading(false);
       })
       .catch(err => {
@@ -87,11 +111,72 @@ export default function PlanDetailsPage() {
           </div>
           <span className="text-xs font-medium text-white/80">{plan.duration || "10 min"}<span className="ml-1 opacity-50">v</span></span>
         </div>
-        <div className="flex flex-col items-center">
-          <div className="w-14 h-14 bg-slate-200 text-[#364147] rounded-full flex items-center justify-center mb-3 overflow-hidden">
-            <User className="w-6 h-6" strokeWidth={1.5} />
-          </div>
-          <span className="text-xs font-medium text-white/80">{plan.instructor || "Ofosu"}<span className="ml-1 opacity-50">v</span></span>
+        <div className="relative flex flex-col items-center pointer-events-auto">
+          <button onClick={() => setShowCoachProfile(!showCoachProfile)} className="flex flex-col items-center group outline-none">
+            <div className="w-14 h-14 bg-white/5 border-2 border-transparent group-hover:border-white/20 text-white rounded-full flex items-center justify-center mb-3 overflow-hidden shadow-lg group-hover:scale-105 transition-all">
+              {plan?.instructor?.avatar ? (
+                <img src={plan.instructor.avatar} alt="Coach" className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-6 h-6 text-white/70" strokeWidth={1.5} />
+              )}
+            </div>
+            <span className="flex items-center text-xs font-medium text-white/80 group-hover:text-white transition-colors capitalize">
+              {typeof plan?.instructor === 'object' ? plan.instructor.name : (plan?.instructor || "Ofosu")}
+              <motion.div animate={{ rotate: showCoachProfile ? 180 : 0 }} className="ml-1 opacity-60">
+                <ChevronDown className="w-3.5 h-3.5" />
+              </motion.div>
+            </span>
+          </button>
+
+          <AnimatePresence>
+            {showCoachProfile && (
+              <motion.div
+                initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                className="absolute bottom-[110%] w-[300px] bg-[#2a3236]/95 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl z-50 origin-bottom"
+              >
+                {plan?.instructor ? (
+                   <div className="flex flex-col items-center">
+                     <div className="relative mb-3">
+                       <div className="w-20 h-20 rounded-full flex items-center justify-center overflow-hidden border border-teal-400/30 shadow-[0_0_15px_rgba(45,212,191,0.15)] bg-white/5">
+                          {plan.instructor.avatar && plan.instructor.avatar !== "" ? (
+                            <img src={plan.instructor.avatar} alt="Coach" className="w-full h-full object-cover" />
+                          ) : (
+                            <User className="w-10 h-10 text-white/50" strokeWidth={1} />
+                          )}
+                       </div>
+                       <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-teal-500 text-[#1a2028] text-[9px] font-black uppercase tracking-[0.2em] px-3 py-0.5 rounded-full shadow-md">
+                         PRO
+                       </div>
+                     </div>
+                     
+                     <h4 className="text-white font-serif text-2xl font-medium tracking-wide mb-1 mt-1 capitalize">
+                       {typeof plan.instructor === 'object' ? plan.instructor.name : plan.instructor}
+                     </h4>
+                     <p className="text-teal-400/80 text-[9px] uppercase tracking-[0.15em] font-bold mb-4">Certified Lunaria Guide</p>
+                     
+                     <div className="w-full max-h-[120px] overflow-y-auto pr-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                       <p className="text-white/60 text-xs leading-relaxed text-center italic font-light">
+                         {typeof plan?.instructor === 'object' && plan.instructor.bio 
+                           ? `"${plan.instructor.bio}"`
+                           : '"A dedicated guide on your mindfulness journey with Lunaria."'}
+                       </p>
+                     </div>
+                   </div>
+                ) : (
+                   <div className="text-center py-4">
+                     <User className="w-10 h-10 text-white/20 mx-auto mb-3" />
+                     <h4 className="text-white font-bold mb-2">Coach Unavailable</h4>
+                     <p className="text-white/50 text-xs leading-relaxed">
+                       This session currently has no assigned instructor.
+                     </p>
+                   </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 

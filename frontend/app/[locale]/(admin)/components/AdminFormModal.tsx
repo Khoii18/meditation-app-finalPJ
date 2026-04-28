@@ -6,15 +6,29 @@ export function AdminFormModal({ formData, setFormData, activeTab, showModal, se
   const [uploading, setUploading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [isAddingNewSubject, setIsAddingNewSubject] = useState(false);
+  const [isAddingNewInstructor, setIsAddingNewInstructor] = useState(false);
+  const [isAddingNewType, setIsAddingNewType] = useState(false);
+  const [allCoaches, setAllCoaches] = useState<any[]>([]);
 
   useEffect(() => {
      if (showModal) {
        setIsAddingNewSubject(false);
+       setIsAddingNewInstructor(false);
+       setIsAddingNewType(false);
        if (!formData.lessons) {
          setFormData((prev: any) => ({ ...prev, lessons: [] }));
        }
      }
-  }, [showModal]);
+  }, [showModal, formData.lessons]);
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/users/coaches`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setAllCoaches(data);
+      })
+      .catch(e => console.error("Error fetching coaches:", e));
+  }, []);
 
   const handleLessonChange = (index: number, field: string, value: string) => {
     const updatedLessons = [...(formData.lessons || [])];
@@ -40,6 +54,19 @@ export function AdminFormModal({ formData, setFormData, activeTab, showModal, se
       .filter((d: any) => d.type?.toLowerCase().includes('plan') && d.subject)
       .map((d: any) => d.subject)
   ));
+
+  const existingInstructors = Array.from(new Set([
+    ...allCoaches.map(c => c.name),
+    ...(existingData || [])
+      .filter((d: any) => d.instructor)
+      .map((d: any) => typeof d.instructor === 'object' ? d.instructor.name : d.instructor)
+  ])).filter(Boolean).sort();
+
+  const existingTypes = Array.from(new Set(
+    (existingData || [])
+      .filter((d: any) => d.type)
+      .map((d: any) => d.type)
+  )).filter(Boolean).sort();
 
   const handleMediaUpload = async (e: any) => {
     const file = e.target.files?.[0];
@@ -159,7 +186,34 @@ export function AdminFormModal({ formData, setFormData, activeTab, showModal, se
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Instructor</label>
-            <input required value={formData.instructor || ''} onChange={e => setFormData({...formData, instructor: e.target.value})} className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 dark:bg-black/20" />
+            {isAddingNewInstructor || existingInstructors.length === 0 ? (
+               <div className="flex gap-2">
+                 <input required value={formData.instructor || ''} onChange={e => setFormData({...formData, instructor: e.target.value})} className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 dark:bg-black/20" placeholder="e.g. Master Roy" autoFocus />
+                 {existingInstructors.length > 0 && (
+                   <button type="button" onClick={() => { setIsAddingNewInstructor(false); setFormData({...formData, instructor: existingInstructors[0]})}} className="px-3 rounded-xl border border-slate-200 dark:border-white/10 dark:bg-black/20 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+                     <X className="w-4 h-4 text-slate-500" />
+                   </button>
+                 )}
+               </div>
+            ) : (
+               <select 
+                 required 
+                 value={formData.instructor || (existingInstructors.includes(formData.instructor) ? formData.instructor : existingInstructors[0]) || ''} 
+                 onChange={e => {
+                   if (e.target.value === '__NEW__') {
+                     setIsAddingNewInstructor(true);
+                     setFormData({...formData, instructor: ''});
+                   } else {
+                     setFormData({...formData, instructor: e.target.value});
+                   }
+                 }}
+                 className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 dark:bg-black/20 appearance-none bg-slate-50"
+               >
+                 {!formData.instructor && <option value="" disabled>Select an instructor</option>}
+                 {existingInstructors.map(inst => <option key={inst as string} value={inst as string}>{String(inst)}</option>)}
+                 <option value="__NEW__" className="text-teal-600 font-medium">+ Add new Instructor</option>
+               </select>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Cover Image</label>
@@ -184,21 +238,49 @@ export function AdminFormModal({ formData, setFormData, activeTab, showModal, se
           </div>
            {(activeTab === 'content' || activeTab === 'soundscapes' || activeTab === 'sleep' || activeTab === 'plans') ? (
              <>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Category / Type</label>
-                  <input 
-                    required 
-                    value={formData.type || ''} 
-                    onChange={e => setFormData({...formData, type: e.target.value})} 
-                    className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 dark:bg-black/20" 
-                    placeholder={
-                      activeTab === 'sleep' ? "e.g. Sleep Story" : 
-                      activeTab === 'soundscapes' ? "e.g. Soundscape" :
-                      activeTab === 'plans' ? "Plan" : 
-                      "Meditation, Breathwork, Focus..."
-                    } 
-                  />
-                </div>
+                 <div>
+                   <label className="block text-sm font-medium mb-1">Category / Type</label>
+                   {isAddingNewType || existingTypes.length === 0 ? (
+                      <div className="flex gap-2">
+                        <input 
+                          required 
+                          value={formData.type || ''} 
+                          onChange={e => setFormData({...formData, type: e.target.value})} 
+                          className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 dark:bg-black/20" 
+                          placeholder={
+                            activeTab === 'sleep' ? "e.g. Sleep Story" : 
+                            activeTab === 'soundscapes' ? "e.g. Soundscape" :
+                            activeTab === 'plans' ? "Plan" : 
+                            "Meditation, Breathwork, Focus..."
+                          }
+                          autoFocus 
+                        />
+                        {existingTypes.length > 0 && (
+                          <button type="button" onClick={() => { setIsAddingNewType(false); setFormData({...formData, type: existingTypes[0]})}} className="px-3 rounded-xl border border-slate-200 dark:border-white/10 dark:bg-black/20 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+                            <X className="w-4 h-4 text-slate-500" />
+                          </button>
+                        )}
+                      </div>
+                   ) : (
+                      <select 
+                        required 
+                        value={formData.type || (existingTypes.includes(formData.type) ? formData.type : existingTypes[0]) || ''} 
+                        onChange={e => {
+                          if (e.target.value === '__NEW__') {
+                            setIsAddingNewType(true);
+                            setFormData({...formData, type: ''});
+                          } else {
+                            setFormData({...formData, type: e.target.value});
+                          }
+                        }}
+                        className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 dark:bg-black/20 appearance-none bg-slate-50"
+                      >
+                        {!formData.type && <option value="" disabled>Select a type</option>}
+                        {existingTypes.map(t => <option key={t as string} value={t as string}>{String(t)}</option>)}
+                        <option value="__NEW__" className="text-teal-600 font-medium">+ Add new type</option>
+                      </select>
+                   )}
+                 </div>
                 <div className="flex gap-4">
                   <div className="flex-1">
                     <label className="block text-sm font-medium mb-1">Duration</label>
@@ -268,7 +350,7 @@ export function AdminFormModal({ formData, setFormData, activeTab, showModal, se
                   <textarea 
                     value={formData.description || ''} 
                     onChange={e => setFormData({...formData, description: e.target.value})} 
-                    className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 dark:bg-black/20 min-h-[100px]" 
+                    className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 dark:bg-black/20 min-h-[100px] dark:text-white" 
                     placeholder="Enter description or intro text here..." 
                   />
                 </div>
@@ -290,35 +372,66 @@ export function AdminFormModal({ formData, setFormData, activeTab, showModal, se
                           </button>
                           <div className="grid grid-cols-2 gap-4 mb-3">
                             <div>
-                              <label className="block text-xs font-medium mb-1 text-slate-500">Lesson Title</label>
-                              <input 
-                                value={lesson.title || ''} 
-                                onChange={e => handleLessonChange(idx, 'title', e.target.value)} 
-                                className="w-full p-2 text-sm rounded-lg border border-slate-200 bg-white" 
-                                placeholder="e.g. Day 1: Introduction" 
-                              />
+                              <label className="block text-xs font-medium mb-1 text-slate-500">Lesson Type</label>
+                              <select 
+                                value={lesson.type || 'Meditation'} 
+                                onChange={e => handleLessonChange(idx, 'type', e.target.value)} 
+                                className="w-full p-2 text-sm rounded-lg border border-slate-200 bg-white appearance-none"
+                              >
+                                <option value="Meditation">🧘 Meditation</option>
+                                <option value="Breathwork">🌬️ Breathwork</option>
+                                <option value="Relaxation">🌿 Relaxation</option>
+                                <option value="Sleep">🌙 Sleep</option>
+                              </select>
                             </div>
                             <div>
-                              <label className="block text-xs font-medium mb-1 text-slate-500">Duration</label>
-                              <input 
-                                value={lesson.duration || ''} 
-                                onChange={e => handleLessonChange(idx, 'duration', e.target.value)} 
-                                className="w-full p-2 text-sm rounded-lg border border-slate-200 bg-white" 
-                                placeholder="e.g. 10 min" 
-                              />
+                              <label className="block text-xs font-bold mb-2 text-slate-400 uppercase tracking-widest">Duration (Min:Sec)</label>
+                              <div className="bg-slate-900/50 dark:bg-black/40 p-4 rounded-2xl border border-slate-200 dark:border-white/5 w-fit shadow-inner">
+                                <input 
+                                  type="text"
+                                  placeholder="00:00"
+                                  value={lesson.duration || ''} 
+                                  onChange={e => {
+                                    let val = e.target.value.replace(/[^0-9:]/g, '');
+                                    // Basic auto-colon logic if user types 4 digits
+                                    if (val.length === 2 && !val.includes(':')) val += ':';
+                                    if (val.length > 5) val = val.slice(0, 5);
+                                    handleLessonChange(idx, 'duration', val);
+                                  }} 
+                                  className="w-32 bg-transparent text-3xl font-mono text-teal-500 font-bold text-center outline-none placeholder:text-teal-900" 
+                                />
+                              </div>
                             </div>
+                          </div>
+                          <div className="mb-3">
+                            <label className="block text-xs font-medium mb-1 text-slate-500">Lesson Title</label>
+                            <input 
+                              value={lesson.title || ''} 
+                              onChange={e => handleLessonChange(idx, 'title', e.target.value)} 
+                              className="w-full p-2 text-sm rounded-lg border border-slate-200 bg-white" 
+                              placeholder="e.g. Day 1: Introduction" 
+                            />
                           </div>
                           <div className="mb-3">
                             <label className="block text-xs font-medium mb-1 text-slate-500">Description</label>
                             <textarea 
                               value={lesson.description || ''} 
                               onChange={e => handleLessonChange(idx, 'description', e.target.value)} 
-                              className="w-full p-2 text-sm rounded-lg border border-slate-200 bg-white min-h-[60px]" 
+                              className="w-full p-2 text-sm rounded-lg border border-slate-200 bg-white dark:bg-black/20 dark:border-white/10 dark:text-white min-h-[60px]" 
                               placeholder="Lesson description..." 
                             />
                           </div>
+                          <div className="mb-3">
+                            <label className="block text-xs font-medium mb-1 text-slate-500">Pre-exercise Suggestion (Tip)</label>
+                            <textarea 
+                              value={lesson.suggestion || ''} 
+                              onChange={e => handleLessonChange(idx, 'suggestion', e.target.value)} 
+                              className="w-full p-2 text-sm rounded-lg border border-slate-200 bg-white dark:bg-black/20 dark:border-white/10 dark:text-white min-h-[60px]" 
+                              placeholder="Pre-exercise suggestion..." 
+                            />
+                          </div>
                           <div>
-                            <label className="block text-xs font-medium mb-1 text-slate-500">Audio URL (Optional)</label>
+                            <label className="block text-xs font-medium mb-1 text-slate-500">Audio URL (Only for Meditation)</label>
                             <input 
                               value={lesson.audioUrl || ''} 
                               onChange={e => handleLessonChange(idx, 'audioUrl', e.target.value)} 

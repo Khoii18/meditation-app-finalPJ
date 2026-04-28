@@ -3,32 +3,30 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
+import { API_URL } from "@/config";
 
 export function SleepSounds() {
   const [sounds, setSounds] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const { claimedRewards, isPaid } = useAuth();
 
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/content");
+        const res = await fetch(`${API_URL}/api/content`);
         if (res.ok) {
           const data = await res.json();
-          const soundscapes = data.filter((d: any) => d.type.toLowerCase() === "sound" || d.type.toLowerCase() === "soundscape" || d.title.toLowerCase().includes("sound"));
-          
-          if (soundscapes.length > 0) {
-            setSounds(soundscapes.slice(0, 8));
-          } else {
-            setSounds([
-              { title: "Heavy Rain", _id: "v1" },
-              { title: "Campfire", _id: "v2" },
-              { title: "Forest Wind", _id: "v3" },
-              { title: "Gentle Waves", _id: "v4" },
-            ]);
-          }
+          const soundscapes = data.filter((d: any) =>
+            d.type?.toLowerCase() === "sound" ||
+            d.type?.toLowerCase() === "soundscape" ||
+            d.title?.toLowerCase().includes("sound")
+          );
+          setSounds(soundscapes.slice(0, 8));
         }
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchContent();
@@ -41,6 +39,29 @@ export function SleepSounds() {
     if (t.includes("wind") || t.includes("breeze")) return <Wind className="w-6 h-6"/>;
     return <Music className="w-6 h-6"/>;
   };
+
+  if (loading) return (
+    <section className="mb-12">
+      <h2 className="text-sm font-semibold tracking-widest uppercase text-slate-500 mb-6 flex items-center gap-2">
+        <Music className="w-4 h-4 text-teal-500" /> Immersive Sounds
+      </h2>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[1,2,3,4].map(i => <div key={i} className="h-40 rounded-3xl bg-white/5 animate-pulse" />)}
+      </div>
+    </section>
+  );
+
+  if (sounds.length === 0) return (
+    <section className="mb-12">
+      <h2 className="text-sm font-semibold tracking-widest uppercase text-slate-500 mb-6 flex items-center gap-2">
+        <Music className="w-4 h-4 text-teal-500" /> Immersive Sounds
+      </h2>
+      <div className="rounded-3xl bg-white/5 border border-white/10 p-10 text-center">
+        <Music className="w-10 h-10 text-slate-600 mx-auto mb-3" />
+        <p className="text-slate-500 text-sm">No soundscapes yet. Admin can add them from the dashboard.</p>
+      </div>
+    </section>
+  );
 
   return (
     <motion.section 

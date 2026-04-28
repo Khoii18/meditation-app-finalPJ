@@ -12,7 +12,6 @@ const transactionSchema = new mongoose.Schema({
   },
   planId: {
     type: String,
-    enum: ["monthly", "annual", "lifetime"],
     required: true
   },
   content: {

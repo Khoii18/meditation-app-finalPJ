@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter, usePathname } from "next/navigation";
 import { AuthGateway } from "@/components/auth/AuthGateway";
+import { API_URL } from "@/config";
 
 export function PricingCards() {
   const [loading, setLoading] = useState<string | null>(null);
@@ -33,7 +34,7 @@ export function PricingCards() {
        setLoading(plan.id);
        const token = localStorage.getItem("token");
        
-       const response = await fetch("http://localhost:5000/api/payment/create-qr", {
+       const response = await fetch(`${API_URL}/api/payment/create-qr`, {
          method: "POST",
          headers: {
            "Content-Type": "application/json",
@@ -67,7 +68,7 @@ export function PricingCards() {
     if (!paymentData?.content) return;
     try {
       setSimulating(true);
-      const res = await fetch("http://localhost:5000/api/payment/simulate-payment", {
+      const res = await fetch(`${API_URL}/api/payment/simulate-payment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transactionCode: paymentData.content })

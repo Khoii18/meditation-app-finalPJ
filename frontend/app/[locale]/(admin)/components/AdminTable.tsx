@@ -20,7 +20,9 @@ export function AdminTable({ data, activeTab, onEdit, onDelete }: { data: any[],
                 {activeTab === 'content' && item.image && (
                   <img src={item.image} alt="thumb" className="w-10 h-10 object-cover rounded-lg inline-block mr-3 border border-teal-100/50 shadow-sm" />
                 )}
-                {item.instructor}
+                <span className="capitalize">
+                  {typeof item.instructor === 'object' ? item.instructor.name : (item.instructor || "—")}
+                </span>
               </td>
               <td className="py-4 text-sm text-slate-500">{activeTab === 'content' ? item.duration : item.time}</td>
               <td className="py-4 text-right">

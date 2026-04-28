@@ -31,6 +31,13 @@ export function RegisterForm() {
   useEffect(() => {
     const randomQuote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
     setQuote(randomQuote);
+
+    // Support role from query params
+    const params = new URLSearchParams(window.location.search);
+    const roleParam = params.get("role");
+    if (roleParam === "coach") {
+      setRole("coach");
+    }
   }, []);
 
   const handleRegister = async (e: React.FormEvent) => {

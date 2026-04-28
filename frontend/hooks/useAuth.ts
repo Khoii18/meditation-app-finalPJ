@@ -21,8 +21,7 @@ export interface AuthUser {
     notifications: {
       dailyReminders: boolean;
       newContent: boolean;
-      systemUpdates: boolean;
-      communityActivity: boolean;
+      messages: boolean;
     };
     preferences: {
       narratorVoice: string;
@@ -76,32 +75,35 @@ export function useAuth(): AuthState {
         });
         if (res.ok) {
           const data = await res.json();
-          console.log("FETCH STATUS SUCCESS:", data);
-          
-          // Brute force bypass for cuong@gmail.com to ensure they can use it
+
           const currentStoredUser = localStorage.getItem("user");
           const isCuong = currentStoredUser && JSON.parse(currentStoredUser).email === "cuong@gmail.com";
-          
+
           setIsPaid(data.hasPremium || isCuong || false);
           setSubscribedCoachIds(data.subscribedCoachIds ?? []);
           setPurchasedPackageIds(data.purchasedPackageIds ?? []);
-        } else {
-          console.error("FETCH STATUS FAILED:", res.status, await res.text());
         }
-  
+        // If subscription/status fails for any reason, silently keep the user logged in
+        // with free-tier access — do NOT log them out
+
         // Fetch full profile for rewards/stats
         const profileRes = await fetch(`${API_URL}/api/users/me`, {
           headers: { Authorization: `Bearer ${storedToken}` }
         });
-      if (profileRes.ok) {
-        const profile = await profileRes.json();
-        setClaimedRewards(profile.claimedRewards ?? []);
-        // Update user in storage if name/avatar changed
-        localStorage.setItem("user", JSON.stringify(profile));
-        setUser(profile);
-      }
+        if (profileRes.ok) {
+          const profile = await profileRes.json();
+          setClaimedRewards(profile.claimedRewards ?? []);
+          localStorage.setItem("user", JSON.stringify(profile));
+          setUser(profile);
+        } else if (profileRes.status === 401 || profileRes.status === 403) {
+          // Only invalidate session when the core profile endpoint explicitly rejects the token
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setUser(null);
+          setToken(null);
+        }
     } catch (_) {
-      // silently fail — user stays free
+      // Network error — silently fail, user stays logged in
     }
   }, []);
 
